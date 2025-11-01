@@ -1,0 +1,37 @@
+/* ========== RESET & TOKENS ========== */
+:root {
+  --primary-color: #00d4ff;
+  --primary-dark: #00a8cc;
+  --secondary-color: #0f1419;
+  --text-dark: #e0e0e0;
+  --text-light: #a0a0a0;
+  --bg-light: #1a1f2e;
+  --bg-white: #0f1419;
+  --border-color: #2a3f5f;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+}
+
+body.light-mode {
+  --primary-color: #0084ff;
+  --primary-dark: #0066cc;
+  --secondary-color: #ffffff;
+  --text-dark: #1a1a1a;
+  --text-light: #999999;
+  --bg-light: #f0f4ff;
+  --bg-white: #ffffff;
+  --border-color: #e0e0e0;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --danger-color: #f44336;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-white);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* Cart Page Styles - Add your cart-specific styles below */
