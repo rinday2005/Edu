@@ -1,4 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -29,114 +32,59 @@
 
                 <!-- Articles List -->
                 <section class="section">
-                    <h3><i class="fas fa-list"></i> Danh sách Bài viết</h3>
+
+                    <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical">
+                        <i class="fas fa-list"></i> Danh sách Bài viết
+                    </a>
+
+
                     <div class="card">
                         <div class="card-header">
                             Tất cả bài viết của bạn
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
+                                <table border="1" cellpadding="5" cellspacing="0">
+                                    <tr>
+                                        <th>Tiêu đề</th>
+                                        <th>Nội dung</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Lượt xem</th>
+                                        <th>Bình luận</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+
+                                    <c:forEach var="artical" items="${articallist}">
                                         <tr>
-                                            <th>Tiêu đề</th>
-                                            <th>Ngày tạo</th>
-                                            <th>Trạng thái</th>
-                                            <th>Lượt xem</th>
-                                            <th>Bình luận</th>
-                                            <th>Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
+                                            <td>${artical.title}</td>
+                                            <td>${artical.content}</td>
+                                            <td>${artical.createAt}</td>
+                                            <td>${artical.status}</td>
+                                            <td>${artical.viewCount}</td>
+                                            <td>${artical.commentCount}</td>
+                                            <!-- Cột Update & Delete -->
                                             <td>
-                                                <div>
-                                                    <div style="font-weight: 600;">10 Tips để học React hiệu quả</div>
-                                                    <div style="font-size: 12px; color: var(--text-muted);">Hướng dẫn học React từ cơ bản đến nâng cao</div>
+                                                <div class="cell-actions">
+                                                    <form action="<c:url value='/ManageArtical'/>" method="post" style="display:inline">
+                                                        <input type="hidden" name="action" value="updateartical">
+                                                        <input type="hidden" name="id" value="${artical.articleID}">
+                                                        <button class="btn btn-sm btn-warning">Update</button>
+                                                    </form>
+
+                                                    <a href="<c:url value='/ManageArtical?action=deleteartical&id=${artical.articleID}'/>"
+                                                       class="btn btn-sm btn-danger"
+                                                       onclick="return confirm('Xóa bài #${artical.articleID}?');">Delete</a>
                                                 </div>
+
                                             </td>
-                                            <td>15/12/2024</td>
-                                            <td><span class="btn btn-success" style="padding: 3px 8px; font-size: 11px;">Published</span></td>
-                                            <td><strong>1,245</strong></td>
-                                            <td><strong>23</strong></td>
-                                            <td>
-                                                <div style="display: flex; gap: 5px;">
-                                                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
+
+
+
                                         </tr>
-                                        <!--                                    <tr>
-                                                                                <td>
-                                                                                    <div>
-                                                                                        <div style="font-weight: 600;">JavaScript ES6+ Features mới nhất</div>
-                                                                                        <div style="font-size: 12px; color: var(--text-muted);">Tổng hợp các tính năng mới trong JavaScript</div>
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>12/12/2024</td>
-                                                                                <td><span class="btn btn-success" style="padding: 3px 8px; font-size: 11px;">Published</span></td>
-                                                                                <td><strong>892</strong></td>
-                                                                                <td><strong>15</strong></td>
-                                                                                <td>
-                                                                                    <div style="display: flex; gap: 5px;">
-                                                                                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-edit"></i>
-                                                                                        </button>
-                                                                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>
-                                                                                    <div>
-                                                                                        <div style="font-weight: 600;">Python vs JavaScript: So sánh chi tiết</div>
-                                                                                        <div style="font-size: 12px; color: var(--text-muted);">Phân tích ưu nhược điểm của hai ngôn ngữ</div>
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>10/12/2024</td>
-                                                                                <td><span class="btn btn-warning" style="padding: 3px 8px; font-size: 11px; background-color: #ffc107; color: #000;">Draft</span></td>
-                                                                                <td><strong>0</strong></td>
-                                                                                <td><strong>0</strong></td>
-                                                                                <td>
-                                                                                    <div style="display: flex; gap: 5px;">
-                                                                                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-edit"></i>
-                                                                                        </button>
-                                                                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>
-                                                                                    <div>
-                                                                                        <div style="font-weight: 600;">Hướng dẫn setup môi trường Node.js</div>
-                                                                                        <div style="font-size: 12px; color: var(--text-muted);">Cài đặt và cấu hình Node.js từ A-Z</div>
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>08/12/2024</td>
-                                                                                <td><span class="btn btn-info" style="padding: 3px 8px; font-size: 11px; background-color: #17a2b8;">Pending Review</span></td>
-                                                                                <td><strong>567</strong></td>
-                                                                                <td><strong>8</strong></td>
-                                                                                <td>
-                                                                                    <div style="display: flex; gap: 5px;">
-                                                                                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-edit"></i>
-                                                                                        </button>
-                                                                                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                                                            <i class="fas fa-trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>-->
-                                    </tbody>
+
+                                    </c:forEach>
+
                                 </table>
                             </div>
                         </div>
@@ -260,21 +208,21 @@
 
         <script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
         <script>
-            function showArticleForm() {
-                document.getElementById('articleFormModal').style.display = 'block';
-            }
+                                    function showArticleForm() {
+                                        document.getElementById('articleFormModal').style.display = 'block';
+                                    }
 
-            function hideArticleForm() {
-                document.getElementById('articleFormModal').style.display = 'none';
-            }
+                                    function hideArticleForm() {
+                                        document.getElementById('articleFormModal').style.display = 'none';
+                                    }
 
-            // Close modal when clicking outside
-            window.onclick = function (event) {
-                const modal = document.getElementById('articleFormModal');
-                if (event.target === modal) {
-                    hideArticleForm();
-                }
-            }
+                                    // Close modal when clicking outside
+                                    window.onclick = function (event) {
+                                        const modal = document.getElementById('articleFormModal');
+                                        if (event.target === modal) {
+                                            hideArticleForm();
+                                        }
+                                    }
         </script>
     </body>
 </html>

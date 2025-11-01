@@ -19,4 +19,6 @@ public interface IArticle {
     int  deleteById(UUID articleId);            // D
     Article findById(UUID articleId);           // R1
     List<Article> findAll();                    // R2
+    public List<Article> findAllWithStats(); //lất thống kê từ Article
+    public int increaseViewCount(UUID articleId, UUID viewerId, UUID authorId);
 }

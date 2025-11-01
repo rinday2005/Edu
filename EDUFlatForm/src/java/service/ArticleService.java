@@ -22,7 +22,7 @@ public class ArticleService {
     }
 
     public int deleteById(UUID articleId) {
-        return deleteById(articleId);
+        return dao.deleteById(articleId);
     }
 
     public Article findById(UUID articleId) {
@@ -31,6 +31,14 @@ public class ArticleService {
 
     public List<Article> findAll() {
         return dao.findAll();
+    }
+
+    public List<Article> findAllWithStats() {
+        return dao.findAllWithStats();
+    }
+
+    public int increaseViewCount(UUID articleId, UUID viewerId, UUID authorId) {
+        return dao.increaseViewCount(articleId, viewerId, authorId);
     }
 
 }

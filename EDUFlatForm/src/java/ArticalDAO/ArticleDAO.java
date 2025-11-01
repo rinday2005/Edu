@@ -4,7 +4,6 @@
  */
 package ArticalDAO;
 
-
 import model.Article;
 import DAO.DBConnection;
 
@@ -13,16 +12,31 @@ import java.util.*;
 
 public class ArticleDAO implements IArticle {
 
+    final String INSERT_ARTICAL = "INSERT INTO Article (articleID, userID, createAt, status, title, content) VALUES (?,?,?,?,?,?)";
+    final String UPDATE_ARTICAL = "UPDATE Article SET userID = ?, createAt = ?, status = ?, title = ?, content = ? WHERE articleID = ?";
+    final String UPDATE_STATUS = "UPDATE Article SET status = ? WHERE articleID = ?";
+    final String DELETE_ARTICAL_BY_ID = "DELETE FROM Article WHERE articleID = ?";
+    final String FIND_ARTICAL_BY_ID = "SELECT * FROM Article WHERE articleID = ?";
+    final String FIND_ALL_ARTICAL = "SELECT * FROM Article ORDER BY createAt DESC";
+    final String FIND_ALL_WITH_STATS
+            = "SELECT a.*, "
+            + "       a.viewCount, "
+            + "       (SELECT COUNT(*) FROM dbo.Comments c "
+            + "         WHERE c.articleID = a.articleID AND c.userID <> a.userID) AS commentCount "
+            + "FROM dbo.Article a "
+            + "ORDER BY a.createAt DESC";
+    final String INCREASE_VIEW = "UPDATE dbo.Article SET viewCount = viewCount + 1 WHERE articleID = ?";
+    Article article = new Article();
     @Override
     public void create(Article a) {
-        String sql = "INSERT INTO Article (userID, createAt, status, title, content) VALUES (?, ?, ?, ?, ?)";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setObject(1, a.getUserID());
-            ps.setDate(2, new java.sql.Date(a.getCreateAt().getTime()));
-            ps.setString(3, a.getStatus());
-            ps.setString(4, a.getTitle());
-            ps.setString(5, a.getContent());
+        String sql = INSERT_ARTICAL;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setObject(1, a.getArticleID()); // UUID
+            ps.setObject(2, a.getUserID());    // UUID
+            ps.setTimestamp(3, new java.sql.Timestamp(a.getCreateAt().getTime()));
+            ps.setString(4, a.getStatus());
+            ps.setString(5, a.getTitle());
+            ps.setString(6, a.getContent());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -31,9 +45,8 @@ public class ArticleDAO implements IArticle {
 
     @Override
     public int update(Article a) {
-        String sql = "UPDATE Article SET userID = ?, createAt = ?, status = ?, title = ?, content = ? WHERE articleID = ?";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = UPDATE_ARTICAL;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
             ps.setDate(2, new java.sql.Date(a.getCreateAt().getTime()));
             ps.setString(3, a.getStatus());
@@ -49,9 +62,8 @@ public class ArticleDAO implements IArticle {
 
     @Override
     public int updateStatus(UUID articleId, String status) {
-        String sql = "UPDATE Article SET status = ? WHERE articleID = ?";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = UPDATE_STATUS;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setObject(2, articleId);
             return ps.executeUpdate();
@@ -63,9 +75,8 @@ public class ArticleDAO implements IArticle {
 
     @Override
     public int deleteById(UUID articleId) {
-        String sql = "DELETE FROM Article WHERE articleID = ?";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = DELETE_ARTICAL_BY_ID;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, articleId);
             return ps.executeUpdate();
         } catch (SQLException e) {
@@ -76,9 +87,8 @@ public class ArticleDAO implements IArticle {
 
     @Override
     public Article findById(UUID articleId) {
-        String sql = "SELECT * FROM Article WHERE articleID = ?";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = FIND_ARTICAL_BY_ID;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, articleId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -94,10 +104,8 @@ public class ArticleDAO implements IArticle {
     @Override
     public List<Article> findAll() {
         List<Article> list = new ArrayList<>();
-        String sql = "SELECT * FROM Article ORDER BY createAt DESC";
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        String sql = FIND_ALL_ARTICAL;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(extractArticle(rs));
             }
@@ -109,12 +117,61 @@ public class ArticleDAO implements IArticle {
 
     private Article extractArticle(ResultSet rs) throws SQLException {
         Article a = new Article();
-        a.setArticleID((UUID) rs.getObject("articleID"));
-        a.setUserID((UUID) rs.getObject("userID"));
-        a.setCreateAt(rs.getDate("createAt"));
+
+        // articleID
+        Object artObj = rs.getObject("articleID");
+        if (artObj instanceof java.util.UUID) {
+            a.setArticleID((java.util.UUID) artObj);
+        } else if (artObj instanceof String) {
+            a.setArticleID(java.util.UUID.fromString((String) artObj));
+        } else if (artObj != null) {
+            a.setArticleID(java.util.UUID.fromString(String.valueOf(artObj)));
+        }
+
+        // userID
+        Object userObj = rs.getObject("userID");
+        if (userObj instanceof java.util.UUID) {
+            a.setUserID((java.util.UUID) userObj);
+        } else if (userObj instanceof String) {
+            a.setUserID(java.util.UUID.fromString((String) userObj));
+        } else if (userObj != null) {
+            a.setUserID(java.util.UUID.fromString(String.valueOf(userObj)));
+        }
+
+        // createAt – dùng Timestamp để không mất giờ/phút/giây
+        java.sql.Timestamp ts = rs.getTimestamp("createAt");
+        a.setCreateAt(ts != null ? new java.util.Date(ts.getTime()) : null);
+
         a.setStatus(rs.getString("status"));
         a.setTitle(rs.getString("title"));
         a.setContent(rs.getString("content"));
         return a;
     }
+
+    @Override
+    public List<Article> findAllWithStats() {
+        List<Article> list = new ArrayList<>();
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(FIND_ALL_WITH_STATS); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Article a = extractArticle(rs);           // dùng bản extract an toàn UUID như mình gửi trước
+                a.setViewCount(rs.getInt("viewCount"));   // có cột => set
+                a.setCommentCount(rs.getInt("commentCount"));
+                list.add(a);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    UUID authorId = article.getUserID();
+    @Override
+    public int increaseViewCount(UUID articleId, UUID viewerId, UUID authorId) {
+    if (viewerId != null && viewerId.equals(authorId)) return 0; // không tính lượt xem của chính tác giả
+    String sql = INCREASE_VIEW;
+    try (Connection con = DBConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setObject(1, articleId);
+        return ps.executeUpdate();
+    } catch (SQLException e) { e.printStackTrace(); return 0; }
+}
 }

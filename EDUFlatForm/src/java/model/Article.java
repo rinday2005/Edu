@@ -4,24 +4,23 @@
  */
 package model;
 
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
-
-
-
 
 import java.util.Date;
 import java.util.UUID;
 
 public class Article {
+
     private UUID articleID;
     private UUID userID;
     private Date createAt;
     private String status;
     private String title;
     private String content;
+    private Integer viewCount;
+    private Integer commentCount;
 
     public Article(UUID articleID, UUID userID, Date createAt, String status, String title, String content) {
         this.articleID = articleID;
@@ -39,7 +38,17 @@ public class Article {
         this.title = title;
         this.content = content;
     }
-    
+
+    public Article(UUID articleID, UUID userID, Date createAt, String status, String title, String content, Integer viewCount, Integer commentCount) {
+        this.articleID = articleID;
+        this.userID = userID;
+        this.createAt = createAt;
+        this.status = status;
+        this.title = title;
+        this.content = content;
+        this.viewCount = viewCount;
+        this.commentCount = commentCount;
+    }
 
     public Article() {
     }
@@ -92,10 +101,27 @@ public class Article {
         this.content = content;
     }
 
-    @Override
-    public String toString() {
-        return "Article{" + "articleID=" + articleID + ", userID=" + userID + ", createAt=" + createAt + ", status=" + status + ", title=" + title + ", content=" + content + '}';
+    public Integer getViewCount() {
+        return viewCount;
     }
 
-    
+    public void setViewCount(Integer viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public Integer getCommentCount() {
+        return commentCount;
+    }
+
+    public void setCommentCount(Integer commentCount) {
+        this.commentCount = commentCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" + "articleID=" + articleID + ", userID=" + userID + ", createAt=" + createAt + ", status=" + status + ", title=" + title + ", content=" + content + ", viewCount=" + viewCount + ", commentCount=" + commentCount + '}';
+    }
+
+   
+
 }

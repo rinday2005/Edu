@@ -3,7 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforArtical/ManageArtical.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforInstructor/ManageArtical.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/ArticalDAO/IArticle.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/model/User.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/login/jsp/login.jsp</file>
@@ -16,11 +16,16 @@
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/learner/common/header.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/learner/jsp/Setting/setting.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/learner/jsp/Cart/Cart.jsp</file>
-            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controller/ManageCourse.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforInstructor/ManageCourse.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/CourseManagement.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/InstructorDashboard.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/ArticleManage.jsp</file>
-            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforArtical/ForgotPasswordController.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforAuthen/ForgotPasswordController.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforAuthen/RegisterAuthenServlet.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/css/instructorsHome.css</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/model/Article.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/ArticalDAO/ArticleDAO.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/service/ArticleService.java</file>
         </group>
     </open-files>
 </project-private>
