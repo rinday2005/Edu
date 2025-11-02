@@ -1,0 +1,170 @@
+ /* Đảm bảo main-container của instructor hoạt động đúng */
+        body .main-container {
+            display: grid !important;
+            grid-template-columns: 250px 1fr !important;
+            grid-template-rows: 70px 1fr !important;
+            height: 100vh !important;
+        }
+        
+        /* Sidebar của instructor */
+        body .main-container .sidebar {
+            grid-column: 1 !important;
+            grid-row: 2 !important;
+            width: 250px !important;
+            height: calc(100vh - 70px) !important;
+            background-color: var(--bg-card) !important;
+            padding: 20px 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+        
+        body .main-container .sidebar .nav-item {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            padding: 12px 20px !important;
+            width: 100% !important;
+            border-radius: 0 !important;
+            border-left: 3px solid transparent !important;
+            color: var(--text-muted) !important;
+            text-decoration: none !important;
+        }
+        
+        body .main-container .sidebar .nav-item:hover {
+            background-color: rgba(0, 123, 255, 0.08) !important;
+            color: var(--primary-color) !important;
+        }
+        
+        body .main-container .sidebar .nav-item.active {
+            background-color: rgba(0, 123, 255, 0.12) !important;
+            color: var(--primary-color) !important;
+            border-left: 3px solid var(--primary-color) !important;
+        }
+        
+        body .main-container .sidebar .nav-item i {
+            font-size: 18px !important;
+            width: 24px !important;
+            text-align: center !important;
+        }
+        
+        /* Content area của instructor */
+        body .main-container .content-area {
+            grid-column: 2 !important;
+            grid-row: 2 !important;
+            padding: 20px !important;
+            background-color: #ffffff !important;
+            overflow-y: auto !important;
+            min-width: 0 !important;
+        }
+        
+        /* Header của instructor nằm trong grid */
+        body .main-container .navbar {
+            grid-column: 1 / 3 !important;
+            grid-row: 1 !important;
+        }
+        
+        /* Override settings section để có giao diện trắng */
+        body .settings-section {
+            padding: 1rem 0 !important;
+            margin-top: 0 !important;
+            background: #ffffff !important;
+        }
+        
+        body .settings-container {
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            background: transparent !important;
+        }
+        
+        /* Đảm bảo settings cards có background trắng */
+        body .settings-card {
+            background-color: #ffffff !important;
+            color: #212529 !important;
+        }
+        
+        body .settings-card .card-header h2 {
+            color: #212529 !important;
+        }
+        
+        body .settings-card .card-header p {
+            color: #6c757d !important;
+        }
+        
+        /* Form inputs và labels có màu đen */
+        body .settings-card .form-group label {
+            color: #212529 !important;
+        }
+        
+        body .settings-card .form-group input,
+        body .settings-card .form-group textarea,
+        body .settings-card .form-group select {
+            background-color: #ffffff !important;
+            color: #212529 !important;
+            border-color: #dee2e6 !important;
+        }
+        
+        body .settings-card .form-group input::placeholder,
+        body .settings-card .form-group textarea::placeholder {
+            color: #6c757d !important;
+        }
+        
+        /* Profile avatar section */
+        body .profile-info {
+            background: transparent !important;
+        }
+        
+        /* Đảm bảo body có background trắng */
+        body {
+            background-color: #ffffff !important;
+        }
+        
+        body .main-container {
+            background-color: #ffffff !important;
+        }
+        
+        /* Thanh search bar sáng hơn cho instructor header */
+        body .navbar .search-bar {
+            background-color: white !important;
+            border: 1px solid #dee2e6 !important;
+        }
+        
+        body .navbar .search-bar input {
+            background-color: white !important;
+            color: #212529 !important;
+        }
+        
+        body .navbar .search-bar input::placeholder {
+            color: #6c757d !important;
+        }
+        
+        body .navbar .search-bar button {
+            background-color: transparent !important;
+            color: #495057 !important;
+        }
+        
+        /* Card header sáng hơn */
+        body .settings-card .card-header {
+            background-color: #f8f9fa !important;
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+        
+        body .settings-card .card-header h2 {
+            color: #212529 !important;
+        }
+        
+        body .settings-card .card-header h2 i {
+            color: #007bff !important;
+        }
+        
+        body .settings-card .card-header p {
+            color: #6c757d !important;
+        }
+        
+        /* Settings card border và shadow */
+        body .settings-card {
+            border: 1px solid #dee2e6 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        }

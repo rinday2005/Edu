@@ -1,0 +1,486 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!-- Kiểm tra nếu chưa có dữ liệu và không phải từ servlet, redirect về servlet để load -->
+<c:if test="${empty courselist and empty fromServlet and empty error}">
+    <c:redirect url="${pageContext.request.contextPath}/ManageCourse"/>
+</c:if>
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Quản lý Khóa học - InstructorsHome</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/instructor/css/instructorsHome.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+        <div class="main-container">
+
+            <!-- ===== HEADER ===== -->
+            <jsp:include page="/instructor/common/header.jsp" />
+
+            <!-- ===== SIDEBAR ===== -->
+            <jsp:include page="/instructor/common/sidebar.jsp" />
+
+            <!-- ===== MAIN CONTENT ===== -->
+            <main class="content-area">
+                <section class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <h2><i class="fas fa-laptop-code"></i> Quản lý Khóa học</h2>
+                        <button class="btn btn-primary" onclick="showCourseForm()">
+                            <i class="fas fa-plus"></i> Tạo khóa học mới
+                        </button>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <h3><i class="fas fa-list"></i> Danh sách Khóa học</h3>
+                    
+                    <!-- Debug info -->
+                    <c:if test="${not empty courselist}">
+                        <p style="color: green; margin-bottom: 10px;">
+                            <i class="fas fa-check-circle"></i> Tìm thấy ${fn:length(courselist)} khóa học
+                        </p>
+                    </c:if>
+                    <c:if test="${empty courselist}">
+                        <p style="color: orange; margin-bottom: 10px;">
+                            <i class="fas fa-exclamation-triangle"></i> Chưa có khóa học nào. Hãy tạo khóa học mới!
+                        </p>
+                    </c:if>
+                    
+                    <div class="card">
+                        <div class="card-header">Tất cả khóa học của bạn</div>
+                        <div class="card-body">
+                            <c:choose>
+                                <c:when test="${empty courselist}">
+                                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                        <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                                        <p style="font-size: 16px; margin: 0;">Chưa có khóa học nào. Hãy tạo khóa học mới!</p>
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="stats-grid">
+                                        <c:forEach var="course" items="${courselist}">
+                                    <div class="stat-card" data-course-name="${course.name}" data-course-level="Beginner" data-course-price="29.99" data-course-status="Published">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                            <div>
+                                                <h4>${course.name}</h4>
+                                                <p style="color: var(--text-muted); margin: 5px 0;">Cấp độ: ${course.level}</p>
+                                                <p style="color: var(--text-muted); margin: 5px 0;">Giá: ${course.price}</p>
+                                            </div>
+                                            <c:if test="${course.approved}">
+                                                <span class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">Published</span>
+</c:if>
+                                            <c:if test="${!course.approved}">
+                                                <span class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">Pending Review</span>
+                                            </c:if> 
+
+
+                                        </div>
+                                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                            <button class="btn btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="editCourseFromCard('${course.courseID}')"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+                                            <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;" onclick="viewCourseContent('${course.courseID}')"><i class="fas fa-eye"></i> Xem nội dung</button>
+                                            <a href="<c:url value='/ManageSection?course=${course.courseID}'/>" class="btn btn-info" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-layer-group"></i> Quản lý chương</a>
+                                        </div>
+                                    </div>
+                                        </c:forEach>
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                                <!--                         ===== Khóa học 2 ===== 
+                                                        <div class="stat-card" data-course-name="Python Advanced" data-course-level="Advanced" data-course-price="49.99" data-course-status="Draft">
+                                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                                                <div>
+                                                                    <h4>Python Advanced</h4>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Cấp độ: Advanced</p>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Giá: $49.99</p>
+                                                                </div>
+                                                                <span class="btn btn-warning" style="padding: 5px 10px; font-size: 12px; background-color: #ffc107; color: #000;">Draft</span>
+                                                            </div>
+                                                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                <button class="btn btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="editCourseFromCard(this)"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+<button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;" onclick="viewCourseContent(this)"><i class="fas fa-eye"></i> Xem nội dung</button>
+                                                                <a href="CourseSession.jsp?course=Python%20Advanced" class="btn btn-info" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-layer-group"></i> Quản lý chương</a>
+                                                            </div>
+                                                        </div>
+                                
+                                                         ===== Khóa học 3 ===== 
+                                                        <div class="stat-card" data-course-name="JavaScript ES6+" data-course-level="Intermediate" data-course-price="39.99" data-course-status="Pending Review">
+                                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                                                <div>
+                                                                    <h4>JavaScript ES6+</h4>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Cấp độ: Intermediate</p>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Giá: $39.99</p>
+                                                                </div>
+                                                                <span class="btn btn-info" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8; color: white;">Pending Review</span>
+                                                            </div>
+                                                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                <button class="btn btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="editCourseFromCard(this)"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+                                                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;" onclick="viewCourseContent(this)"><i class="fas fa-eye"></i> Xem nội dung</button>
+                                                                <a href="CourseSession.jsp?course=JavaScript%20ES6%2B" class="btn btn-info" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-layer-group"></i> Quản lý chương</a>
+                                                            </div>
+                                                        </div>
+                                
+                                                         ===== Khóa học 4 =====
+<div class="stat-card" data-course-name="HTML/CSS Master" data-course-level="Beginner" data-course-price="19.99" data-course-status="Published">
+                                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                                                <div>
+                                                                    <h4>HTML/CSS Master</h4>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Cấp độ: Beginner</p>
+                                                                    <p style="color: var(--text-muted); margin: 5px 0;">Giá: $19.99</p>
+                                                                </div>
+                                                                <span class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">Published</span>
+                                                            </div>
+                                                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                                                <button class="btn btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="editCourseFromCard(this)"><i class="fas fa-edit"></i> Chỉnh sửa</button>
+                                                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;" onclick="viewCourseContent(this)"><i class="fas fa-eye"></i> Xem nội dung</button>
+                                                                <a href="CourseSession.jsp?course=HTML%2FCSS%20Master" class="btn btn-info" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-layer-group"></i> Quản lý chương</a>
+                                                            </div>
+                                                        </div>-->
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== MODAL TẠO KHÓA HỌC (có tích hợp Thêm chương) ===== -->
+                <div id="courseFormModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--bg-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 id="modalTitle"><i class="fas fa-plus"></i> Tạo khóa học mới</h3>
+<button onclick="hideCourseForm()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light);">&times;</button>
+                        </div>
+                        <form id="createCourseForm"action="<c:url value='/ManageCourse'/>"  method="post"  enctype="multipart/form-data">
+                            <input type="hidden" id="formAction" name="action" value="createcourse">
+                            <input type="hidden" id="courseIdInput" name="courseId" value="">
+                            <div class="form-group">
+                                <label for="courseName">Tên khóa học *</label>
+                                <input name="namecourse" type="text" id="courseName" class="form-control" placeholder="Nhập tên khóa học" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseDescription">Mô tả khóa học *</label>
+                                <textarea name="descriptioncourse" id="courseDescription" class="form-control" rows="4" placeholder="Mô tả chi tiết về khóa học" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="coursePrice">Giá khóa học ($) *</label>
+                                <input type="number" name = "pricecourse" id="coursePrice" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseLevel">Cấp độ *</label>
+
+                                <select id="courseLevel" name="levelcourse" class="form-control" required>
+                                    <option value="">Chọn cấp độ</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="courseImage">Ảnh bìa khóa học</label>
+                                <input type="file" name="picturecourse" id="courseImage" class="form-control" accept="image/*">
+                            </div>
+                            <div class="form-group">
+                                <label for="courseStatus">Trạng thái</label>
+                                <select id="courseStatus" name="status" class="form-control">
+                                    <option value="true">Published</option>
+                                    <option value="false">Pending Review</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+<button type="button" class="btn btn-secondary" onclick="hideCourseForm()">Hủy</button>
+                                <button type="submit" id="submitBtn" class="btn btn-primary">Tạo khóa học</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ===== MODAL XEM KHÓA HỌC ===== -->
+                <div id="viewCourseModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--bg-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3><i class="fas fa-eye"></i> Chi tiết khóa học</h3>
+                            <button onclick="hideViewCourse()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light);">&times;</button>
+                        </div>
+                        <div id="viewCourseContent">
+                            <c:if test="${not empty viewCourse}">
+                                <div class="form-group">
+                                    <label><strong>Tên khóa học:</strong></label>
+                                    <p>${fn:escapeXml(viewCourse.name)}</p>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Mô tả:</strong></label>
+                                    <p>${fn:escapeXml(viewCourse.description)}</p>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Giá:</strong></label>
+                                    <p>$${viewCourse.price}</p>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Cấp độ:</strong></label>
+                                    <p>${fn:escapeXml(viewCourse.level)}</p>
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Trạng thái:</strong></label>
+                                    <p>
+                                        <c:if test="${viewCourse.approved}">
+                                            <span class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">Published</span>
+                                        </c:if>
+                                        <c:if test="${!viewCourse.approved}">
+                                            <span class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;">Pending Review</span>
+                                        </c:if>
+                                    </p>
+                                </div>
+                                <c:if test="${not empty viewCourse.imgURL}">
+                                    <div class="form-group">
+                                        <label><strong>Ảnh bìa:</strong></label>
+                                        <img src="${pageContext.request.contextPath}/${viewCourse.imgURL}" alt="Course Image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
+                                    </div>
+                                </c:if>
+                            </c:if>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                            <button type="button" class="btn btn-secondary" onclick="hideViewCourse()">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
+        <script>
+                                    function showCourseForm() {
+                                        document.getElementById('courseFormModal').style.display = 'block';
+                                        // Khởi tạo 1 dòng chương mặc định nếu chưa có
+                                        const sessionsContainer = document.getElementById('sessionsContainer');
+                                        if (sessionsContainer && sessionsContainer.children.length === 0) {
+                                            addSessionRow();
+                                        }
+                                    }
+
+                                    function hideCourseForm() {
+                                        document.getElementById('courseFormModal').style.display = 'none';
+                                        // Reset form khi đóng
+                                        const form = document.getElementById('createCourseForm');
+                                        if (form) {
+                                            form.reset();
+                                            document.getElementById('formAction').value = 'createcourse';
+                                            document.getElementById('courseIdInput').value = '';
+                                            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Tạo khóa học mới';
+                                            document.getElementById('submitBtn').textContent = 'Tạo khóa học';
+                                            const container = document.getElementById('sessionsContainer');
+                                            if (container)
+                                                container.innerHTML = '';
+                                        }
+                                    }
+                                    
+                                    function editCourseFromCard(courseId) {
+                                        window.location.href = '${pageContext.request.contextPath}/ManageCourse?action=edit&courseId=' + courseId;
+                                    }
+                                    
+                                    function viewCourseContent(courseId) {
+                                        window.location.href = '${pageContext.request.contextPath}/ManageCourse?action=view&courseId=' + courseId;
+                                    }
+                                    
+                                    function hideViewCourse() {
+                                        document.getElementById('viewCourseModal').style.display = 'none';
+                                        // Redirect về trang list để xóa viewCourse từ request
+                                        window.location.href = '${pageContext.request.contextPath}/ManageCourse';
+                                    }
+                                    
+                                    // Tự động mở modal edit khi có course từ server
+                                    <c:if test="${not empty course and isEdit}">
+                                        // Prefill form với dữ liệu course
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const course = {
+                                                courseID: '${course.courseID}',
+                                                name: '${fn:escapeXml(course.name)}',
+                                                description: '${fn:escapeXml(course.description)}',
+                                                price: ${course.price},
+                                                level: '${fn:escapeXml(course.level)}',
+                                                approved: ${course.approved}
+                                            };
+                                            
+                                            document.getElementById('formAction').value = 'updatecourse';
+                                            document.getElementById('courseIdInput').value = course.courseID;
+                                            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Chỉnh sửa khóa học';
+                                            document.getElementById('submitBtn').textContent = 'Cập nhật khóa học';
+                                            
+                                            document.getElementById('courseName').value = course.name;
+                                            document.getElementById('courseDescription').value = course.description;
+                                            document.getElementById('coursePrice').value = course.price;
+                                            document.getElementById('courseLevel').value = course.level;
+                                            document.getElementById('courseStatus').value = course.approved.toString();
+                                            
+                                            document.getElementById('courseFormModal').style.display = 'block';
+                                        });
+                                    </c:if>
+                                    
+                                    // Tự động mở modal view khi có viewCourse từ server
+                                    <c:if test="${not empty viewCourse}">
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            document.getElementById('viewCourseModal').style.display = 'block';
+                                        });
+                                    </c:if>
+
+                                    //    // Hàm thêm 1 dòng chương mới (FE only)
+                                    //    function addSessionRow(prefill) {
+                                    //        const container = document.getElementById('sessionsContainer');
+                                    //        if (!container) return;
+                                    //
+                                    //        const row = document.createElement('div');
+                                    //        row.className = 'session-row';
+                                    //        row.style.display = 'grid';
+                                    //        row.style.gridTemplateColumns = '1fr';
+                                    //        row.style.gap = '12px';
+                                    //        row.style.alignItems = 'start';
+                                    //        row.style.padding = '12px';
+                                    //        row.style.border = '1px solid var(--border-color)';
+                                    //        row.style.borderRadius = '8px';
+//        row.style.backgroundColor = 'var(--bg-card)';
+                                    //        const sessionIndex = document.querySelectorAll('.session-row').length;
+                                    //        row.setAttribute('data-session-index', String(sessionIndex));
+                                    //
+                                    //        // Dùng nối chuỗi để tránh JSP EL can thiệp
+                                    //        row.innerHTML =
+                                    //            '<div class="session-header" style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:10px; align-items:center;">'
+                                    //          +   '<input type="text" name="sessionNames[]" class="form-control" placeholder="Tên chương (vd: Giới thiệu)"'
+                                    //          +     (prefill && prefill.name ? (' value="' + prefill.name + '"') : '') + ' required>'
+                                    //          +   '<input type="text" name="sessionDescriptions[]" class="form-control" placeholder="Mô tả chương (tùy chọn)"'
+                                    //          +     (prefill && prefill.desc ? (' value="' + prefill.desc + '"') : '') + '>'
+                                    //          +   '<input type="file" name="sessionFiles[]" class="form-control" style="width:100%;" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,image/*,video/*">'
+                                    //          +   '<button type="button" class="btn btn-danger remove-session" title="Xóa chương"><i class="fas fa-times"></i></button>'
+                                    //          + '</div>'
+                                    //          + '<div class="session-lessons" style="display:grid; gap:10px;">'
+                                    //          +   '<div class="lessons-container" style="display:grid; gap:8px;"></div>'
+                                    //          +   '<div style="display:flex; justify-content:flex-start;">'
+                                    //          +     '<button type="button" class="btn btn-secondary add-lesson"><i class="fas fa-plus"></i> Thêm bài học</button>'
+                                    //          +   '</div>'
+                                    //          + '</div>';
+                                    //
+                                    //        // Xử lý xóa chương
+                                    //        row.querySelector('.remove-session').addEventListener('click', function(){ row.remove(); });
+                                    //        // Thêm bài học
+                                    //        row.querySelector('.add-lesson').addEventListener('click', function(){ addLessonRow(row); });
+                                    //
+                                    //        container.appendChild(row);
+                                    //    }
+                                    //
+//    // Thêm 1 dòng bài học cho một chương (FE only)
+                                    //    function addLessonRow(sessionRow, prefill) {
+                                    //        if (!sessionRow) return;
+                                    //        const sessionIndex = sessionRow.getAttribute('data-session-index');
+                                    //        const lessonsContainer = sessionRow.querySelector('.lessons-container');
+                                    //        if (!lessonsContainer) return;
+                                    //
+                                    //        const item = document.createElement('div');
+                                    //        item.style.display = 'grid';
+                                    //        item.style.gridTemplateColumns = '1fr 1fr 1fr auto';
+                                    //        item.style.gap = '8px';
+                                    //
+                                    //        item.innerHTML =
+                                    //            '<input type="text" name="lessonNames_' + sessionIndex + '[]" class="form-control" placeholder="Tên bài học"'
+                                    //          +   (prefill && prefill.name ? (' value="' + prefill.name + '"') : '') + ' required>'
+                                    //          + '<input type="text" name="lessonUrls_' + sessionIndex + '[]" class="form-control" placeholder="URL video/tài liệu">'
+                                    //          + '<input type="file" name="lessonFiles_' + sessionIndex + '[]" class="form-control" style="width:100%;" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar,image/*,video/*">'
+                                    //          + '<button type="button" class="btn btn-danger remove-lesson" title="Xóa bài học"><i class="fas fa-times"></i></button>';
+                                    //
+                                    //        item.querySelector('.remove-lesson').addEventListener('click', function(){ item.remove(); });
+                                    //        lessonsContainer.appendChild(item);
+                                    //    }
+                                    //
+                                    //    // Nút thêm chương
+                                    //    const addSessionBtn = document.getElementById('addSessionBtn');
+                                    //    if (addSessionBtn) {
+                                    //        addSessionBtn.addEventListener('click', function() {
+                                    //            addSessionRow();
+                                    //        });
+                                    //    }
+                                    //
+                                    //    // Đóng modal khi click ra ngoài
+                                    //    window.addEventListener('click', function(event) {
+//        const modal = document.getElementById('courseFormModal');
+                                    //        if (event.target === modal) {
+                                    //            hideCourseForm();
+                                    //        }
+                                    //    });
+                                    //
+                                    //    // Xử lý submit form (FE only - demo)
+                                    //    const createCourseForm = document.getElementById('createCourseForm');
+                                    //    if (createCourseForm) {
+                                    //        createCourseForm.addEventListener('submit', function(e) {
+                                    //            e.preventDefault();
+                                    //
+                                    //            const formData = new FormData(createCourseForm);
+                                    //            const sessionNames = formData.getAll('sessionNames[]');
+                                    //            const sessionDescriptions = formData.getAll('sessionDescriptions[]');
+                                    //            const sessionFiles = formData.getAll('sessionFiles[]');
+                                    //
+                                    //            // Thu thập thông tin khóa học
+                                    //            const courseData = {
+                                    //                name: formData.get('courseName'),
+                                    //                description: formData.get('courseDescription'),
+                                    //                price: formData.get('coursePrice'),
+                                    //                level: formData.get('courseLevel'),
+                                    //                status: formData.get('courseStatus'),
+                                    //                sessions: []
+                                    //            };
+                                    //
+                                    //            // Thu thập thông tin các chương
+                                    //            const sessionRows = Array.from(document.querySelectorAll('.session-row'));
+                                    //            sessionRows.forEach(function(row, idx){
+                                    //                const name = sessionNames[idx];
+                                    //                if (!name || !name.trim()) return;
+                                    //                const session = {
+                                    //                    name,
+                                    //                    description: sessionDescriptions[idx] || '',
+                                    //                    fileName: (sessionFiles[idx] && sessionFiles[idx].name) ? sessionFiles[idx].name : '',
+//                    lessons: []
+                                    //                };
+                                    //                const sIdx = row.getAttribute('data-session-index');
+                                    //                const lessonNameInputs = row.querySelectorAll('input[name="lessonNames_' + sIdx + '[]"]');
+                                    //                const lessonUrlInputs = row.querySelectorAll('input[name="lessonUrls_' + sIdx + '[]"]');
+                                    //                const lessonFileInputs = row.querySelectorAll('input[name="lessonFiles_' + sIdx + '[]"]');
+                                    //                for (let i = 0; i < lessonNameInputs.length; i++) {
+                                    //                    const ln = lessonNameInputs[i].value.trim();
+                                    //                    const lu = (lessonUrlInputs[i] ? lessonUrlInputs[i].value.trim() : '');
+                                    //                    const lf = (lessonFileInputs[i] && lessonFileInputs[i].files && lessonFileInputs[i].files[0]) ? lessonFileInputs[i].files[0].name : '';
+                                    //                    if (ln) session.lessons.push({ name: ln, url: lu, fileName: lf });
+                                    //                }
+                                    //                courseData.sessions.push(session);
+                                    //            });
+                                    //
+                                    //            console.log('Dữ liệu khóa học và chương (FE):', courseData);
+                                    //            alert('Đã thu thập dữ liệu:\n- Khóa học: ' + courseData.name + '\n- Số chương: ' + courseData.sessions.length + '\n\n(Xem console để xem chi tiết - FE demo)');
+                                    //            
+                                    //            hideCourseForm();
+                                    //        });
+                                    //    }
+                                    //
+                                    //    // Mở modal tạo khóa học và prefill từ card
+                                    //    function editCourseFromCard(btn) {
+                                    //        const card = btn.closest('.stat-card');
+                                    //        if (!card) return;
+                                    //        const name = card.getAttribute('data-course-name') || '';
+                                    //        const level = card.getAttribute('data-course-level') || '';
+                                    //        const price = card.getAttribute('data-course-price') || '';
+                                    //        const status = card.getAttribute('data-course-status') || '';
+                                    //
+//        document.getElementById('courseName').value = name;
+                                    //        document.getElementById('courseLevel').value = level;
+                                    //        document.getElementById('coursePrice').value = price;
+                                    //        document.getElementById('courseStatus').value = status;
+                                    //        showCourseForm();
+                                    //    }
+                                    //
+                                    //    // Chuyển đến trang quản lý nội dung
+                                    //    function viewCourseContent(btn) {
+                                    //        const card = btn.closest('.stat-card');
+                                    //        const name = card ? (card.getAttribute('data-course-name') || '') : '';
+                                    //        const url = 'CourseContentManager.jsp' + (name ? ('?course=' + encodeURIComponent(name)) : '');
+                                    //        window.location.href = url;
+                                    //    }
+        </script>
+    </body>
+</html>

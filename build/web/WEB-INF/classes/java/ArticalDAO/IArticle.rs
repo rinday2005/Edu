@@ -1,0 +1,1 @@
+ArticalDAO.IArticle
