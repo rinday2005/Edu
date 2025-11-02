@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Chương - InstructorsHome</title>
+    <title>Báo cáo Tài chính - InstructorsHome</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/instructor/css/instructorsHome.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -15,297 +15,205 @@
     <jsp:include page="/instructor/common/header.jsp" />
 
     <!-- ===== SIDEBAR ===== -->
-   <jsp:include page="/instructor/common/sidebar.jsp" />
+    <jsp:include page="/instructor/common/sidebar.jsp" />
+    
     <!-- ===== MAIN CONTENT ===== -->
     <main class="content-area">
         <section class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                <div>
-                    <h2><i class="fas fa-layer-group"></i> Quản lý Chương</h2>
-                    <p style="color: var(--text-muted); margin: 5px 0 0 0;">
-                        <a href="CourseManagement.jsp" style="color: var(--primary-color); text-decoration: none;">
-                            <i class="fas fa-arrow-left"></i> Quay lại Quản lý Khóa học
-                        </a>
-                    </p>
-                </div>
-                <button class="btn btn-primary" onclick="showAddSessionForm()">
-                    <i class="fas fa-plus"></i> Thêm chương mới
-                </button>
-            </div>
+            <h2><i class="fas fa-wallet"></i> Báo cáo Tài chính</h2>
         </section>
 
-        <section class="section">
-            <h3><i class="fas fa-list"></i> Danh sách Chương</h3>
-            <div class="card">
-                <div class="card-header">
-                    <span id="courseTitle">React.js Cơ bản</span> - Tất cả chương
+        <!-- Redesigned wallet card with improved layout and styling -->
+        <div class="wallet-hero">
+            <div class="wallet-card-main">
+                <div class="wallet-header">
+                    <div class="wallet-label"><i class="fas fa-piggy-bank"></i> Ví của bạn</div>
+                    <div class="wallet-badge">Hoạt động</div>
                 </div>
-                <div class="card-body">
-                    <div class="stats-grid">
-
-                        <!-- ===== Chương 1 ===== -->
-                        <div class="stat-card session-card" data-session-id="1">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                                <div>
-                                    <h4 class="session-title">Chương 1: Giới thiệu React.js</h4>
-                                    <p class="session-lessons" style="color: var(--text-muted); margin: 5px 0;">Số bài học: 5</p>
-                                    <p class="session-duration" style="color: var(--text-muted); margin: 5px 0;">Thời lượng: 2h 30m</p>
-                                </div>
-                                <span class="btn btn-success session-status" style="padding: 5px 10px; font-size: 12px;">Hoàn thành</span>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="btn btn-primary edit-session-btn" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-eye"></i> Xem chi tiết</button>
-                                <button class="btn btn-danger" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-trash"></i> Xóa</button>
-                            </div>
-                        </div>
-
-<!--                         ===== Chương 2 ===== 
-                        <div class="stat-card session-card" data-session-id="2">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                                <div>
-                                    <h4 class="session-title">Chương 2: Components & Props</h4>
-                                    <p class="session-lessons" style="color: var(--text-muted); margin: 5px 0;">Số bài học: 7</p>
-                                    <p class="session-duration" style="color: var(--text-muted); margin: 5px 0;">Thời lượng: 3h 15m</p>
-                                </div>
-                                <span class="btn btn-warning session-status" style="padding: 5px 10px; font-size: 12px; background-color: #ffc107; color: #000;">Đang làm</span>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="btn btn-primary edit-session-btn" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-eye"></i> Xem chi tiết</button>
-                                <button class="btn btn-danger" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-trash"></i> Xóa</button>
-                            </div>
-                        </div>
-
-                         ===== Chương 3 ===== 
-                        <div class="stat-card session-card" data-session-id="3">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                                <div>
-                                    <h4 class="session-title">Chương 3: State & Lifecycle</h4>
-                                    <p class="session-lessons" style="color: var(--text-muted); margin: 5px 0;">Số bài học: 6</p>
-                                    <p class="session-duration" style="color: var(--text-muted); margin: 5px 0;">Thời lượng: 2h 45m</p>
-                                </div>
-                                <span class="btn btn-info session-status" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8; color: white;">Chưa bắt đầu</span>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="btn btn-primary edit-session-btn" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-eye"></i> Xem chi tiết</button>
-                                <button class="btn btn-danger" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-trash"></i> Xóa</button>
-                            </div>
-                        </div>
-
-                         ===== Chương 4 ===== 
-                        <div class="stat-card session-card" data-session-id="4">
-                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                                <div>
-                                    <h4 class="session-title">Chương 4: Hooks & Advanced Topics</h4>
-                                    <p class="session-lessons" style="color: var(--text-muted); margin: 5px 0;">Số bài học: 8</p>
-                                    <p class="session-duration" style="color: var(--text-muted); margin: 5px 0;">Thời lượng: 4h 20m</p>
-                                </div>
-                                <span class="btn btn-info session-status" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8; color: white;">Chưa bắt đầu</span>
-                            </div>
-                            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                                <button class="btn btn-primary edit-session-btn" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-edit"></i> Chỉnh sửa</button>
-                                <button class="btn btn-secondary" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-eye"></i> Xem chi tiết</button>
-                                <button class="btn btn-danger" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-trash"></i> Xóa</button>
-                            </div>
-                        </div>-->
-
+                <div class="wallet-balance-display">
+                    <span class="currency-symbol">₫</span>
+                    <span class="wallet-balance-amount">5,250,000</span>
+                </div>
+                <div class="wallet-info-grid">
+                    <div class="wallet-info-item">
+                        <span class="info-label">Ngân hàng</span>
+                        <span class="info-value">Vietcombank</span>
+                    </div>
+                    <div class="wallet-info-item">
+                        <span class="info-label">Số tài khoản</span>
+                        <span class="info-value">1234567890</span>
+                    </div>
+                    <div class="wallet-info-item">
+                        <span class="info-label">Cập nhật</span>
+                        <span class="info-value">Hôm nay</span>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- ===== MODAL THÊM CHƯƠNG MỚI ===== -->
-        <div id="addSessionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--bg-card); padding: 30px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3><i class="fas fa-plus"></i> Thêm chương mới</h3>
-                    <button onclick="hideAddSessionForm()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light);">&times;</button>
-                </div>
-                <form id="addSessionForm">
-                    <div class="form-group">
-                        <label for="sessionName">Tên chương *</label>
-                        <input type="text" id="sessionName" class="form-control" placeholder="Ví dụ: Chương 1: Giới thiệu React.js" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionDescription">Mô tả chương</label>
-                        <textarea id="sessionDescription" class="form-control" rows="4" placeholder="Mô tả chi tiết về chương này..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionOrder">Thứ tự chương *</label>
-                        <input type="number" id="sessionOrder" class="form-control" placeholder="1" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sessionStatus">Trạng thái</label>
-                        <select id="sessionStatus" class="form-control">
-                            <option value="Chưa bắt đầu">Chưa bắt đầu</option>
-                            <option value="Đang làm">Đang làm</option>
-                            <option value="Hoàn thành">Hoàn thành</option>
-                        </select>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                        <button type="button" class="btn btn-secondary" onclick="hideAddSessionForm()">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Thêm chương</button>
-                    </div>
-                </form>
             </div>
         </div>
+
+        <!-- Financial statistics with improved visual hierarchy -->
+        <section class="section">
+            <h3><i class="fas fa-chart-bar"></i> Thống kê Tài chính tháng này</h3>
+            <div class="stats-grid-enhanced">
+                <div class="stat-box-enhanced income-stat">
+                    <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                    <div class="stat-content">
+                        <h4>Thu nhập</h4>
+                        <div class="stat-amount">₫ 15,500,000</div>
+                        <p class="stat-change">+12% so với tháng trước</p>
+                    </div>
+                </div>
+                <div class="stat-box-enhanced expense-stat">
+                    <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                    <div class="stat-content">
+                        <h4>Chi phí</h4>
+                        <div class="stat-amount">₫ 2,100,000</div>
+                        <p class="stat-change">-5% so với tháng trước</p>
+                    </div>
+                </div>
+                <div class="stat-box-enhanced balance-stat">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-content">
+                        <h4>Tổng lợi nhuận</h4>
+                        <div class="stat-amount">₫ 13,400,000</div>
+                        <p class="stat-change">Tháng này</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transaction history with enhanced table styling -->
+        <section class="section">
+            <div class="section-header-with-filter">
+                <h3><i class="fas fa-history"></i> Lịch sử Giao dịch</h3>
+                <div class="filter-actions">
+                    <input type="text" class="filter-input" placeholder="Tìm kiếm giao dịch...">
+                    <select class="filter-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="income">Thu nhập</option>
+                        <option value="expense">Chi phí</option>
+                        <option value="withdraw">Rút tiền</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body table-responsive">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Ngày giao dịch</th>
+                                <th><i class="fas fa-info-circle"></i> Mô tả</th>
+                                <th><i class="fas fa-money-bill"></i> Số tiền</th>
+                                <th><i class="fas fa-tag"></i> Loại</th>
+                                <th><i class="fas fa-check-circle"></i> Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="transaction-row">
+                                <td>2024-01-15</td>
+                                <td>Thanh toán khóa học - React Advanced</td>
+                                <td class="transaction-amount credit">+ ₫ 5,000,000</td>
+                                <td><span class="badge badge-income">Thu nhập</span></td>
+                                <td><span class="transaction-status status-success"><i class="fas fa-check"></i> Thành công</span></td>
+                            </tr>
+                            <tr class="transaction-row">
+                                <td>2024-01-14</td>
+                                <td>Phí hệ thống 3%</td>
+                                <td class="transaction-amount debit">- ₫ 150,000</td>
+                                <td><span class="badge badge-expense">Chi phí</span></td>
+                                <td><span class="transaction-status status-success"><i class="fas fa-check"></i> Thành công</span></td>
+                            </tr>
+                            <tr class="transaction-row">
+                                <td>2024-01-12</td>
+                                <td>Thanh toán khóa học - Web Design</td>
+                                <td class="transaction-amount credit">+ ₫ 3,500,000</td>
+                                <td><span class="badge badge-income">Thu nhập</span></td>
+                                <td><span class="transaction-status status-success"><i class="fas fa-check"></i> Thành công</span></td>
+                            </tr>
+                            <tr class="transaction-row">
+                                <td>2024-01-10</td>
+                                <td>Rút tiền về tài khoản ngân hàng</td>
+                                <td class="transaction-amount debit">- ₫ 10,000,000</td>
+                                <td><span class="badge badge-withdraw">Rút tiền</span></td>
+                                <td><span class="transaction-status status-success"><i class="fas fa-check"></i> Thành công</span></td>
+                            </tr>
+                            <tr class="transaction-row">
+                                <td>2024-01-08</td>
+                                <td>Thanh toán khóa học - JavaScript Basics</td>
+                                <td class="transaction-amount credit">+ ₫ 2,500,000</td>
+                                <td><span class="badge badge-income">Thu nhập</span></td>
+                                <td><span class="transaction-status status-success"><i class="fas fa-check"></i> Thành công</span></td>
+                            </tr>
+                            <tr class="transaction-row">
+                                <td>2024-01-05</td>
+                                <td>Hoàn tiền - Khôi phục giao dịch</td>
+                                <td class="transaction-amount debit">- ₫ 1,500,000</td>
+                                <td><span class="badge badge-refund">Hoàn tiền</span></td>
+                                <td><span class="transaction-status status-pending"><i class="fas fa-clock"></i> Đang xử lý</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Withdrawal request form with improved layout -->
+        <section class="section">
+            <h3><i class="fas fa-credit-card"></i> Yêu cầu Rút tiền</h3>
+            <div class="card">
+                <div class="card-body">
+                    <form class="withdrawal-form-enhanced">
+                        <div class="form-section">
+                            <p class="form-note"><i class="fas fa-info-circle"></i> Điền thông tin tài khoản ngân hàng để yêu cầu rút tiền</p>
+                            
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label for="withdrawAmount"><i class="fas fa-dollar-sign"></i> Số tiền cần rút (₫) *</label>
+                                    <input type="number" id="withdrawAmount" class="form-control" placeholder="1,000,000" min="100000" required>
+                                    <small class="form-hint">Tối thiểu: 100,000 ₫ | Tối đa: 5,250,000 ₫</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bankName"><i class="fas fa-building"></i> Tên ngân hàng *</label>
+                                    <select id="bankName" class="form-control" required>
+                                        <option value="">-- Chọn ngân hàng --</option>
+                                        <option value="Vietcombank">Vietcombank</option>
+                                        <option value="BIDV">BIDV</option>
+                                        <option value="Techcombank">Techcombank</option>
+                                        <option value="ACB">ACB</option>
+                                        <option value="MB Bank">MB Bank</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="bankAccount"><i class="fas fa-credit-card"></i> Số tài khoản ngân hàng *</label>
+                                <input type="text" id="bankAccount" class="form-control" placeholder="1234567890" required>
+                                <small class="form-hint">Nhập số tài khoản đầy đủ 9-18 chữ số</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="accountHolder"><i class="fas fa-user"></i> Tên chủ tài khoản *</label>
+                                <input type="text" id="accountHolder" class="form-control" placeholder="Nguyễn Văn A" required>
+                            </div>
+
+                            <div class="form-note-warning">
+                                <i class="fas fa-warning"></i>
+                                <span>Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Không thể thay đổi sau khi xác nhận.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary"><i class="fas fa-times"></i> Hủy</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
 
     </main>
 </div>
 
-<script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
-<script>
-    // Modal chỉnh sửa session
-    function openEditSessionModal(card) {
-        const title = card.querySelector('.session-title')?.textContent || '';
-        const lessons = (card.querySelector('.session-lessons')?.textContent || '').replace(/[^0-9]/g, '');
-        const duration = card.querySelector('.session-duration')?.textContent.replace('Thời lượng: ', '') || '';
-        const statusText = card.querySelector('.session-status')?.textContent || 'Chưa bắt đầu';
-
-        document.getElementById('editSessionTitle').value = title;
-        document.getElementById('editSessionLessons').value = lessons || '';
-        document.getElementById('editSessionDuration').value = duration || '';
-        document.getElementById('editSessionStatus').value = statusText;
-
-        document.getElementById('editSessionModal').style.display = 'block';
-        document.getElementById('editSessionModal').setAttribute('data-target-id', card.getAttribute('data-session-id'));
-    }
-
-    function hideEditSessionModal() {
-        document.getElementById('editSessionModal').style.display = 'none';
-    }
-
-    // Lấy tên khóa học từ URL parameter
-    function getCourseFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const course = urlParams.get('course');
-        if (course) {
-            document.getElementById('courseTitle').textContent = decodeURIComponent(course);
-        }
-    }
-
-    function showAddSessionForm() {
-        document.getElementById('addSessionModal').style.display = 'block';
-    }
-
-    function hideAddSessionForm() {
-        document.getElementById('addSessionModal').style.display = 'none';
-        // Reset form khi đóng
-        const form = document.getElementById('addSessionForm');
-        if (form) {
-            form.reset();
-        }
-    }
-
-    // Đóng modal khi click ra ngoài
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('addSessionModal');
-        if (event.target === modal) {
-            hideAddSessionForm();
-        }
-    });
-
-    // Xử lý submit form thêm chương (FE only - demo)
-    const addSessionForm = document.getElementById('addSessionForm');
-    if (addSessionForm) {
-        addSessionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(addSessionForm);
-            const sessionData = {
-                name: formData.get('sessionName'),
-                description: formData.get('sessionDescription'),
-                order: formData.get('sessionOrder'),
-                status: formData.get('sessionStatus')
-            };
-
-            console.log('Dữ liệu chương mới (FE):', sessionData);
-            alert('Đã thêm chương mới (FE demo):\n- Tên: ' + sessionData.name + '\n- Thứ tự: ' + sessionData.order + '\n- Trạng thái: ' + sessionData.status);
-            
-            hideAddSessionForm();
-        });
-    }
-
-    // Khởi tạo trang
-    document.addEventListener('DOMContentLoaded', function() {
-        getCourseFromURL();
-
-        // Attach edit handlers
-        Array.from(document.querySelectorAll('.edit-session-btn')).forEach(function(btn){
-            btn.addEventListener('click', function(){
-                const card = btn.closest('.session-card');
-                if (card) openEditSessionModal(card);
-            });
-        });
-
-        // Submit edit
-        const editForm = document.getElementById('editSessionForm');
-        if (editForm) {
-            editForm.addEventListener('submit', function(e){
-                e.preventDefault();
-                const targetId = document.getElementById('editSessionModal').getAttribute('data-target-id');
-                const card = document.querySelector('.session-card[data-session-id="' + targetId + '"]');
-                if (!card) return;
-
-                const title = document.getElementById('editSessionTitle').value.trim();
-                const lessons = document.getElementById('editSessionLessons').value.trim();
-                const duration = document.getElementById('editSessionDuration').value.trim();
-                const status = document.getElementById('editSessionStatus').value;
-
-                if (title) card.querySelector('.session-title').textContent = title;
-                card.querySelector('.session-lessons').textContent = 'Số bài học: ' + (lessons || '0');
-                card.querySelector('.session-duration').textContent = 'Thời lượng: ' + (duration || '');
-                const statusEl = card.querySelector('.session-status');
-                statusEl.textContent = status;
-                // đổi màu nhanh theo trạng thái
-                statusEl.className = 'btn session-status';
-                if (status === 'Hoàn thành') statusEl.classList.add('btn-success');
-                else if (status === 'Đang làm') statusEl.classList.add('btn-warning');
-                else statusEl.classList.add('btn-info');
-
-                hideEditSessionModal();
-            });
-        }
-    });
-</script>
-
-<!-- Modal Edit Session -->
-<div id="editSessionModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div style="position:absolute; top:50%; left:50%; transform: translate(-50%, -50%); background: var(--bg-card); width: 90%; max-width: 560px; border-radius: 8px; padding: 24px;">
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 12px;">
-            <h3 style="margin:0"><i class="fas fa-edit"></i> Chỉnh sửa chương</h3>
-            <button onclick="hideEditSessionModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
-        </div>
-        <form id="editSessionForm">
-            <div class="form-group">
-                <label for="editSessionTitle">Tiêu đề chương</label>
-                <input id="editSessionTitle" type="text" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="editSessionLessons">Số bài học</label>
-                <input id="editSessionLessons" type="number" min="0" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="editSessionDuration">Thời lượng (ví dụ: 2h 30m)</label>
-                <input id="editSessionDuration" type="text" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="editSessionStatus">Trạng thái</label>
-                <select id="editSessionStatus" class="form-control">
-                    <option>Chưa bắt đầu</option>
-                    <option>Đang làm</option>
-                    <option>Hoàn thành</option>
-                </select>
-            </div>
-            <div style="display:flex; gap:8px; justify-content:flex-end; margin-top: 12px;">
-                <button type="button" class="btn btn-secondary" onclick="hideEditSessionModal()">Hủy</button>
-                <button type="submit" class="btn btn-primary">Lưu</button>
-            </div>
-        </form>
-    </div>
-</div>
+<script src="${pageContext.request.contextPath}/instructor/js/instructorsHome.js"></script>
 </body>
 </html>

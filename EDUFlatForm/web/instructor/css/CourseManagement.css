@@ -1,0 +1,85 @@
+.course-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+    width: 320px; /* tăng độ rộng của box */
+    padding: 20px; /* thêm khoảng trống bên trong */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background-color 0.2s;
+}
+
+.course-header:hover {
+    background-color: #f5f5f5;
+}
+
+.course-info h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.course-info p {
+    margin: 4px 0;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.course-action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.btn-small {
+    padding: 10px 18px; /* tăng kích thước button */
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-small:hover {
+    transform: translateY(-2px);
+}
+
+.btn-edit {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #0056b3;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+.status-badge {
+    padding: 8px 14px; /* badge lớn hơn */
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+}

@@ -175,7 +175,7 @@ public class ManageCourse extends HttpServlet {
             String imagePath = "uploads/course_images/" + fileName;
             Courses course = new Courses(UUID.randomUUID(),userID, name, description, imagePath, 0, price, level, status);
             courseservice.insert(course);
-            response.sendRedirect(request.getContextPath()+"/instructor/jsp/CourseManagement.jsp");
+            response.sendRedirect(request.getContextPath()+"/ManageCourse");
 
     }
 

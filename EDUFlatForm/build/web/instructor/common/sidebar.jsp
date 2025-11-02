@@ -14,7 +14,7 @@
 
     <a href="${pageContext.request.contextPath}/instructor/jsp/FinanceReport.jsp" 
        class="nav-item <%= request.getRequestURI().contains("FinanceReport.jsp") ? "active" : "" %>">
-        <i class="fas fa-chart-line"></i> Báo cáo
+        <i class="fas fa-chart-line"></i> Ví tiền
     </a>
 
     <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical" 
@@ -22,10 +22,7 @@
         <i class="fas fa-blog"></i> Bài viết
     </a>
 
-    <a href="${pageContext.request.contextPath}/instructor/jsp/CourseContentManager.jsp" 
-       class="nav-item <%= request.getRequestURI().contains("CourseContentManager.jsp") ? "active" : "" %>">
-        <i class="fas fa-video"></i> Nội dung
-    </a>
+    
 
     <a href="${pageContext.request.contextPath}/instructor/jsp/AssignmentDetails.jsp" 
        class="nav-item <%= request.getRequestURI().contains("AssignmentDetails.jsp") ? "active" : "" %>">

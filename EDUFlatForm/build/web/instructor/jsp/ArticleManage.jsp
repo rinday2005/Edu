@@ -9,7 +9,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quản lý Bài viết - InstructorsHome</title>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/instructor/css/instructorsHome.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/instructor/css/ArticleManagement.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+      
     </head>
     <body>
         <div class="main-container">
@@ -33,9 +35,7 @@
                 <!-- Articles List -->
                 <section class="section">
 
-                    <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical">
-                        <i class="fas fa-list"></i> Danh sách Bài viết
-                    </a>
+                   <h3 style="margin-bottom: 30px;"><i class="fas fa-list"></i> Danh sách Bài viết</h3>
 
 
                     <div class="card">
@@ -44,47 +44,65 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table border="1" cellpadding="5" cellspacing="0">
-                                    <tr>
-                                        <th>Tiêu đề</th>
-                                        <th>Nội dung</th>
-                                        <th>Ngày tạo</th>
-                                        <th>Trạng thái</th>
-                                        <th>Lượt xem</th>
-                                        <th>Bình luận</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-
-                                    <c:forEach var="artical" items="${articallist}">
+                                <!-- Redesigned table with modern styling -->
+                                <table class="articles-table">
+                                    <thead>
                                         <tr>
-                                            <td>${artical.title}</td>
-                                            <td>${artical.content}</td>
-                                            <td>${artical.createAt}</td>
-                                            <td>${artical.status}</td>
-                                            <td>${artical.viewCount}</td>
-                                            <td>${artical.commentCount}</td>
-                                            <!-- Cột Update & Delete -->
-                                            <td>
-                                                <div class="cell-actions">
-                                                    <form action="<c:url value='/ManageArtical'/>" method="post" style="display:inline">
-                                                        <input type="hidden" name="action" value="updateartical">
-                                                        <input type="hidden" name="id" value="${artical.articleID}">
-                                                        <button class="btn btn-sm btn-warning">Update</button>
-                                                    </form>
-
-                                                    <a href="<c:url value='/ManageArtical?action=deleteartical&id=${artical.articleID}'/>"
-                                                       class="btn btn-sm btn-danger"
-                                                       onclick="return confirm('Xóa bài #${artical.articleID}?');">Delete</a>
-                                                </div>
-
-                                            </td>
-
-
-
+                                            <th><i class="fas fa-heading"></i> Tiêu đề</th>
+                                            <th><i class="fas fa-align-left"></i> Nội dung</th>
+                                            <th><i class="fas fa-calendar"></i> Ngày tạo</th>
+                                            <th><i class="fas fa-tag"></i> Trạng thái</th>
+                                            <th><i class="fas fa-chart-bar"></i> Thống kê</th>
+                                            <th><i class="fas fa-cogs"></i> Thao tác</th>
                                         </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="artical" items="${articallist}">
+                                            <tr>
+                                                <td><span class="article-title">${artical.title}</span></td>
+                                                <td><span class="article-content">${artical.content}</span></td>
+                                                <td><span class="article-date">${artical.createAt}</span></td>
+                                                <td>
+                                                    <c:choose>
+                                                        <c:when test="${artical.status == 'Published'}">
+                                                            <span class="status-badge status-published">Published</span>
+                                                        </c:when>
+                                                        <c:when test="${artical.status == 'Draft'}">
+                                                            <span class="status-badge status-draft">Draft</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="status-badge status-pending">Pending</span>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </td>
+                                                <td>
+                                                    <div class="article-stats">
+                                                        <div class="stat-item">
+                                                            <div class="stat-number">${artical.viewCount}</div>
+                                                            <div class="stat-label">Xem</div>
+                                                        </div>
+                                                        <div class="stat-item">
+                                                            <div class="stat-number">${artical.commentCount}</div>
+                                                            <div class="stat-label">Bình luận</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="table-actions">
+                                                        <form action="<c:url value='/ManageArtical'/>" method="post" style="display:inline">
+                                                            <input type="hidden" name="action" value="updateartical">
+                                                            <input type="hidden" name="id" value="${artical.articleID}">
+                                                            <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Sửa</button>
+                                                        </form>
 
-                                    </c:forEach>
-
+                                                        <a href="<c:url value='/ManageArtical?action=deleteartical&id=${artical.articleID}'/>"
+                                                           class="action-btn btn-delete"
+                                                           onclick="return confirm('Xóa bài #${artical.articleID}?');"><i class="fas fa-trash"></i> Xóa</a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -93,7 +111,7 @@
 
                 <!-- Comments Management -->
                 <section class="section">
-                    <h3><i class="fas fa-comments"></i> Quản lý Bình luận</h3>
+                    <h3 style="margin-bottom: 30px;"><i class="fas fa-comments"></i> Quản lý Bình luận</h3>
                     <div class="card">
                         <div class="card-header">
                             Bình luận mới nhất
@@ -118,42 +136,6 @@
                                         </button>
                                     </div>
                                 </div>
-                                <!--                            <div class="activity-item">
-                                                                <div class="activity-icon">
-                                                                    <i class="fas fa-user"></i>
-                                                                </div>
-                                                                <div class="activity-content">
-                                                                    <h4>Trần Thị B</h4>
-                                                                    <p>"Có thể bạn có thể giải thích thêm về phần hooks không?"</p>
-                                                                    <p style="font-size: 12px; color: var(--text-muted);">Bài viết: JavaScript ES6+ Features mới nhất • 4 giờ trước</p>
-                                                                </div>
-                                                                <div style="display: flex; gap: 5px;">
-                                                                    <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">
-                                                                        <i class="fas fa-check"></i> Duyệt
-                                                                    </button>
-                                                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                                        <i class="fas fa-times"></i> Xóa
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                            <div class="activity-item">
-                                                                <div class="activity-icon">
-                                                                    <i class="fas fa-user"></i>
-                                                                </div>
-                                                                <div class="activity-content">
-                                                                    <h4>Lê Văn C</h4>
-                                                                    <p>"Tuyệt vời! Đây chính là những gì tôi đang tìm kiếm."</p>
-                                                                    <p style="font-size: 12px; color: var(--text-muted);">Bài viết: Hướng dẫn setup môi trường Node.js • 6 giờ trước</p>
-                                                                </div>
-                                                                <div style="display: flex; gap: 5px;">
-                                                                    <button class="btn btn-success" style="padding: 5px 10px; font-size: 12px;">
-                                                                        <i class="fas fa-check"></i> Duyệt
-                                                                    </button>
-                                                                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
-                                                                        <i class="fas fa-times"></i> Xóa
-                                                                    </button>
-                                                                </div>
-                                                            </div>-->
                             </div>
                         </div>
                     </div>
@@ -182,7 +164,6 @@
 
                             <div class="form-group">
                                 <label for="articleStatus">Trạng thái</label>
-                                <!-- PHẢI có name để submit -->
                                 <select id="articleStatus" name="statusArtical" class="form-control">
                                     <option value="Draft">Draft</option>
                                     <option value="Published">Published</option>
@@ -192,7 +173,6 @@
 
                             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
                                 <button type="button" class="btn btn-secondary" onclick="hideArticleForm()">Hủy</button>
-                                <!-- 2 nút này đổi value của select nếu bạn muốn -->
                                 <button type="submit" class="btn btn-warning" onclick="document.getElementById('articleStatus').value = 'Draft'">
                                     Lưu nháp
                                 </button>
@@ -207,22 +187,23 @@
         </div>
 
         <script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
+        <script src="${pageContext.request.contextPath}/instructor/js/articleManage.js"></script>
         <script>
-                                    function showArticleForm() {
-                                        document.getElementById('articleFormModal').style.display = 'block';
-                                    }
+            function showArticleForm() {
+                document.getElementById('articleFormModal').style.display = 'block';
+            }
 
-                                    function hideArticleForm() {
-                                        document.getElementById('articleFormModal').style.display = 'none';
-                                    }
+            function hideArticleForm() {
+                document.getElementById('articleFormModal').style.display = 'none';
+            }
 
-                                    // Close modal when clicking outside
-                                    window.onclick = function (event) {
-                                        const modal = document.getElementById('articleFormModal');
-                                        if (event.target === modal) {
-                                            hideArticleForm();
-                                        }
-                                    }
+            // Close modal when clicking outside
+            window.onclick = function (event) {
+                const modal = document.getElementById('articleFormModal');
+                if (event.target === modal) {
+                    hideArticleForm();
+                }
+            }
         </script>
     </body>
 </html>

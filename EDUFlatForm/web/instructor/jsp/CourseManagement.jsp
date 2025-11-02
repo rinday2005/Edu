@@ -61,7 +61,7 @@
                                             <a href="CourseSession.jsp?course=React.js%20Cơ%20bản" class="btn btn-info" style="padding: 8px 15px; font-size: 12px;"><i class="fas fa-layer-group"></i> Quản lý chương</a>
                                         </div>
                                     </div>
-                                </c:forEach>>
+                                </c:forEach>
 
                                 <!--                         ===== Khóa học 2 ===== 
                                                         <div class="stat-card" data-course-name="Python Advanced" data-course-level="Advanced" data-course-price="49.99" data-course-status="Draft">
