@@ -114,7 +114,7 @@
                     <h3 style="margin-bottom: 30px;"><i class="fas fa-comments"></i> Quản lý Bình luận</h3>
                     <div class="card">
                         <div class="card-header">
-                            Bình luận mới nhất
+                            Tất cả bình luận
                         </div>
                         <div class="card-body">
                             <div class="activity-list">
@@ -173,10 +173,7 @@
 
                             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
                                 <button type="button" class="btn btn-secondary" onclick="hideArticleForm()">Hủy</button>
-                                <button type="submit" class="btn btn-warning" onclick="document.getElementById('articleStatus').value = 'Draft'">
-                                    Lưu nháp
-                                </button>
-                                <button type="submit" class="btn btn-primary"  onclick="document.getElementById('articleStatus').value = 'Published'">
+                                <button type="submit" class="btn btn-primary" >
                                     Xuất bản
                                 </button>
                             </div>

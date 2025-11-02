@@ -14,8 +14,9 @@ public class Comments {
     private String content;
     private UUID articleID;
     private UUID lessionID;
+    private String status;
 
-    public Comments(UUID commentID, UUID userID, Date createAt, UUID parentID, String content, UUID articleID, UUID lessionID) {
+    public Comments(UUID commentID, UUID userID, Date createAt, UUID parentID, String content, UUID articleID, UUID lessionID, String status) {
         this.commentID = commentID;
         this.userID = userID;
         this.createAt = createAt;
@@ -23,7 +24,10 @@ public class Comments {
         this.content = content;
         this.articleID = articleID;
         this.lessionID = lessionID;
+        this.status = status;
     }
+
+    
 
     public Comments() {
     }
@@ -84,10 +88,20 @@ public class Comments {
         this.lessionID = lessionID;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        return "Comments{" + "commentID=" + commentID + ", userID=" + userID + ", createAt=" + createAt + ", parentID=" + parentID + ", content=" + content + ", articleID=" + articleID + ", lessionID=" + lessionID + '}';
+        return "Comments{" + "commentID=" + commentID + ", userID=" + userID + ", createAt=" + createAt + ", parentID=" + parentID + ", content=" + content + ", articleID=" + articleID + ", lessionID=" + lessionID + ", status=" + status + '}';
     }
+
+    
 
     
 }

@@ -74,15 +74,16 @@ public class ManageArtical extends HttpServlet {
 
         switch (action) {
             case "listartical":
-                listartical(request,response);
+                listartical(request, response);
                 break;
             case "deleteartical":
-                deleteartical(request,response);
+                deleteartical(request, response);
                 break;
             case "updateartical":
-                updateartical(request,response);
+                updateartical(request, response);
                 break;
-            
+            case "managecomment":
+                managecomment(request, response);
         }
     }
 
@@ -107,10 +108,10 @@ public class ManageArtical extends HttpServlet {
                 createartical(request, response);
                 break;
             case "deleteartical":
-                deleteartical(request,response);
-                break;    
+                deleteartical(request, response);
+                break;
             case "updateartical":
-                updateartical(request,response);
+                updateartical(request, response);
                 break;
         }
     }
@@ -171,13 +172,12 @@ public class ManageArtical extends HttpServlet {
     }
 
     private void listartical(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    List<Article> articallist = articleservice.findAllWithStats();
-    req.setAttribute("articallist", articallist);
-    req.getRequestDispatcher("/instructor/jsp/ArticleManage.jsp").forward(req, resp);
-}
+        List<Article> articallist = articleservice.findAllWithStats();
+        req.setAttribute("articallist", articallist);
+        req.getRequestDispatcher("/instructor/jsp/ArticleManage.jsp").forward(req, resp);
+    }
 
-
-    private void deleteartical(HttpServletRequest request, HttpServletResponse response) 
+    private void deleteartical(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         UUID articalid;
 
@@ -188,10 +188,24 @@ public class ManageArtical extends HttpServlet {
             e.printStackTrace();
 
         }
-        response.sendRedirect("ManageArtical");
+        response.sendRedirect(request.getContextPath() + "/ManageArtical?action=listartical");
     }
 
-    private void updateartical(HttpServletRequest request, HttpServletResponse response) {
+    private void updateartical(HttpServletRequest request, HttpServletResponse response) 
+            throws IOException, ServletException {
+        UUID articalid;
+
+        try {
+            articalid = UUID.fromString(request.getParameter("id"));
+            articleservice.update(articalid);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        response.sendRedirect(request.getContextPath() + "/ManageArtical?action=listartical");
+    }
+
+    private void managecomment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
     }
 }
