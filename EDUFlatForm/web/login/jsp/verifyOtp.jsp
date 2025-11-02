@@ -12,7 +12,7 @@
   <div class="modal-content">
     <!-- Nút đóng -->
     <button class="modal-close" 
-            onclick="window.location.href='${pageContext.request.contextPath}/authen/loginAuthen.jsp'" 
+            onclick="window.location.href='${pageContext.request.contextPath}/login/jsp/login.jsp'" 
             aria-label="Đóng">✕</button>
     
     <!-- Header -->
@@ -45,7 +45,7 @@
     <!-- Footer -->
     <div class="auth-footer">
       <p>Không nhận được mã? 
-        <a href="${pageContext.request.contextPath}/authen/forgotPassword.jsp">Gửi lại OTP</a>
+        <a href="${pageContext.request.contextPath}/login/jsp/forgotPass.jsp">Gửi lại OTP</a>
       </p>
     </div>
   </div>

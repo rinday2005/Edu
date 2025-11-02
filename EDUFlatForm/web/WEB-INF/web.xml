@@ -22,5 +22,9 @@
         <url-pattern>/ManageArtical</url-pattern>
     </servlet-mapping>
     
-    
+    <context-param>
+        <param-name>COLAB_PUBLIC_URL</param-name>
+        <param-value>https://fighter-comparing-technical-furthermore.trycloudflare.com</param-value>
+    </context-param>
+
 </web-app>

@@ -142,6 +142,8 @@
     <!-- Footer -->
      <jsp:include page="/learner/common/footer.jsp" />
 
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <!-- Updated JS path to src/js/learning.js -->
     <script src="${pageContext.request.contextPath}/learner/js/learning.js"></script>
 </body>

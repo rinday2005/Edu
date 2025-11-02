@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!-- Kiểm tra đăng nhập - nếu chưa đăng nhập thì chuyển về trang chủ -->
 <c:if test="${empty sessionScope.user}">
-    <c:redirect url="/eduHome/eduHome.jsp"/>
+    <c:redirect url="/learner/jsp/Home/home.jsp"/>
 </c:if>
 
 <!DOCTYPE html>
@@ -12,6 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ & Cài đặt - E-Learning System</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/common.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/setting.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -20,8 +21,7 @@
     <jsp:include page="/learner/common/header.jsp" />
     
     <!-- Sidebar -->
-    <jsp:include page="/learner/common/header.jsp" />
-    /common/sidebar.jsp" />
+    <jsp:include page="/learner/common/sidebar.jsp" />
     <!-- Main Content -->
     <main class="main-content">
         <section class="settings-section">
@@ -44,7 +44,8 @@
                             <div class="profile-avatar-section">
                                 <div class="profile-avatar">
                                     <c:set var="avatarUrl" value="${sessionScope.user.avatarUrl}" />
-                                    <img src="${not empty avatarUrl ? avatarUrl : defaultAvatar}" alt="Profile Avatar" id="avatar-preview">
+                                    <c:set var="defaultAvatar" value="${pageContext.request.contextPath}/login/images/logo.jpg" />
+                                    <img src="${not empty avatarUrl and avatarUrl != '' ? avatarUrl : defaultAvatar}" alt="Profile Avatar" id="avatar-preview">
                                     <div class="avatar-overlay">
                                         <i class="fas fa-camera"></i>
                                     </div>
@@ -161,7 +162,9 @@
         </section>
     </main>
 
- <script src="${pageContext.request.contextPath}/learner/js/setting.js"></script>
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
+    <script src="${pageContext.request.contextPath}/learner/js/setting.js"></script>
 
 </body>
 </html>

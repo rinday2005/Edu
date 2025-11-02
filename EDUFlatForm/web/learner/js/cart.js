@@ -1,198 +1,214 @@
-// Cart JavaScript
 // Cart Page JavaScript
 
 // Initialize theme
 function initTheme() {
-  const savedTheme = localStorage.getItem("theme") || "dark"
-  document.body.classList.toggle("light-mode", savedTheme === "light")
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  document.body.classList.toggle("light-mode", savedTheme === "light");
 }
 
 function toggleTheme() {
-  const isLightMode = document.body.classList.toggle("light-mode")
-  const theme = isLightMode ? "light" : "dark"
-  localStorage.setItem("theme", theme)
+  const isLightMode = document.body.classList.toggle("light-mode");
+  const theme = isLightMode ? "light" : "dark";
+  localStorage.setItem("theme", theme);
 }
 
 // Remove item from cart
 function removeFromCart(cartId) {
   if (confirm("Bạn có chắc chắn muốn xóa khóa học này khỏi giỏ hàng?")) {
     // Show loading state
-    const cartItem = document.querySelector(`[data-cart-id="${cartId}"]`)
+    const cartItem = document.querySelector(`[data-cart-id="${cartId}"]`);
     if (cartItem) {
-      cartItem.style.opacity = "0.5"
-      cartItem.style.pointerEvents = "none"
+      cartItem.style.opacity = "0.5";
+      cartItem.style.pointerEvents = "none";
     }
-
+    
     // Simulate API call
     setTimeout(() => {
       // Remove from DOM
       if (cartItem) {
-        cartItem.remove()
+        cartItem.remove();
       }
-
+      
       // Update cart summary
-      updateCartSummary()
-
+      updateCartSummary();
+      
       // Show success message
-      showNotification("Đã xóa khóa học khỏi giỏ hàng!", "success")
-
+      showNotification("Đã xóa khóa học khỏi giỏ hàng!", "success");
+      
       // Check if cart is empty
-      checkEmptyCart()
-    }, 1000)
+      checkEmptyCart();
+    }, 1000);
   }
 }
 
 // View course detail
 function viewCourseDetail(courseId) {
-  // Redirect to course detail page
-  window.location.href = `${window.location.origin}/PRJ_Assginment_EDUCATION/course?action=detail&id=${courseId}`
+  // Dùng đường dẫn tương đối từ root context
+  window.location.href = `/EDUFlatForm/CourseServletController?action=detail&id=${courseId}`;
 }
 
 // Apply discount code
 function applyDiscount() {
-  const discountCode = document.getElementById("discount-code").value.trim()
-
+  const discountCode = document.getElementById("discount-code").value.trim();
+  
   if (!discountCode) {
-    showNotification("Vui lòng nhập mã giảm giá!", "warning")
-    return
+    showNotification("Vui lòng nhập mã giảm giá!", "warning");
+    return;
   }
-
+  
   // Show loading state
-  const applyBtn = document.querySelector(".btn-apply-discount")
-  const originalText = applyBtn.innerHTML
-  applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang áp dụng...'
-  applyBtn.disabled = true
-
+  const applyBtn = document.querySelector(".btn-apply-discount");
+  const originalText = applyBtn.innerHTML;
+  applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang áp dụng...';
+  applyBtn.disabled = true;
+  
   // Simulate API call
   setTimeout(() => {
     // Mock discount codes
     const validCodes = {
-      WELCOME10: 10,
-      STUDENT20: 20,
-      SAVE50: 50,
-    }
-
+      "WELCOME10": 10,
+      "STUDENT20": 20,
+      "SAVE50": 50
+    };
+    
     if (validCodes[discountCode.toUpperCase()]) {
-      const discountPercent = validCodes[discountCode.toUpperCase()]
-      applyDiscountToTotal(discountPercent)
-      showNotification(`Áp dụng mã giảm giá thành công! Giảm ${discountPercent}%`, "success")
-
+      const discountPercent = validCodes[discountCode.toUpperCase()];
+      applyDiscountToTotal(discountPercent);
+      showNotification(`Áp dụng mã giảm giá thành công! Giảm ${discountPercent}%`, "success");
+      
       // Disable input and button
-      document.getElementById("discount-code").disabled = true
-      applyBtn.innerHTML = '<i class="fas fa-check"></i> Đã áp dụng'
-      applyBtn.style.background = "#28a745"
+      document.getElementById("discount-code").disabled = true;
+      applyBtn.innerHTML = '<i class="fas fa-check"></i> Đã áp dụng';
+      applyBtn.style.background = "#28a745";
     } else {
-      showNotification("Mã giảm giá không hợp lệ!", "error")
-      applyBtn.innerHTML = originalText
-      applyBtn.disabled = false
+      showNotification("Mã giảm giá không hợp lệ!", "error");
+      applyBtn.innerHTML = originalText;
+      applyBtn.disabled = false;
     }
-  }, 1500)
+  }, 1500);
 }
 
 // Apply discount to total
 function applyDiscountToTotal(discountPercent) {
-  const totalAmountElement = document.querySelector(".total-amount")
-  const finalAmountElement = document.querySelector(".final-amount")
-
+  const totalAmountElement = document.querySelector(".total-amount");
+  const finalAmountElement = document.querySelector(".final-amount");
+  
   if (totalAmountElement && finalAmountElement) {
-    const originalAmount = Number.parseFloat(totalAmountElement.textContent.replace(/[^\d]/g, ""))
-    const discountAmount = (originalAmount * discountPercent) / 100
-    const finalAmount = originalAmount - discountAmount
-
+    const originalAmount = parseFloat(totalAmountElement.textContent.replace(/[^\d]/g, ""));
+    const discountAmount = (originalAmount * discountPercent) / 100;
+    const finalAmount = originalAmount - discountAmount;
+    
     // Update final amount
-    finalAmountElement.textContent = formatCurrency(finalAmount)
-
+    finalAmountElement.textContent = formatCurrency(finalAmount);
+    
     // Add discount info
-    const discountInfo = document.createElement("div")
-    discountInfo.className = "summary-row discount-info"
+    const discountInfo = document.createElement("div");
+    discountInfo.className = "summary-row discount-info";
     discountInfo.innerHTML = `
       <span>Giảm giá (${discountPercent}%):</span>
       <span class="summary-value discount-amount">-${formatCurrency(discountAmount)}</span>
-    `
-
+    `;
+    
     // Insert before final total
-    const finalTotalRow = document.querySelector(".final-total")
-    finalTotalRow.parentNode.insertBefore(discountInfo, finalTotalRow)
+    const finalTotalRow = document.querySelector(".final-total");
+    finalTotalRow.parentNode.insertBefore(discountInfo, finalTotalRow);
   }
 }
 
 // Proceed to checkout
 function proceedToCheckout() {
-  const cartItems = document.querySelectorAll(".cart-item")
+  const cartItems = document.querySelectorAll(".cart-item");
 
   if (cartItems.length === 0) {
-    showNotification("Giỏ hàng của bạn đang trống!", "warning")
-    return
+    showNotification("Giỏ hàng của bạn đang trống!", "warning");
+    return;
   }
 
-  // Show loading state
-  const checkoutBtn = document.querySelector(".btn-checkout")
-  const originalText = checkoutBtn.innerHTML
-  checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang chuyển hướng...'
-  checkoutBtn.disabled = true
+  // Lấy danh sách khóa học trong giỏ
+  const items = [];
+  cartItems.forEach(item => {
+    const name = item.querySelector(".item-title").textContent.trim();
 
-  // Simulate redirect to payment page
+    // Lấy giá và bỏ ký tự không phải số
+    const priceText = item.querySelector(".price-amount").textContent.replace(/[^\d]/g, "");
+    const price = parseFloat(priceText) || 0;
+
+    items.push({ name, price });
+  });
+
+  // Lấy tổng giá trị từ JSP
+  const totalPrice = parseFloat(document.querySelector(".final-amount .price-amount").textContent.replace(/[^\d]/g, "")) || 0;
+
+  // Loading button
+  const checkoutBtn = document.querySelector(".btn-checkout");
+  checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+  checkoutBtn.disabled = true;
+
+  // Gửi dữ liệu sang servlet
+  const servletURL = `${window.location.origin}${window.location.pathname.replace('/cart.jsp','')}/QRServlet?total=${totalPrice}&items=${encodeURIComponent(JSON.stringify(items))}`;
+
   setTimeout(() => {
-    // In real implementation, redirect to payment page
-    window.location.href = `${window.location.origin}/PRJ_Assginment_EDUCATION/payment`
-  }, 1000)
+    window.location.href = servletURL;
+  }, 1000);
 }
+
+
 
 // Continue shopping
 function continueShopping() {
-  window.location.href = `${window.location.origin}/PRJ_Assginment_EDUCATION/course`
+  window.location.href = `${window.location.origin}/EDUFlatForm/CourseServletController`;
 }
 
 // Update cart summary
 function updateCartSummary() {
-  const cartItems = document.querySelectorAll(".cart-item")
-  const totalItems = cartItems.length
-
+  const cartItems = document.querySelectorAll(".cart-item");
+  const totalItems = cartItems.length;
+  
   // Update item count
-  const itemCountElement = document.querySelector(".cart-summary strong")
+  const itemCountElement = document.querySelector(".cart-summary strong");
   if (itemCountElement) {
-    itemCountElement.textContent = totalItems
+    itemCountElement.textContent = totalItems;
   }
-
+  
   // Update total amount
-  let totalAmount = 0
-  cartItems.forEach((item) => {
-    const priceElement = item.querySelector(".price-amount")
+  let totalAmount = 0;
+  cartItems.forEach(item => {
+    const priceElement = item.querySelector(".price-amount");
     if (priceElement) {
-      const price = Number.parseFloat(priceElement.textContent.replace(/[^\d]/g, ""))
-      totalAmount += price
+      const price = parseFloat(priceElement.textContent.replace(/[^\d]/g, ""));
+      totalAmount += price;
     }
-  })
-
-  const totalAmountElement = document.querySelector(".total-amount")
-  const finalAmountElement = document.querySelector(".final-amount")
-
+  });
+  
+  const totalAmountElement = document.querySelector(".total-amount");
+  const finalAmountElement = document.querySelector(".final-amount");
+  
   if (totalAmountElement) {
-    totalAmountElement.textContent = formatCurrency(totalAmount)
+    totalAmountElement.textContent = formatCurrency(totalAmount);
   }
-
+  
   if (finalAmountElement) {
-    finalAmountElement.textContent = formatCurrency(totalAmount)
+    finalAmountElement.textContent = formatCurrency(totalAmount);
   }
-
+  
   // Update summary text
-  const summaryText = document.querySelector(".cart-summary")
+  const summaryText = document.querySelector(".cart-summary");
   if (summaryText) {
     if (totalItems > 0) {
-      summaryText.innerHTML = `Bạn có <strong>${totalItems}</strong> khóa học trong giỏ hàng.`
+      summaryText.innerHTML = `Bạn có <strong>${totalItems}</strong> khóa học trong giỏ hàng.`;
     } else {
-      summaryText.textContent = "Giỏ hàng của bạn đang trống."
+      summaryText.textContent = "Giỏ hàng của bạn đang trống.";
     }
   }
 }
 
 // Check if cart is empty
 function checkEmptyCart() {
-  const cartItems = document.querySelectorAll(".cart-item")
-
+  const cartItems = document.querySelectorAll(".cart-item");
+  
   if (cartItems.length === 0) {
     // Show empty cart message
-    const cartContent = document.querySelector(".cart-content")
+    const cartContent = document.querySelector(".cart-content");
     cartContent.innerHTML = `
       <div class="empty-cart">
         <div class="empty-cart-icon">
@@ -204,27 +220,27 @@ function checkEmptyCart() {
           <i class="fas fa-arrow-left"></i> Tiếp tục học
         </button>
       </div>
-    `
+    `;
   }
 }
 
 // Format currency
 function formatCurrency(amount) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount)
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount);
 }
 
 // Show notification
 function showNotification(message, type = "info") {
   // Remove existing notifications
-  const existingNotifications = document.querySelectorAll(".notification")
-  existingNotifications.forEach((notification) => notification.remove())
-
+  const existingNotifications = document.querySelectorAll(".notification");
+  existingNotifications.forEach(notification => notification.remove());
+  
   // Create notification element
-  const notification = document.createElement("div")
-  notification.className = `notification notification-${type}`
+  const notification = document.createElement("div");
+  notification.className = `notification notification-${type}`;
   notification.innerHTML = `
     <div class="notification-content">
       <i class="fas fa-${getNotificationIcon(type)}"></i>
@@ -233,8 +249,8 @@ function showNotification(message, type = "info") {
         <i class="fas fa-times"></i>
       </button>
     </div>
-  `
-
+  `;
+  
   // Add styles
   notification.style.cssText = `
     position: fixed;
@@ -248,18 +264,18 @@ function showNotification(message, type = "info") {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     animation: slideInRight 0.3s ease;
     max-width: 400px;
-  `
-
+  `;
+  
   // Add to page
-  document.body.appendChild(notification)
-
+  document.body.appendChild(notification);
+  
   // Auto remove after 5 seconds
   setTimeout(() => {
     if (notification.parentNode) {
-      notification.style.animation = "slideOutRight 0.3s ease"
-      setTimeout(() => notification.remove(), 300)
+      notification.style.animation = "slideOutRight 0.3s ease";
+      setTimeout(() => notification.remove(), 300);
     }
-  }, 5000)
+  }, 5000);
 }
 
 // Get notification icon
@@ -268,9 +284,9 @@ function getNotificationIcon(type) {
     success: "check-circle",
     error: "exclamation-circle",
     warning: "exclamation-triangle",
-    info: "info-circle",
-  }
-  return icons[type] || "info-circle"
+    info: "info-circle"
+  };
+  return icons[type] || "info-circle";
 }
 
 // Get notification color
@@ -279,13 +295,13 @@ function getNotificationColor(type) {
     success: "#28a745",
     error: "#dc3545",
     warning: "#ffc107",
-    info: "#17a2b8",
-  }
-  return colors[type] || "#17a2b8"
+    info: "#17a2b8"
+  };
+  return colors[type] || "#17a2b8";
 }
 
 // Add CSS animations
-const style = document.createElement("style")
+const style = document.createElement("style");
 style.textContent = `
   @keyframes slideInRight {
     from {
@@ -327,36 +343,36 @@ style.textContent = `
   .notification-close:hover {
     opacity: 0.8;
   }
-`
-document.head.appendChild(style)
+`;
+document.head.appendChild(style);
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  initTheme()
-
+  initTheme();
+  
   // Add hover effects to cart items
-  const cartItems = document.querySelectorAll(".cart-item")
-  cartItems.forEach((item) => {
-    item.addEventListener("mouseenter", function () {
-      this.style.transform = "translateY(-2px)"
-    })
-
-    item.addEventListener("mouseleave", function () {
-      this.style.transform = "translateY(0)"
-    })
-  })
-
+  const cartItems = document.querySelectorAll(".cart-item");
+  cartItems.forEach(item => {
+    item.addEventListener("mouseenter", function() {
+      this.style.transform = "translateY(-2px)";
+    });
+    
+    item.addEventListener("mouseleave", function() {
+      this.style.transform = "translateY(0)";
+    });
+  });
+  
   // Add click effect to buttons
-  const buttons = document.querySelectorAll("button")
-  buttons.forEach((button) => {
-    button.addEventListener("click", function () {
-      this.style.transform = "scale(0.95)"
+  const buttons = document.querySelectorAll("button");
+  buttons.forEach(button => {
+    button.addEventListener("click", function() {
+      this.style.transform = "scale(0.95)";
       setTimeout(() => {
-        this.style.transform = "scale(1)"
-      }, 150)
-    })
-  })
-
+        this.style.transform = "scale(1)";
+      }, 150);
+    });
+  });
+  
   // Initialize cart summary
-  updateCartSummary()
-})
+  updateCartSummary();
+});

@@ -5,6 +5,7 @@
 package controller;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ import service.CourseServiceImpl;
  *
  * @author trank
  */
+@WebServlet(name = "CourseServletController", urlPatterns = {"/CourseServletController"})
 public class CourseServletController extends HttpServlet {
     private CourseServiceImpl courseService = new CourseServiceImpl();
 
@@ -71,7 +73,7 @@ public class CourseServletController extends HttpServlet {
         try {
             List<Courses> courses = courseService.getAllCourses();
             request.setAttribute("courses", courses);
-            request.getRequestDispatcher("/eduHome/eduHome.jsp").forward(request, response);
+            request.getRequestDispatcher("/learner/jsp/Home/home.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi tải danh sách khóa học");
@@ -129,7 +131,7 @@ public class CourseServletController extends HttpServlet {
                 request.setAttribute("totalMinutes", 0);
             }
 
-            request.getRequestDispatcher("/course/lessonNewbie.jsp").forward(request, response);
+            request.getRequestDispatcher("/learner/jsp/Course/lessonNewbie.jsp").forward(request, response);
 
         } catch (Exception e) {
             System.err.println("[v0] Lỗi khi tải chi tiết khóa học:");

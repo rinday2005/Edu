@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 public class DBConnection{
     public static String driverName= "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-    private static final String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=DB_PRJ_Assignment;encrypt=false;";
+    private static final String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=DB_PRJ_Assginment;encrypt=false;";
     private static final String userDB = "sa";
     private static final String passDB = "admin";
     public static Connection getConnection(){

@@ -264,6 +264,7 @@
 </div>
 
 
+<script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
 <script src="${pageContext.request.contextPath}/learner/js/course.js"></script>
 </body>
 </html>

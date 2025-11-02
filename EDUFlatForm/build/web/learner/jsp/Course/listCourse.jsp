@@ -45,7 +45,6 @@
                           <span class="discount-price">Giá tiền: ${course.price}đ</span>
                         </div>
                         <div class="course-stats-row">
-                          <span class="stat-item">👨‍🏫 <span class="stat-label">${course.instructorName}</span></span>
                           <span class="stat-item">⭐ <span class="stat-label">${course.rating}/5</span></span>
                           <span class="stat-item">💰 <span class="stat-label">${course.level}</span></span>
                         </div>
@@ -57,10 +56,11 @@
         </main>
     </div>
 
-
     <!-- Footer -->
     <jsp:include page="/learner/common/footer.jsp" />
 
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <!-- Updated JS path to src/js/course.js -->
     <script src="${pageContext.request.contextPath}/learner/js/course.js"></script>
 </body>

@@ -287,6 +287,8 @@
 
     <!-- Footer -->
     <jsp:include page="/learner/common/footer.jsp" />
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <script src="${pageContext.request.contextPath}/js/learning.js"></script>
 </body>
 </html>

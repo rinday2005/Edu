@@ -59,7 +59,7 @@ public class ForgotPasswordController extends HttpServlet {
         User user = userService.getUserByEmail(email);
         if (user == null) {
             request.setAttribute("error", "Không tìm thấy tài khoản với email này.");
-            request.getRequestDispatcher("/authen/forgotPassWord.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/forgotPass.jsp").forward(request, response);
             return;
         }
 
@@ -84,7 +84,7 @@ public class ForgotPasswordController extends HttpServlet {
             request.getRequestDispatcher("/authen/verifyOtp.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Không thể gửi email. Vui lòng thử lại.");
-            request.getRequestDispatcher("/authen/forgotPassWord.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/forgotPass.jsp").forward(request, response);
         }
     }
 
@@ -95,7 +95,7 @@ public class ForgotPasswordController extends HttpServlet {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("otp") == null) {
             request.setAttribute("error", "OTP đã hết hạn hoặc không tồn tại.");
-            request.getRequestDispatcher("/forgotPassWord.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/forgotPass.jsp").forward(request, response);
             return;
         }
 
@@ -104,10 +104,10 @@ public class ForgotPasswordController extends HttpServlet {
 
         if (otpInput != null && otpInput.equals(otpSaved)) {
             request.setAttribute("message", "OTP hợp lệ, vui lòng nhập mật khẩu mới.");
-            request.getRequestDispatcher("/authen/resetPassWord.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/resetPass.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Mã OTP không đúng, vui lòng thử lại.");
-            request.getRequestDispatcher("/authen/verifyOtp.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/verifyOtp.jsp").forward(request, response);
         }
     }
 
@@ -118,7 +118,7 @@ public class ForgotPasswordController extends HttpServlet {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("email") == null) {
             request.setAttribute("error", "Phiên làm việc đã hết hạn.");
-            request.getRequestDispatcher("/authen/forgotPassWord.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/forgotPass.jsp").forward(request, response);
             return;
         }
 
@@ -127,7 +127,7 @@ public class ForgotPasswordController extends HttpServlet {
 
         if (newPassword == null || newPassword.length() < 6) {
             request.setAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự.");
-            request.getRequestDispatcher("/authen/resetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/resetPass.jsp").forward(request, response);
             return;
         }
 
@@ -135,10 +135,10 @@ public class ForgotPasswordController extends HttpServlet {
         if (updated) {
             session.invalidate();
             request.setAttribute("message", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.");
-            request.getRequestDispatcher("/authen/loginAuthen.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/login.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Cập nhật mật khẩu thất bại.");
-            request.getRequestDispatcher("/authen/resetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/login/jsp/resetPass.jsp").forward(request, response);
         }
     }
 

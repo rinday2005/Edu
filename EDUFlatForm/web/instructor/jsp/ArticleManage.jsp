@@ -91,7 +91,7 @@
                                                     <div class="table-actions">
                                                         <form action="<c:url value='/ManageArtical'/>" method="post" style="display:inline">
                                                             <input type="hidden" name="action" value="updateartical">
-                                                            <input type="hidden" name="id" value="${artical.articleID}">
+                                                            <input type="hidden" name="articalid" value="${artical.articleID}">
                                                             <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Sửa</button>
                                                         </form>
 

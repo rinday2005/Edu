@@ -26,12 +26,12 @@
             break;
         case "2":
             title = "Giới thiệu về ngành Công Nghệ Thông Tin và Những Kiến Thức Cơ Bản Bắt Buộc Phải Học";
-            description = "Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số...";
+            description = "Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số...";
             author = "Hoàng Tuấn 12A1 40 Vĩ";
             authorAvatar = "avatar2.jpg";
             tags = "học lập trình,3 bảng trước,3 phút đọc";
             thumbnail = "article-featured-2.jpg";
-            content = "<h2 class='section-title'>Ngành Công Nghệ Thông Tin là gì?</h2><p>Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số. Nó bao gồm các hoạt động liên quan đến máy tính, phần mềm, mạng máy tính và các ứng dụng công nghệ thông tin.</p><h2 class='section-title'>Kiến thức cơ bản cần biết</h2><ul class='benefits-list'><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Hiểu biết về phần cứng máy tính</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Kiến thức về hệ điều hành</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Lập trình cơ bản</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Mạng máy tính và internet</span></li></ul>";
+            content = "<h2 class='section-title'>Ngành Công Nghệ Thông Tin là gì?</h2><p>Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số. Nó bao gồm các hoạt động liên quan đến máy tính, phần mềm, mạng máy tính và các ứng dụng công nghệ thông tin.</p><h2 class='section-title'>Kiến thức cơ bản cần biết</h2><ul class='benefits-list'><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Hiểu biết về phần cứng máy tính</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Kiến thức về hệ điều hành</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Lập trình cơ bản</span></li><li><svg viewBox='0 0 24 24' width='20' height='20' fill='#4CAF50'><path d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/></svg><span>Mạng máy tính và internet</span></li></ul>";
             break;
         case "3":
             title = "SOLID - 5 nguyên lý \"vàng\" giúp viết code sạch và dễ bảo trì";
@@ -192,7 +192,7 @@
                                         <span class="related-author-name">Hoàng Tuấn 12A1 40 Vĩ</span>
                                     </div>
                                     <h3 class="related-article-title"><a href="${pageContext.request.contextPath}/eduHome/articlesDetail.jsp?id=2">Giới thiệu về ngành Công Nghệ Thông Tin và Những Kiến Thức Cơ Bản Bắt Buộc Phải Học</a></h3>
-                                    <p class="related-article-desc">Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số...</p>
+                                    <p class="related-article-desc">Ngành Công Nghệ Thông Tin (CNTT) là một lĩnh vực dạng phát triển mạnh mẽ và có vai trò quan trọng trong thời đại số...</p>
                                     <div class="related-article-meta">
                                         <span class="tag">học lập trình</span>
                                         <span class="tag">3 bảng trước</span>
@@ -223,6 +223,8 @@
     <!-- Footer -->
      <jsp:include page="/learner/common/footer.jsp" />
    
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <script src="${pageContext.request.contextPath}/learner/js/articles.js"></script>
 </body>
 </html>

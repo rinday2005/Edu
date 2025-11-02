@@ -89,7 +89,10 @@
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
                             <!-- Đã đăng nhập: chuyển đến room.jsp -->
-                            <a href="${pageContext.request.contextPath}/course/room.jsp?courseID=${course.courseID}" class="btn-enroll">ĐĂNG KÝ HỌC</a>
+                            <form action="${pageContext.request.contextPath}/AddCartServlet" method="post">
+                            <input type="hidden" name="courseID" value="${course.courseID}">
+                            <button type="submit" class="btn-enroll">ĐĂNG KÝ HỌC</button>
+                            </form>
                         </c:when>
                         <c:otherwise>
                             <!-- Chưa đăng nhập: chuyển đến trang đăng nhập với redirect về room.jsp -->
@@ -101,7 +104,6 @@
                         <div class="info-item">Trình độ: ${course.level}</div>
                         <div class="info-item">Tổng số bài: ${totalLessons}</div>
                         <div class="info-item">Thời lượng: ${totalMinutes} phút</div>
-                        <div class="info-item">Giảng viên: ${course.instructorName}</div>
                     </div>
                 </div>
             </aside>
@@ -110,7 +112,10 @@
 </div>
 
 <jsp:include page="/learner/common/footer.jsp" />
-<script src="${pageContext.request.contextPath}/learne/js/course.js"></script>
+
+<!-- Added global theme script before page-specific JS -->
+<script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
+<script src="${pageContext.request.contextPath}/learner/js/course.js"></script>
 
 <!-- Added script to handle room navigation -->
 <script>
@@ -120,7 +125,3 @@
 </script>
 </body>
 </html>
-
-
-
-

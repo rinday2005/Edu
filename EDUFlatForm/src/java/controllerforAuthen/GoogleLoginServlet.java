@@ -113,7 +113,7 @@ public class GoogleLoginServlet extends HttpServlet {
             // Redirect: ưu tiên tham số redirect, mặc định về /course
             String redirect = request.getParameter("redirect");
             if (redirect == null || redirect.isBlank()) {
-                redirect = request.getContextPath() + "/course";
+                redirect = request.getContextPath() + "/CourseServletController";
             }
             response.sendRedirect(response.encodeRedirectURL(redirect));
         } catch (JSONException e) {

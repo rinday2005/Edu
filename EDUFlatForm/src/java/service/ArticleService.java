@@ -13,7 +13,7 @@ public class ArticleService {
         dao.create(a);
     }
 
-    public int update(Article a) {
+    public UUID update(Article a) {
         return dao.update(a);
     }
 

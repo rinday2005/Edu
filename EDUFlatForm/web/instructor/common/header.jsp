@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!-- HEADER COMPONENT -->
 <header class="navbar">
     <!-- Phần 1: Logo (trái) -->
@@ -20,38 +21,69 @@
 
     <!-- Phần 3: Hồ sơ người dùng (phải) -->
     <div class="navbar-right">
-        <div class="user-profile-wrapper">
-            <div class="user-profile" id="userProfileToggle">
-                <span class="username">Nguyễn Văn A</span>
-                <i class="fas fa-user-circle user-avatar"></i>
-            </div>
+        <c:choose>
+            <c:when test="${empty sessionScope.user}">
+                <button class="btn-login"
+                        onclick="window.location.href='${pageContext.request.contextPath}/login/jsp/login.jsp'">
+                    Đăng nhập
+                </button>
+            </c:when>
+            <c:otherwise>
+                <div class="user-profile-wrapper">
+                    <div class="user-menu">
+                        <img src="${sessionScope.user.avatarUrl != null ? sessionScope.user.avatarUrl : (pageContext.request.contextPath + '/learner/images/default-avatar.png')}"
+                             alt="User Avatar"
+                             class="user-avatar"
+                             onclick="toggleUserMenu()" />
 
-            <!-- Menu Dropdown -->
-            <div class="dropdown-menu" id="profileDropdown">
-                <div class="dropdown-header">
-                    <div class="avatar-container large">
-                        <i class="fas fa-user avatar-icon"></i>
-                    </div>
-                    <div>
-                        <h4>Nguyễn Văn A</h4>
-                        <p>nguyenvana@example.com</p>
-                        <span class="user-role">Giảng viên</span>
+                        <div id="dropdownMenu" class="dropdown-menu">
+                            <div class="dropdown-header">
+                                <img src="${sessionScope.user.avatarUrl != null ? sessionScope.user.avatarUrl : (pageContext.request.contextPath + '/learner/images/default-avatar.png')}"
+                                     class="menu-avatar" alt="User"/>
+                                <div class="menu-info">
+                                    <h4 class="user-name">${sessionScope.user.userName}</h4>
+                                    <p class="user-email">${sessionScope.user.email}</p>
+                                    <span class="user-role">Giảng viên</span>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            
+                            <a href="${pageContext.request.contextPath}/instructor/jsp/Setting.jsp" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Cài đặt
+                            </a>
+<a href="${pageContext.request.contextPath}/instructorHome/Help.jsp" class="dropdown-item">
+                                <i class="fas fa-question-circle"></i> Trợ giúp
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+
+                            <a href="${pageContext.request.contextPath}/logout" class="dropdown-item logout">
+                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <a href="${pageContext.request.contextPath}/instructorHome/Profile.jsp" class="dropdown-item">
-                    <i class="fas fa-user"></i> Hồ sơ cá nhân
-                </a>
-                <a href="${pageContext.request.contextPath}/instructorHome/Setting.jsp" class="dropdown-item">
-                    <i class="fas fa-cog"></i> Cài đặt
-                </a>
-                <a href="${pageContext.request.contextPath}/instructorHome/Help.jsp" class="dropdown-item">
-                    <i class="fas fa-question-circle"></i> Trợ giúp
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="${pageContext.request.contextPath}/LogoutServlet" class="dropdown-item logout">
-                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                </a>
-            </div>
-        </div>
+            </c:otherwise>
+        </c:choose>
     </div>
 </header>
+
+<script>
+function toggleUserMenu() {
+    const menu = document.getElementById("dropdownMenu");
+    if (menu) {
+        menu.classList.toggle("show");
+    }
+}
+
+// Ẩn menu khi click ra ngoài
+window.addEventListener("click", function (event) {
+    const menu = document.getElementById("dropdownMenu");
+    const avatar = document.querySelector(".user-avatar");
+    if (menu && avatar && !menu.contains(event.target) && !avatar.contains(event.target)) {
+        menu.classList.remove("show");
+    }
+});
+</script>

@@ -17,7 +17,7 @@
         <i class="fas fa-chart-line"></i> Ví tiền
     </a>
 
-    <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical" 
+    <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical"
        class="nav-item <%= request.getRequestURI().contains("ArticleManage.jsp") ? "active" : "" %>">
         <i class="fas fa-blog"></i> Bài viết
     </a>

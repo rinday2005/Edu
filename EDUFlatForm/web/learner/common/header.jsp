@@ -1,11 +1,11 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/base/base.css?v=2.1">
+ <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/common.css">
 <header class="header">
   <div class="header-container">
     <!-- LOGO -->
-    <div class="logo" onclick="window.location.href='${pageContext.request.contextPath}/eduHome/eduHome.jsp'">
-      <img src="${pageContext.request.contextPath}/learner/images/authen/logo.jpg"
+    <div class="logo" onclick="window.location.href='${pageContext.request.contextPath}/learner/jsp/Home/home.jsp'">
+      <img src="${pageContext.request.contextPath}/learner/images/logo.jpg"
            alt="Logo" class="logo-img" decoding="async" />
       <span class="logo-text">E-Learning System</span>
     </div>
@@ -55,7 +55,7 @@
             <div class="menu-divider"></div>
 
             <a href="${pageContext.request.contextPath}/learner/jsp/Cart/Cart.jsp">🛒 Giỏ hàng</a>
-            <a href="${pageContext.request.contextPath}/card.jsp">📝 Bài viết của tôi</a>
+            <a href="${pageContext.request.contextPath}/learner/jsp/Cart/Cart.jsp">📝 Bài viết của tôi</a>
             <a href="${pageContext.request.contextPath}/learner/jsp/Setting/setting.jsp">⚙️ Cài đặt</a>
             
 
@@ -86,3 +86,6 @@ window.addEventListener("click", function (event) {
   }
 });
 </script>
+
+<!-- ========== CHAT AI COMPONENT ========== -->
+<jsp:include page="/learner/components/chatAI.jsp" />

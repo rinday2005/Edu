@@ -191,22 +191,75 @@ public class ManageArtical extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/ManageArtical?action=listartical");
     }
 
-    private void updateartical(HttpServletRequest request, HttpServletResponse response) 
+    private void updateartical(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        UUID articalid;
-
         try {
-            articalid = UUID.fromString(request.getParameter("id"));
-            articleservice.update(articalid);
+            // Chỉ cập nhật khi đã đăng nhập
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
+                return;
+            }
+
+            // Lấy userID từ session (hỗ trợ "user", "authUser", hoặc "userID")
+            UUID userID = null;
+            Object u = session.getAttribute("user");
+            if (u == null) {
+                u = session.getAttribute("authUser");
+            }
+            if (u instanceof User userObj) {
+                Object idObj = userObj.getUserID();
+                if (idObj instanceof UUID) {
+                    userID = (UUID) idObj;
+                } else if (idObj != null) {
+                    userID = UUID.fromString(String.valueOf(idObj));
+                }
+            }
+            if (userID == null) {
+                Object uidAttr = session.getAttribute("userID");
+                if (uidAttr != null) {
+                    userID = UUID.fromString(String.valueOf(uidAttr));
+                }
+            }
+            if (userID == null) {
+                response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
+                return;
+            }
+
+            // Lấy tham số từ form
+            UUID articleID = UUID.fromString(request.getParameter("articalid"));
+            String title = request.getParameter("titleartical");
+            String content = request.getParameter("contentArtical");
+            String status = request.getParameter("statusArtical");
+
+            // Tùy ý: giữ nguyên createAt cũ bằng cách load từ DB qua service
+            Article old = articleservice.findById(articleID); // cần có method này trong service
+            java.util.Date createAt = (old != null && old.getCreateAt() != null)
+                    ? old.getCreateAt()
+                    : new java.util.Date();
+
+            // Tạo Article để update
+            Article a = new Article(articleID, userID, createAt, status, title, content);
+
+            // Gọi service cập nhật
+            UUID updatedId = articleservice.update(a); // service trả về UUID (hoặc boolean)
+
+            if (updatedId == null) {
+                request.setAttribute("error", "Cập nhật bài viết thất bại!");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+                return;
+            }
+
+            response.sendRedirect(request.getContextPath() + "/ManageArtical?action=listartical");
         } catch (Exception e) {
             e.printStackTrace();
-
+            request.setAttribute("error", "Lỗi cập nhật: " + e.getMessage());
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
-        response.sendRedirect(request.getContextPath() + "/ManageArtical?action=listartical");
     }
 
     private void managecomment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
+
     }
 }
 /**

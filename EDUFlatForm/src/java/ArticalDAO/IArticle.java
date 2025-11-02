@@ -14,7 +14,7 @@ import model.Article;
 
 public interface IArticle {
       void create(Article a);                     // C
-    int  update(Article a);                     // U
+    UUID  update(Article a);                     // U
     int  updateStatus(UUID articleId, String status);
     int  deleteById(UUID articleId);            // D
     Article findById(UUID articleId);           // R1

@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -12,10 +14,10 @@
 </head>
 <body>
   <div class="modal-content">
-    <button class="modal-close" onclick="window.location.href='${pageContext.request.contextPath}/course'" aria-label="Đóng">✕</button>
+    <button class="modal-close" onclick="window.location.href='${pageContext.request.contextPath}/MainServlet'" aria-label="Đóng">✕</button>
 
     <div class="modal-header">
-      <img src="${pageContext.request.contextPath}/images/logo.jpg" alt="Logo" width="64" height="64">
+      <img src="${pageContext.request.contextPath}/login/images/logo.jpg" alt="Logo" width="64" height="64">
       <h2>Đăng nhập vào E-Learning System</h2>
     </div>
 
@@ -61,7 +63,7 @@
       </form>
 
       <div class="auth-footer">
-        <p>Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register">Đăng ký</a></p>
+        <p>Chưa có tài khoản? <a href="${pageContext.request.contextPath}/login/jsp/register.jsp">Đăng ký</a></p>
         <p><a href="${pageContext.request.contextPath}/forgot">Quên mật khẩu?</a></p>
       </div>
 
@@ -70,6 +72,6 @@
       </p>
     </div>
   </div>
-  <script src="${pageContext.request.contextPath}/js/login.js?v=2.1"></script>
+  <script src="${pageContext.request.contextPath}/login/js/login.js?v=2.1"></script>
 </body>
 </html>

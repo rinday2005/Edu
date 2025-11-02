@@ -41,7 +41,7 @@
                                 <div class="article-actions">
                                     <button class="bookmark-btn" aria-label="Bookmark">
                                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                            <path d="M17 3H5c-1.11 0-2 .9-2 2s-.9 2-2 2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                                            <path d="M17 3H5c-1.11 0-2 .9-2 2s-.9 2-2 2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                                         </svg>
                                     </button>
                                     <button class="menu-btn" aria-label="More options">
@@ -251,12 +251,11 @@
         </main>
     </div>
 
-    <!-- Authentication Modal -->
-    
-
     <!-- Footer -->
     <jsp:include page="/learner/common/footer.jsp" />
 
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <!-- Updated JS path to src/js/articles.js -->
     <script src="${pageContext.request.contextPath}/learner/js/articles.js"></script>
 </body>

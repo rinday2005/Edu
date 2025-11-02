@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -10,10 +12,10 @@
 </head>
 <body>
   <div class="modal-content">
-    <button class="modal-close" onclick="window.location.href='${pageContext.request.contextPath}/course'" aria-label="Đóng">✕</button>
+    <button class="modal-close" onclick="window.location.href='${pageContext.request.contextPath}/MainServlet'" aria-label="Đóng">✕</button>
 
     <div class="modal-header">
-      <img src="${pageContext.request.contextPath}/assets/images/authen/logo.jpg" alt="Logo" width="64" height="64">
+      <img src="${pageContext.request.contextPath}/login/images/logo.jpg" alt="Logo" width="64" height="64">
       <h2>Tạo tài khoản E-Learning</h2>
       <p>Vui lòng nhập đầy đủ thông tin để đăng ký.</p>
     </div>
@@ -55,7 +57,7 @@
       </form>
 
       <div class="auth-footer">
-        <p>Đã có tài khoản? <a href="${pageContext.request.contextPath}/login">Đăng nhập</a></p>
+        <p>Đã có tài khoản? <a href="${pageContext.request.contextPath}/login/jsp/login.jsp">Đăng nhập</a></p>
       </div>
     </div>
   </div>

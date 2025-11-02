@@ -169,18 +169,6 @@ function handleEnroll() {
   }
 }
 
-// Initialize theme
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme") || "dark"
-  document.body.classList.toggle("light-mode", savedTheme === "light")
-}
-
-function toggleTheme() {
-  const isLightMode = document.body.classList.toggle("light-mode")
-  const theme = isLightMode ? "light" : "dark"
-  localStorage.setItem("theme", theme)
-}
-
 function toggleLike(button) {
   button.classList.toggle("liked")
   const comment = button.closest(".qa-comment")
@@ -320,8 +308,6 @@ function submitComment() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  initTheme()
-
   // Debug: Check if elements exist
   const qaModal = document.getElementById("qaModalOverlay")
   const qaSendBtn = document.getElementById("qaSendBtn")

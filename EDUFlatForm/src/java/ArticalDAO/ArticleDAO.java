@@ -19,14 +19,16 @@ public class ArticleDAO implements IArticle {
     final String FIND_ARTICAL_BY_ID = "SELECT * FROM Article WHERE articleID = ?";
     final String FIND_ALL_ARTICAL = "SELECT * FROM Article ORDER BY createAt DESC";
     final String FIND_ALL_WITH_STATS
-            = "SELECT a.*, "
-            + "       a.viewCount, "
-            + "       (SELECT COUNT(*) FROM dbo.Comments c "
-            + "         WHERE c.articleID = a.articleID AND c.userID <> a.userID) AS commentCount "
+            = "SELECT a.articleID, a.userID, a.createAt, a.status, a.title, a.content, "
+            + "       CAST(0 AS int) AS viewCount, "
+            + // <-- không cần cột
+            "       (SELECT COUNT(*) FROM dbo.Comment c "
+            + "         WHERE c.articleID = a.articleID AND (c.userID IS NULL OR c.userID <> a.userID)) AS commentCount "
             + "FROM dbo.Article a "
             + "ORDER BY a.createAt DESC";
     final String INCREASE_VIEW = "UPDATE dbo.Article SET viewCount = viewCount + 1 WHERE articleID = ?";
     Article article = new Article();
+
     @Override
     public void create(Article a) {
         String sql = INSERT_ARTICAL;
@@ -44,19 +46,23 @@ public class ArticleDAO implements IArticle {
     }
 
     @Override
-    public int update(Article a) {
-        String sql = UPDATE_ARTICAL;
+    public UUID update(Article a) {
+        final String sql = UPDATE_ARTICAL; // "UPDATE Article SET userID = ?, createAt = ?, status = ?, title = ?, content = ? WHERE articleID = ?"
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            // SQL Server (uniqueidentifier) chấp nhận setObject(UUID) với driver mới
             ps.setObject(1, a.getUserID());
-            ps.setDate(2, new java.sql.Date(a.getCreateAt().getTime()));
+            ps.setTimestamp(2, new java.sql.Timestamp(a.getCreateAt().getTime())); // giữ giờ/phút/giây
             ps.setString(3, a.getStatus());
             ps.setString(4, a.getTitle());
             ps.setString(5, a.getContent());
             ps.setObject(6, a.getArticleID());
-            return ps.executeUpdate();
+
+            int rows = ps.executeUpdate();
+            return rows > 0 ? a.getArticleID() : null;
         } catch (SQLException e) {
             e.printStackTrace();
-            return 0;
+            return null;
         }
     }
 
@@ -118,33 +124,38 @@ public class ArticleDAO implements IArticle {
     private Article extractArticle(ResultSet rs) throws SQLException {
         Article a = new Article();
 
-        // articleID
         Object artObj = rs.getObject("articleID");
         if (artObj instanceof java.util.UUID) {
             a.setArticleID((java.util.UUID) artObj);
-        } else if (artObj instanceof String) {
-            a.setArticleID(java.util.UUID.fromString((String) artObj));
         } else if (artObj != null) {
             a.setArticleID(java.util.UUID.fromString(String.valueOf(artObj)));
         }
 
-        // userID
         Object userObj = rs.getObject("userID");
         if (userObj instanceof java.util.UUID) {
             a.setUserID((java.util.UUID) userObj);
-        } else if (userObj instanceof String) {
-            a.setUserID(java.util.UUID.fromString((String) userObj));
         } else if (userObj != null) {
             a.setUserID(java.util.UUID.fromString(String.valueOf(userObj)));
         }
 
-        // createAt – dùng Timestamp để không mất giờ/phút/giây
-        java.sql.Timestamp ts = rs.getTimestamp("createAt");
-        a.setCreateAt(ts != null ? new java.util.Date(ts.getTime()) : null);
+        // createAt là DATE -> lấy bằng getDate; nếu null thì để null
+        java.sql.Date d = rs.getDate("createAt");
+        a.setCreateAt(d != null ? new java.util.Date(d.getTime()) : null);
 
         a.setStatus(rs.getString("status"));
         a.setTitle(rs.getString("title"));
         a.setContent(rs.getString("content"));
+
+        // 2 dòng dưới đây chỉ chạy nếu SELECT có alias tương ứng
+        try {
+            a.setViewCount(rs.getInt("viewCount"));
+        } catch (SQLException ignore) {
+        }
+        try {
+            a.setCommentCount(rs.getInt("commentCount"));
+        } catch (SQLException ignore) {
+        }
+
         return a;
     }
 
@@ -164,14 +175,19 @@ public class ArticleDAO implements IArticle {
         return list;
     }
     UUID authorId = article.getUserID();
+
     @Override
     public int increaseViewCount(UUID articleId, UUID viewerId, UUID authorId) {
-    if (viewerId != null && viewerId.equals(authorId)) return 0; // không tính lượt xem của chính tác giả
-    String sql = INCREASE_VIEW;
-    try (Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setObject(1, articleId);
-        return ps.executeUpdate();
-    } catch (SQLException e) { e.printStackTrace(); return 0; }
-}
+        if (viewerId != null && viewerId.equals(authorId)) {
+            return 0; // không tính lượt xem của chính tác giả
+        }
+        String sql = INCREASE_VIEW;
+        try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setObject(1, articleId);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

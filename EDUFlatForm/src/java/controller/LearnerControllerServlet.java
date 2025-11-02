@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 import jakarta.servlet.RequestDispatcher;
@@ -26,45 +22,16 @@ import util.AvatarUploadUtil;
 @WebServlet(name = "LearnerControllerServlet", urlPatterns = {"/learner"})
 public class LearnerControllerServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     private UserServiceImpl userService = new UserServiceImpl();
 
-
-    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet LearnerControllerServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet LearnerControllerServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+            out.println("<h1>LearnerControllerServlet active</h1>");
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -73,15 +40,15 @@ public class LearnerControllerServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số action");
             return;
         }
-        switch(action.toLowerCase()){
+
+        switch (action.toLowerCase()) {
             case "setting":
-                showSettingPage(request,response);
+                showSettingPage(request, response);
                 break;
             default:
-                showLearnerHome(request,response);
+                showLearnerHome(request, response);
                 break;
         }
-                
     }
 
     @Override
@@ -95,17 +62,12 @@ public class LearnerControllerServlet extends HttpServlet {
         }
 
         switch (action.toLowerCase()) {
-            case "create":
-//                handleCreateLearner(request, response);
-                break;
             case "editinfo":
-            {
                 try {
                     handleUpdateLearnerPro(request, response);
                 } catch (Exception ex) {
                     Logger.getLogger(LearnerControllerServlet.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
                 break;
 
             case "changepassword":
@@ -115,88 +77,91 @@ public class LearnerControllerServlet extends HttpServlet {
                     Logger.getLogger(LearnerControllerServlet.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 break;
-            case "delete":
-//                handleDeleteLearner(request, response);
-                break;
+
             default:
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unsupported action: " + action);
+response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unsupported action: " + action);
                 break;
         }
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
-    private void handleUpdateLearnerPro(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, Exception {
+    private void handleUpdateLearnerPro(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException, Exception {
         HttpSession session = request.getSession();
         User sessionUser = (User) session.getAttribute("user");
 
         if (sessionUser == null) {
-            response.sendRedirect(request.getContextPath() + "/login/loginRole.jsp");
+            // ➤ Nếu chưa đăng nhập → quay về trang đăng nhập
+            response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
             return;
-        }      
-            String fullName = param(request, "fullName");
-            String email = param(request, "email");
-            String phone = param(request, "phone");
-            String bio = param(request, "bio");
-            String birthday = param(request, "birthday");
-
-            sessionUser.setFullName(fullName);
-            sessionUser.setEmail(email);
-            sessionUser.setPhoneNumber(phone);
-            sessionUser.setBio(bio);
-        
-        if (birthday != null && !birthday.isEmpty()) {
-        try {
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy");
-            Date parsedDate = sdf.parse(birthday);
-            sessionUser.setDateofbirth(parsedDate);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-}
 
-        // --- Upload Avatar ---
+        String fullName = param(request, "fullName");
+        String email = param(request, "email");
+        String phone = param(request, "phone");
+        String bio = param(request, "bio");
+        String birthday = param(request, "birthday");
+
+        sessionUser.setFullName(fullName);
+        sessionUser.setEmail(email);
+        sessionUser.setPhoneNumber(phone);
+        sessionUser.setBio(bio);
+
+        if (birthday != null && !birthday.isEmpty()) {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-MM-yyyy");
+                Date parsedDate = sdf.parse(birthday);
+                sessionUser.setDateofbirth(parsedDate);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // --- Upload avatar nếu có ---
         Part avatarPart = request.getPart("avatar");
         String avatarUrl = AvatarUploadUtil.uploadFile(
-            avatarPart,
-            request.getServletContext(),
-            request.getContextPath(),
-            "uploads/avatar/learner" // bạn có thể đổi thư mục tùy context
+                avatarPart,
+                request.getServletContext(),
+                request.getContextPath(),
+                "uploads/avatar/learner"
         );
         if (avatarUrl != null) {
             sessionUser.setAvatarUrl(avatarUrl);
         }
-        // --- Update DB ---
+
+        // --- Cập nhật thông tin trong DB ---
         boolean updated = false;
         try {
             updated = userService.updateProfile(sessionUser);
-        } catch (Exception e) {       
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         if (updated) {
             session.setAttribute("user", sessionUser);
-            request.setAttribute("message", "Cập nhật thông tin thành công!");
+            request.setAttribute("message", "✅ Cập nhật thông tin thành công!");
         } else {
-            request.setAttribute("error", "Cập nhật thất bại, vui lòng thử lại!");
-        }        
-        request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+            request.setAttribute("error", "❌ Cập nhật thất bại, vui lòng thử lại!");
+        }
+
+        // ➤ Quay lại trang setting.jsp - kiểm tra từ trang nào submit
+        String referer = request.getHeader("Referer");
+        String settingPage = "/learner/jsp/Setting/setting.jsp";
         
+        if (referer != null && referer.contains("/instructor/jsp/Setting.jsp")) {
+            settingPage = "/instructor/jsp/Setting.jsp";
+        }
+        
+        RequestDispatcher rd = request.getRequestDispatcher(settingPage);
+        rd.forward(request, response);
     }
-    private void handleChangePassword(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException, Exception {
+
+    private void handleChangePassword(HttpServletRequest request, HttpServletResponse response)
+throws IOException, ServletException, Exception {
         HttpSession session = request.getSession();
         User sessionUser = (User) session.getAttribute("user");
 
         if (sessionUser == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+            response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
             return;
         }
 
@@ -204,47 +169,55 @@ public class LearnerControllerServlet extends HttpServlet {
         String newPassword = param(request, "newPassword");
         String confirmPassword = param(request, "confirmPassword");
 
-        // Kiểm tra các trường bắt buộc
         if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
             request.setAttribute("error", "Vui lòng điền đầy đủ thông tin!");
-            request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+            forwardSetting(request, response);
             return;
         }
 
-        // Kiểm tra mật khẩu mới và xác nhận có khớp không
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Mật khẩu mới và xác nhận không khớp!");
-            request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+            forwardSetting(request, response);
             return;
         }
 
-        // Kiểm tra độ dài mật khẩu mới
         if (newPassword.length() < 6) {
             request.setAttribute("error", "Mật khẩu mới phải có ít nhất 6 ký tự!");
-            request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+            forwardSetting(request, response);
             return;
         }
 
-        // Kiểm tra mật khẩu hiện tại có đúng không
         if (!currentPassword.equals(sessionUser.getPassword())) {
             request.setAttribute("error", "Mật khẩu hiện tại không đúng!");
-            request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+            forwardSetting(request, response);
             return;
         }
 
-        // Cập nhật mật khẩu trong database
         boolean updated = userService.updatePassword(sessionUser.getEmail(), newPassword);
 
         if (updated) {
-            // Cập nhật session user với mật khẩu mới
             sessionUser.setPassword(newPassword);
             session.setAttribute("user", sessionUser);
-            request.setAttribute("message", "Đổi mật khẩu thành công!");
+            request.setAttribute("message", "✅ Đổi mật khẩu thành công!");
         } else {
-            request.setAttribute("error", "Đổi mật khẩu thất bại, vui lòng thử lại!");
+            request.setAttribute("error", "❌ Đổi mật khẩu thất bại, vui lòng thử lại!");
         }
 
-        request.getRequestDispatcher("/learner/setting.jsp").forward(request, response);
+        forwardSetting(request, response);
+    }
+
+    private void forwardSetting(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Kiểm tra từ trang nào submit để forward về đúng trang
+        String referer = request.getHeader("Referer");
+        String settingPage = "/learner/jsp/Setting/setting.jsp";
+        
+        if (referer != null && referer.contains("/instructor/jsp/Setting.jsp")) {
+            settingPage = "/instructor/jsp/Setting.jsp";
+        }
+        
+        RequestDispatcher rd = request.getRequestDispatcher(settingPage);
+        rd.forward(request, response);
     }
 
     private String param(HttpServletRequest request, String name) {
@@ -252,13 +225,20 @@ public class LearnerControllerServlet extends HttpServlet {
         return v != null ? v.trim() : "";
     }
 
-    private void showSettingPage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher rd = request.getRequestDispatcher("/learner/setting.jsp");
-        rd.forward(request, response);
+    private void showSettingPage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        RequestDispatcher rd = request.getRequestDispatcher("/learner/jsp/Setting/setting.jsp");
+rd.forward(request, response);
     }
 
-    private void showLearnerHome(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher rd = request.getRequestDispatcher("/course");
-        rd.forward(request, response);
+    private void showLearnerHome(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // ➤ Nếu bạn có trang learner chính, đổi đường dẫn tại đây
+        response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
+    }
+
+    @Override
+    public String getServletInfo() {
+        return "Learner Controller Servlet";
     }
 }

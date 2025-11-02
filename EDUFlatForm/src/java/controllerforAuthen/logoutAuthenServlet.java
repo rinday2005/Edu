@@ -83,7 +83,7 @@ public class logoutAuthenServlet extends HttpServlet {
         response.addCookie(jsession);
 
         // 🔹 Chuyển hướng về trang đăng nhập
-        response.sendRedirect(request.getContextPath() + "/course");
+        response.sendRedirect(request.getContextPath() + "/CourseServletController");
     }
 
     @Override

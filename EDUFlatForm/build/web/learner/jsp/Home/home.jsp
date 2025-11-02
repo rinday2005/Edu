@@ -89,25 +89,26 @@
                         <p>Chưa có khóa học nào được duyệt.</p>
                     </c:if>
 
-                    <c:forEach var="course" items="${courses}">
-                        <div class="pro-course-card" onclick="window.location.href='${pageContext.request.contextPath}/course?action=detail&id=${course.courseID}'">
-                            <div class="course-image">
-                                <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
-                            </div>
-                            <div class="course-content">
-                                <h3>${course.name}</h3>
-                                <p class="course-description">${course.description}</p>
-                                <div class="course-pricing">
-                                    <span class="discount-price">Giá tiền: ${course.price}đ</span>
-                                </div>
-                                <div class="course-stats-row">
-                                    <span class="stat-item">👨‍🏫 <span class="stat-label">${course.instructorName}</span></span>
-                                    <span class="stat-item">⭐ <span class="stat-label">${course.rating}/5</span></span>
-                                    <span class="stat-item">💰 <span class="stat-label">${course.level}</span></span>
-                                </div>
+                <c:forEach var="course" items="${courses}">
+                    <div class="pro-course-card" 
+                        onclick="window.location.href='${pageContext.request.contextPath}/CourseServletController?action=detail&id=${course.courseID}'">
+                    <div class="course-image">
+                        <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                    </div>
+                        <div class="course-content">
+                            <h3>${course.name}</h3>
+                            <p class="course-description">${course.description}</p>
+                        <div class="course-pricing">
+                            <span class="discount-price">Giá tiền: ${course.price}đ</span>
+                        </div>
+                            <div class="course-stats-row">
+                                <span class="stat-item">⭐ <span class="stat-label">${course.rating}/5</span></span>
+                                <span class="stat-item">💰 <span class="stat-label">${course.level}</span></span>
                             </div>
                         </div>
-                    </c:forEach>
+                    </div>
+                </c:forEach>
+
                 </div>
             </section>
 
@@ -252,6 +253,8 @@
     <!-- Footer -->
     <jsp:include page="/learner/common/footer.jsp" />
 
+    <!-- Added global theme script before page-specific JS -->
+    <script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
     <script src="${pageContext.request.contextPath}/learner/js/home.js"></script>
 </body>
 </html>

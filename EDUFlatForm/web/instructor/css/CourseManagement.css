@@ -1,85 +1,143 @@
+/* ===== Danh sách khóa học ===== */
+.course-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* ===== Box mỗi khóa học ===== */
 .course-item {
     border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    background: var(--bg-card);
-    width: 320px; /* tăng độ rộng của box */
-    padding: 20px; /* thêm khoảng trống bên trong */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 12px;
+    background: var(--bg-card, #fff);
+    width: 380px;                 /* rộng hơn */
+    padding: 24px;
+    box-shadow: 0 3px 8px rgba(0,0,0,.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+    display: flex;
+    flex-direction: column;       /* giữ mọi thứ trong box */
+    gap: 14px;
 }
 
 .course-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.12);
 }
 
+/* ===== Header trạng thái/tiêu đề (nếu dùng) ===== */
 .course-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 22px;
-    border-bottom: 1px solid #e0e0e0;
-    transition: background-color 0.2s;
+    padding: 14px 18px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
 }
 
-.course-header:hover {
-    background-color: #f5f5f5;
-}
-
+/* ===== Thông tin khóa học ===== */
 .course-info h4 {
     margin: 0 0 8px 0;
-    font-size: 18px;
-    color: var(--text-primary);
+    font-size: 20px;
+    color: var(--text-primary, #222);
+    word-break: break-word;
 }
 
 .course-info p {
     margin: 4px 0;
-    color: var(--text-muted);
-    font-size: 14px;
+    color: var(--text-muted, #666);
+    font-size: 15px;
+    line-height: 1.5;
 }
 
+/* ===== Badge trạng thái ===== */
+.status-badge {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+.status-badge.active   { background: #28a745; }
+.status-badge.pending  { background: #17a2b8; } /* xanh ngọc cho Pending Review */
+.status-badge.inactive { background: #6c757d; }
+
+/* ===== Nhóm nút hành động ===== */
 .course-action-buttons {
     display: flex;
     gap: 12px;
-    margin-top: 15px;
+    flex-wrap: wrap;
 }
 
 .btn-small {
-    padding: 10px 18px; /* tăng kích thước button */
+    padding: 10px 18px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: background-color .18s ease, transform .1s ease, box-shadow .18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .btn-small:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
 }
 
 .btn-edit {
-    background-color: #007bff;
-    color: white;
+    background: #0d6efd;
+    color: #fff;
+}
+.btn-edit:hover { background: #0a58ca; }
+
+.btn-view {
+    background: #6c757d;
+    color: #fff;
+}
+.btn-view:hover { background: #5a6268; }
+
+/* ===== Khu vực Quản lý chương (nằm trong box) ===== */
+.manage-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;  /* đẩy về phải trong box */
+    gap: 6px;
+    margin-top: 4px;
 }
 
-.btn-edit:hover {
-    background-color: #0056b3;
+.manage-section i {
+    font-size: 16px;
+    color: #0a58ca;
 }
 
-.btn-delete {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-delete:hover {
-    background-color: #c82333;
-}
-
-.status-badge {
-    padding: 8px 14px; /* badge lớn hơn */
-    border-radius: 5px;
-    font-size: 13px;
+.manage-section a {
+    color: #0a58ca;
+    font-size: 14px;
     font-weight: 600;
+    text-decoration: none;
+    line-height: 1;
+    display: inline-block;
+    padding: 6px 0;
+}
+.manage-section a:hover { text-decoration: underline; }
+
+/* ===== Ngăn phần tử trôi ra ngoài box ===== */
+.course-item * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1200px) {
+    .course-item { width: 45%; }   /* ~2 box mỗi hàng */
+}
+
+@media (max-width: 768px) {
+    .course-item { width: 100%; }  /* 1 box mỗi hàng trên mobile */
 }

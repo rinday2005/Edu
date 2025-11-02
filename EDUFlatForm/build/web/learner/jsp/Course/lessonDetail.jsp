@@ -1,17 +1,13 @@
-<%-- 
-    Document   : lessonDetail
-    Created on : Oct 31, 2025, 10:42:11 PM
-    Author     : ADMIN
---%>
+<jsp:include page="/learner/common/footer.jsp" />
+<!-- Added global theme script and fixed typo in course.js path -->
+<script src="${pageContext.request.contextPath}/learner/js/theme.js"></script>
+<script src="${pageContext.request.contextPath}/learner/js/course.js"></script>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
+<!-- Added script to handle room navigation -->
+<script>
+    function navigateToRoom(courseId) {
+        window.location.href = '${pageContext.request.contextPath}/course/room.jsp?id=' + courseId;
+    }
+</script>
+</body>
 </html>
