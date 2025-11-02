@@ -172,9 +172,8 @@ public class ManageArtical extends HttpServlet {
 
     private void listartical(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     List<Article> articallist = articleservice.findAllWithStats();
-  
     req.setAttribute("articallist", articallist);
-    req.getRequestDispatcher("/WEB-INF/instructor/jsp/ArticleManage.jsp").forward(req, resp);
+    req.getRequestDispatcher("/instructor/jsp/ArticleManage.jsp").forward(req, resp);
 }
 
 

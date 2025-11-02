@@ -173,12 +173,12 @@
                     <form>
                         <div class="form-group">
                             <label for="sectionName">Tên Section *</label>
-                            <input type="text" id="sectionName" class="form-control" placeholder="Nhập tên section" required>
+                            <input type="text" name="namesections"id="sectionName" class="form-control" placeholder="Nhập tên section" required>
                         </div>
                         
                         <div class="form-group">
                             <label for="sectionDescription">Mô tả Section</label>
-                            <textarea id="sectionDescription" class="form-control" rows="3" placeholder="Mô tả về nội dung section"></textarea>
+                            <textarea id="sectionDescription" name="descriptsection"class="form-control" rows="3" placeholder="Mô tả về nội dung section"></textarea>
                         </div>
                         
                         <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">

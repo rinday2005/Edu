@@ -17,15 +17,26 @@
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/learner/jsp/Setting/setting.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/learner/jsp/Cart/Cart.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforInstructor/ManageCourse.java</file>
-            <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/CourseManagement.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/InstructorDashboard.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/ArticleManage.jsp</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforAuthen/ForgotPasswordController.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforAuthen/RegisterAuthenServlet.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/css/instructorsHome.css</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/controllerforInstructor/ManageContent.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/SectionsDAO/SectionDAO.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/SectionsDAO/ISectionDAO.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/demo/DemoAll.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/service/CourseServiceImpl.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/model/Article.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/ArticalDAO/ArticleDAO.java</file>
             <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/service/ArticleService.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/CourseManagement.jsp</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/model/Courses.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/model/Sections.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/service/SectionsService.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/web/instructor/jsp/CourseContentManager.jsp</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/CourseDAO/CourseDAO.java</file>
+            <file>file:/D:/EDUFlatForm/EDUFlatForm/src/java/CourseDAO/ICourseDAO.java</file>
         </group>
     </open-files>
 </project-private>

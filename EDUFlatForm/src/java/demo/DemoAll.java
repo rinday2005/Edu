@@ -1,62 +1,32 @@
-// src/demo/DemoMcqUserAnswer.java
-package demo;
-
-import McqUserAnswerDAO.McqUserAnswerDAO;
-import McqUserAnswerDAO.IMcqUserAnswerDAO;
-import model.McqUserAnswer;
-import model.McqUserAnswerPK;
-
-import java.util.*;
+import CourseDAO.*;
+import model.Courses;
 import java.util.UUID;
 
 public class DemoAll {
-
-    private static void print(String label, McqUserAnswer x) {
-        if (x == null) { System.out.println(label + " = null"); return; }
-        System.out.println(label + " = {submissionId="
-            + x.getMcqUserAnswerPK().getSubmissionId()
-            + ", mcqChoiceId=" + x.getMcqUserAnswerPK().getMcqChoiceId() + "}");
-    }
-
     public static void main(String[] args) {
-        IMcqUserAnswerDAO dao = new McqUserAnswerDAO();
+        ICourseDAO dao = new CourseDAO();
 
-        UUID sub = UUID.randomUUID();
-        UUID c1 = UUID.randomUUID();
-        UUID c2 = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        UUID instructorId = UUID.randomUUID(); // hoặc lấy từ session
 
-        McqUserAnswerPK k1 = new McqUserAnswerPK(sub, c1);
-        McqUserAnswerPK k2 = new McqUserAnswerPK(sub, c2);
+        Courses c = new Courses(
+            courseId, instructorId,
+            "Java Core", "Khóa nhập môn Java", null,
+            0, 199, "Beginner", false
+        );
 
-        // INSERT
-        try {
-            dao.insert(k1);
-            System.out.println(">>> INSERT k1 OK");
-        } catch (Exception e) { e.printStackTrace(); return; }
+        System.out.println("Insert: " + dao.insert(c));
 
-        // EXISTS + FIND
-        try {
-            System.out.println("exists(k1) = " + dao.exists(k1));
-            print("findById(k1)", dao.findById(k1));
-        } catch (Exception e) { e.printStackTrace(); }
+        Courses got = dao.findById(courseId);
+        System.out.println("Got: " + (got != null ? got.getName() : "null"));
 
-        // UPDATE KEY (đổi c1 -> c2)
-        try {
-            dao.updateKey(k1, k2);
-            print("after updateKey to k2, findById(k2)", dao.findById(k2));
-        } catch (Exception e) { e.printStackTrace(); }
+        System.out.println("Approve: " + dao.updateIsApproved(courseId, true));
 
-        // FIND BY SUBMISSION
-        try {
-            var bySub = dao.findBySubmission(sub);
-            System.out.println("findBySubmission size = " + bySub.size());
-        } catch (Exception e) { e.printStackTrace(); }
+        c.setPrice(249);
+        c.setDescription("Cập nhật mô tả");
+        c.setApproved(true);
+        System.out.println("Update full: " + dao.update(c));
 
-        // DELETE
-        try {
-            boolean ok = dao.delete(k2);
-            System.out.println(">>> DELETE " + (ok ? "OK" : "FAIL"));
-            print("after delete, findById(k2)", dao.findById(k2)); // mong đợi null
-        } catch (Exception e) { e.printStackTrace(); }
+        System.out.println("Delete: " + dao.delete(courseId));
     }
 }

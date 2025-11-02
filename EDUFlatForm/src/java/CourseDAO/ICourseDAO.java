@@ -14,7 +14,16 @@ import model.Courses;
 
 public interface ICourseDAO {
 
-    List<Courses> getAllCourses();
-    Courses getCourseById(UUID courseId);
+    boolean insert(Courses c);                      // CREATE
+
+    Courses findById(UUID courseId);                // READ 1
+    List<Courses> findAll();                        // READ *
+    List<Courses> findByUserId(UUID userId);        // READ theo instructor
+
+    boolean update(Courses c);                      // UPDATE toàn bộ
+    boolean updateIsApproved(UUID courseId, boolean approved);  // UPDATE cờ duyệt
+
+    boolean delete(UUID courseId);                  // DELETE
+    boolean existsById(UUID courseId);              // tiện ích
 
 }

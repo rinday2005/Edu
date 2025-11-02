@@ -22,6 +22,42 @@ public class Courses {
     private String level;
     private boolean isApproved;
 
+    public Courses() {
+    }
+
+    public Courses(UUID courseID, UUID userID, String name, String description, String imgURL, int rating, int price, String level, boolean isApproved) {
+        this.courseID = courseID;
+        this.userID = userID;
+        this.name = name;
+        this.description = description;
+        this.imgURL = imgURL;
+        this.rating = rating;
+        this.price = price;
+        this.level = level;
+        this.isApproved = isApproved;
+    }
+
+    public Courses(UUID userID, String name, String description, String imgURL, int rating, int price, String level, boolean isApproved) {
+        this.userID = userID;
+        this.name = name;
+        this.description = description;
+        this.imgURL = imgURL;
+        this.rating = rating;
+        this.price = price;
+        this.level = level;
+        this.isApproved = isApproved;
+    }
+
+    public Courses(String name, String description, String imgURL, int rating, int price, String level, boolean isApproved) {
+        this.name = name;
+        this.description = description;
+        this.imgURL = imgURL;
+        this.rating = rating;
+        this.price = price;
+        this.level = level;
+        this.isApproved = isApproved;
+    }
+    
     public UUID getCourseID() { return courseID; }
     public void setCourseID(UUID courseID) { this.courseID = courseID; }
 

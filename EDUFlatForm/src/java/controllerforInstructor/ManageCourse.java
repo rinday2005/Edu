@@ -12,7 +12,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
+import java.io.File;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.UUID;
+import model.*;
+import service.*;
 
 /**
  *
@@ -20,7 +27,7 @@ import java.time.LocalDate;
  */
 @WebServlet(name = "ManageLession", urlPatterns = {"/ManageLession"})
 public class ManageCourse extends HttpServlet {
-
+   
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -65,9 +72,10 @@ public class ManageCourse extends HttpServlet {
         }
 
         switch (action) {
-            
+
+        }
     }
-    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -77,17 +85,16 @@ public class ManageCourse extends HttpServlet {
         }
 
         switch (action) {
-            case "createlession":
-            {
+            case "createlession": {
                 try {
-                    createLession(request,response);
+                    createcourse(request, response);
                 } catch (SQLServerException ex) {
                     System.getLogger(ManageCourse.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                 }
             }
 
         }
-            
+
     }
 
     /**
@@ -100,23 +107,70 @@ public class ManageCourse extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    private void createLession(HttpServletRequest request, HttpServletResponse response) 
-    throws SQLServerException{
+    private void createcourse(HttpServletRequest request, HttpServletResponse response)
+            throws SQLServerException {
         try {
 
-            String name = request.getParameter("name");
-            long price = Long.parseLong(request.getParameter("price"));
-            String description = request.getParameter("description");
-            int stock = Integer.parseInt(request.getParameter("stock"));
-            LocalDate import_date = LocalDate.parse(request.getParameter("import_date")); 
-            java.sql.Date day = java.sql.Date.valueOf(import_date);
-//            Product pro = new Product(name, price, description, stock, import_date);
-//            productservice.insertProduct(pro);
-            response.sendRedirect(request.getContextPath() + "/ProductServlet?action=listforadmin");
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                // Chưa đăng nhập hoặc mất cookie session
+                response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
+                return;
+            }
+
+            // Lấy user từ session (hỗ trợ cả "user" và "authUser" phòng nơi khác dùng tên khác)
+            UUID userID = null;
+            Object u = session.getAttribute("user");
+            if (u == null) {
+                u = session.getAttribute("authUser");
+            }
+
+            if (u instanceof User userObj) {
+                // userObj.getUserID() có thể là UUID hoặc String -> ép kiểu an toàn
+                Object idObj = userObj.getUserID();
+                if (idObj instanceof UUID) {
+                    userID = (UUID) idObj;
+                } else if (idObj != null) {
+                    userID = UUID.fromString(String.valueOf(idObj));
+                }
+            }
+            // Dự phòng: nếu bạn còn set "userID" (String) riêng trong Login
+            if (userID == null) {
+                Object uidAttr = session.getAttribute("userID");
+                if (uidAttr != null) {
+                    userID = UUID.fromString(String.valueOf(uidAttr));
+                }
+            }
+
+            if (userID == null) {
+                // Có session nhưng thiếu thông tin người dùng -> coi như chưa đăng nhập
+                response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
+                return;
+            }
+            String name = request.getParameter("namecourse");
+            String description = request.getParameter("descriptioncourse");
+            int price = Integer.parseInt(request.getParameter("pricecourse"));
+            String level = request.getParameter("levelcourse");
+            String status = request.getParameter("status"); // Draft/Published/...
+
+            Part img = request.getPart("picturecourse");
+            String imgURL = null;
+            if (img != null && img.getSize() > 0) {
+                String fileName = Paths.get(img.getSubmittedFileName()).getFileName().toString();
+                File uploadDir = new File(getServletContext().getRealPath("/uploads/course"));
+                uploadDir.mkdirs();
+                File saved = new File(uploadDir, fileName);
+                img.write(saved.getAbsolutePath());
+                imgURL = request.getContextPath() + "/uploads/course/" + fileName;
+            }
+
+            UUID courseID = UUID.randomUUID();
+            Courses course = new Courses(courseID, userID, name, description, imgURL, 0, price, level, false);
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
-           
+
     }
 
 }

@@ -115,22 +115,23 @@
                     <h3><i class="fas fa-plus"></i> Tạo khóa học mới</h3>
                     <button onclick="hideCourseForm()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light);">&times;</button>
                 </div>
-                <form id="createCourseForm">
+                <form id="createCourseForm"action="${pageContext.request.contextPath}/ManageCourse"  method="post"  enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="courseName">Tên khóa học *</label>
-                        <input type="text" id="courseName" class="form-control" placeholder="Nhập tên khóa học" required>
+                        <input name="namecourse" type="text" id="courseName" class="form-control" placeholder="Nhập tên khóa học" required>
                     </div>
                     <div class="form-group">
                         <label for="courseDescription">Mô tả khóa học *</label>
-                        <textarea id="courseDescription" class="form-control" rows="4" placeholder="Mô tả chi tiết về khóa học" required></textarea>
+                        <textarea name="descriptioncourse" id="courseDescription" class="form-control" rows="4" placeholder="Mô tả chi tiết về khóa học" required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="coursePrice">Giá khóa học ($) *</label>
-                        <input type="number" id="coursePrice" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                        <input type="number" name = "pricecourse" id="coursePrice" class="form-control" placeholder="0.00" step="0.01" min="0" required>
                     </div>
                     <div class="form-group">
                         <label for="courseLevel">Cấp độ *</label>
-                        <select id="courseLevel" class="form-control" required>
+                      
+                        <select id="courseLevel" name="levelcourse" class="form-control" required>
                             <option value="">Chọn cấp độ</option>
                             <option value="Beginner">Beginner</option>
                             <option value="Intermediate">Intermediate</option>
@@ -139,12 +140,11 @@
                     </div>
                     <div class="form-group">
                         <label for="courseImage">Ảnh bìa khóa học</label>
-                        <input type="file" id="courseImage" class="form-control" accept="image/*">
+                        <input type="file" name="picturecourse" id="courseImage" class="form-control" accept="image/*">
                     </div>
                     <div class="form-group">
                         <label for="courseStatus">Trạng thái</label>
-                        <select id="courseStatus" class="form-control">
-                            <option value="Draft">Draft</option>
+                        <select id="courseStatus" name="status" class="form-control">
                             <option value="Published">Published</option>
                             <option value="Pending Review">Pending Review</option>
                         </select>
@@ -155,6 +155,7 @@
                         <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                             <i class="fas fa-layer-group"></i>
                             <strong>Thêm Chương (Session)</strong>
+                            
                         </label>
                         <p style="color: var(--text-light); opacity: 0.7; font-size: 0.9rem; margin-bottom: 12px;">
                             Thêm các chương cho khóa học này. Bạn có thể thêm nhiều chương cùng lúc.

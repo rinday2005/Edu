@@ -13,5 +13,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ISectionDAO {
-    List<Sections> getByCourseId(UUID courseID);
+      boolean insert(Sections s);
+    Sections findById(UUID sectionID);
+    List<Sections> findAll();
+    List<Sections> findByCourseId(UUID courseID);
+    boolean update(Sections s);
+    boolean delete(UUID sectionID);
+
+    // yêu cầu thêm
+    boolean updateStatus(UUID sectionID, boolean status);
 }
