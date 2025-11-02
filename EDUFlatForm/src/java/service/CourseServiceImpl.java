@@ -26,13 +26,13 @@ public class CourseServiceImpl {
     }
 
     public List<Courses> getAllCourses() {
-        return courseDAO.getAllCourses();
+        return courseDAO.findAll();
     }
 
     public CourseDetailDTO getCourseDetail(UUID courseId) {
         CourseDetailDTO dto = new CourseDetailDTO();
         try {
-            dto.course = courseDAO.getCourseById(courseId);
+            dto.course = courseDAO.findById(courseId);
             if (dto.course == null) {
                 throw new IllegalArgumentException("Course not found: " + courseId);
             }
@@ -61,6 +61,9 @@ public class CourseServiceImpl {
             // có thể quăng RuntimeException để Servlet catch và trả 500
             throw new RuntimeException("getCourseDetail failed: " + e.getMessage(), e);
         }
+    }
+    public boolean insert(Courses c){
+       return courseDAO.insert(c);
     }
     
 

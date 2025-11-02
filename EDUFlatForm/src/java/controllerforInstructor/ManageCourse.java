@@ -8,6 +8,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.Part;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import model.*;
 import service.*;
@@ -25,9 +27,16 @@ import service.*;
  *
  * @author ADMIN
  */
-@WebServlet(name = "ManageLession", urlPatterns = {"/ManageLession"})
+@WebServlet(name = "ManageCourse", urlPatterns = {"/ManageCourse"})
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1MB - file tạm lưu RAM
+        maxFileSize = 1024 * 1024 * 10, // 10MB mỗi file
+        maxRequestSize = 1024 * 1024 * 50 // 50MB tổng request
+)
 public class ManageCourse extends HttpServlet {
-   
+
+    CourseServiceImpl courseservice = new CourseServiceImpl();
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -72,6 +81,9 @@ public class ManageCourse extends HttpServlet {
         }
 
         switch (action) {
+           default:
+               listcourse(request,response);
+            
 
         }
     }
@@ -85,14 +97,10 @@ public class ManageCourse extends HttpServlet {
         }
 
         switch (action) {
-            case "createlession": {
-                try {
-                    createcourse(request, response);
-                } catch (SQLServerException ex) {
-                    System.getLogger(ManageCourse.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
+            case "createcourse": {
+                createcourse(request, response);
             }
-
+            break;
         }
 
     }
@@ -107,9 +115,8 @@ public class ManageCourse extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-    private void createcourse(HttpServletRequest request, HttpServletResponse response)
-            throws SQLServerException {
-        try {
+    private void createcourse(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        
 
             HttpSession session = request.getSession(false);
             if (session == null) {
@@ -151,26 +158,31 @@ public class ManageCourse extends HttpServlet {
             String description = request.getParameter("descriptioncourse");
             int price = Integer.parseInt(request.getParameter("pricecourse"));
             String level = request.getParameter("levelcourse");
-            String status = request.getParameter("status"); // Draft/Published/...
-
-            Part img = request.getPart("picturecourse");
-            String imgURL = null;
-            if (img != null && img.getSize() > 0) {
-                String fileName = Paths.get(img.getSubmittedFileName()).getFileName().toString();
-                File uploadDir = new File(getServletContext().getRealPath("/uploads/course"));
+            boolean status = Boolean.parseBoolean(request.getParameter("status")); // Draft/Published/...
+            Part filePart = request.getPart("picturecourse"); // name trùng trong form
+            String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String uploadPath = request.getServletContext().getRealPath("") + "uploads" + File.separator + "course_images";
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
-                File saved = new File(uploadDir, fileName);
-                img.write(saved.getAbsolutePath());
-                imgURL = request.getContextPath() + "/uploads/course/" + fileName;
             }
 
-            UUID courseID = UUID.randomUUID();
-            Courses course = new Courses(courseID, userID, name, description, imgURL, 0, price, level, false);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            // Lưu file vào thư mục
+            String filePath = uploadPath + File.separator + fileName;
+            filePart.write(filePath);
 
+            // Lưu đường dẫn (tương đối) vào DB
+            String imagePath = "uploads/course_images/" + fileName;
+            Courses course = new Courses(UUID.randomUUID(),userID, name, description, imagePath, 0, price, level, status);
+            courseservice.insert(course);
+            response.sendRedirect(request.getContextPath()+"/instructor/jsp/CourseManagement.jsp");
+
+    }
+
+    private void listcourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<Courses> courselist = courseservice.getAllCourses();
+    request.setAttribute("courselist", courselist);
+    request.getRequestDispatcher("/instructor/jsp/CourseManagement.jsp").forward(request, response);
     }
 
 }

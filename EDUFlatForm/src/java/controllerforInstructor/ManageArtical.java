@@ -82,8 +82,7 @@ public class ManageArtical extends HttpServlet {
             case "updateartical":
                 updateartical(request,response);
                 break;
-            default:
-               listartical(request,response); 
+            
         }
     }
 
@@ -112,6 +111,7 @@ public class ManageArtical extends HttpServlet {
                 break;    
             case "updateartical":
                 updateartical(request,response);
+                break;
         }
     }
 

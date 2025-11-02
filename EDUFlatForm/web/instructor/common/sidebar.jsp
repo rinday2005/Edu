@@ -7,7 +7,7 @@
         <i class="fas fa-home"></i> Trang chủ
     </a>
 
-    <a href="${pageContext.request.contextPath}/instructor/jsp/CourseManagement.jsp" 
+    <a href="${pageContext.request.contextPath}/ManageCourse" 
        class="nav-item <%= request.getRequestURI().contains("CourseManagement.jsp") ? "active" : "" %>">
         <i class="fas fa-laptop-code"></i> Khóa học
     </a>
@@ -17,7 +17,7 @@
         <i class="fas fa-chart-line"></i> Báo cáo
     </a>
 
-    <a href="${pageContext.request.contextPath}/instructor/jsp/ArticleManage.jsp" 
+    <a href="${pageContext.request.contextPath}/ManageArtical?action=listartical" 
        class="nav-item <%= request.getRequestURI().contains("ArticleManage.jsp") ? "active" : "" %>">
         <i class="fas fa-blog"></i> Bài viết
     </a>
