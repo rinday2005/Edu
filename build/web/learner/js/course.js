@@ -101,6 +101,11 @@ function openQAModal() {
     modal.style.opacity = "1"
     document.getElementById("qaInput").focus()
 
+    // 当已选定 lesson 时，打开弹窗即拉取后端评论，避免刷新/重进丢数据
+    if (currentLessonId) {
+      fetchComments(currentLessonId)
+    }
+
     // Debug log
     console.log("Q&A Modal opened")
   } else {
@@ -121,11 +126,20 @@ function closeQAModal() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("qaModalOverlay")
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
+  const qaModal = document.getElementById("qaModalOverlay")
+  if (qaModal) {
+    qaModal.addEventListener("click", (e) => {
+      if (e.target === qaModal) {
         closeQAModal()
+      }
+    })
+  }
+  
+  const testModal = document.getElementById("testModalOverlay")
+  if (testModal) {
+    testModal.addEventListener("click", (e) => {
+      if (e.target === testModal) {
+        closeTestModal()
       }
     })
   }
@@ -134,6 +148,346 @@ document.addEventListener("DOMContentLoaded", () => {
 // Play video
 function playVideo(event) {
   event.preventDefault()
+}
+
+// Load selected lesson video into player
+let currentLessonId = null
+let currentSectionId = null
+function loadLessonVideo(element) {
+  const url = element.getAttribute("data-video-url")
+  const name = element.getAttribute("data-lesson-name")
+  currentLessonId = element.getAttribute("data-lesson-id")
+  currentSectionId = element.getAttribute('data-section-id')
+  const container = document.querySelector(".video-container")
+  if (!container) return
+
+  if (isYouTubeUrl(url)) {
+    const videoId = extractYouTubeId(url)
+    if (!videoId) return
+    container.innerHTML = `
+      <iframe
+        id="ytPlayer"
+        width="100%"
+        height="480"
+        src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1"
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>`
+  } else {
+    // Ensure a <video> element exists
+    let video = container.querySelector("#courseVideo")
+    if (!video) {
+      container.innerHTML = ""
+      video = document.createElement("video")
+      video.id = "courseVideo"
+      video.className = "video-player"
+      video.controls = true
+      video.setAttribute("controlsList", "nodownload")
+      const source = document.createElement("source")
+      source.type = "video/mp4"
+      video.appendChild(source)
+      container.appendChild(video)
+    }
+
+    const source = video.querySelector("source")
+    source.src = url || ""
+    video.load()
+    video.play().catch(() => {})
+  }
+
+  // update title
+  const title = document.querySelector(".video-title")
+  if (title && name) title.textContent = name
+
+  // active state
+  document.querySelectorAll(".lesson-item.active").forEach((el) => el.classList.remove("active"))
+  element.classList.add("active")
+
+  // Load comments for this lesson
+  if (currentLessonId) {
+    fetchComments(currentLessonId)
+    // Load tests for this lesson
+    fetchTestsForLesson(currentLessonId)
+  }
+  if (currentSectionId) {
+    fetchAssignments(currentSectionId)
+  }
+}
+
+function isYouTubeUrl(url) {
+  if (!url) return false
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(url)
+}
+
+function extractYouTubeId(url) {
+  if (!url) return null
+  try {
+    const u = new URL(url, window.location.origin)
+    // youtu.be/<id>
+    if (u.hostname.includes("youtu.be")) {
+      return u.pathname.replace("/", "").split("/")[0]
+    }
+    // youtube.com/watch?v=<id>
+    if (u.searchParams.get("v")) return u.searchParams.get("v")
+    // youtube.com/embed/<id>
+    if (u.pathname.includes("/embed/")) return u.pathname.split("/embed/")[1]?.split("/")[0]
+  } catch (e) {
+    // fallback regex
+    const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)
+    return m ? m[1] : null
+  }
+  return null
+}
+
+/* ===== COMMENTS: EDIT / DELETE / REPORT / MODERATE ===== */
+function getUserRole() {
+  const m = document.querySelector('meta[name="user-role"]')
+  return m?.content || "Learner"
+}
+
+function getUserId() {
+  const m = document.querySelector('meta[name="user-id"]')
+  return m?.content || ""
+}
+
+function renderActionsForComment(authorId) {
+  const role = getUserRole()
+  const currentUserId = getUserId()
+  const isOwner = currentUserId && authorId && currentUserId.toUpperCase() === authorId.toUpperCase()
+  const isInstructor = role === "Instructor"
+  const isAdmin = role === "Admin"
+
+  const actions = []
+  if (isOwner) {
+    actions.push('<button class="qa-action-btn" onclick="startEditComment(this)">Chỉnh sửa</button>')
+    actions.push('<button class="qa-action-btn" onclick="deleteComment(this)">Xóa</button>')
+  }
+  actions.push('<button class="qa-action-btn qa-reply-btn" onclick="toggleReply(this)">Phản hồi</button>')
+  // three-dots menu for report and moderation
+  actions.push('<div class="qa-more"><button class="qa-action-btn qa-more-btn" onclick="toggleMoreMenu(this)">...</button><div class="qa-more-menu">'
+    + (!isOwner ? '<button class="qa-more-item" onclick="reportCommentFromMenu(this)">Report</button>' : '')
+    + (isInstructor ? '<button class="qa-more-item" onclick="restrictCommentFromMenu(this)">Hạn chế</button>' : '')
+    + (isAdmin ? '<button class="qa-more-item" onclick="adminDeleteCommentFromMenu(this)">Xóa (Admin)</button>' : '')
+    + '</div></div>')
+  if (isInstructor) {
+    actions.push('<button class="qa-action-btn" onclick="restrictComment(this)">Hạn chế</button>')
+  }
+  if (isAdmin) {
+    actions.push('<button class="qa-action-btn" onclick="adminDeleteComment(this)">Xóa (Admin)</button>')
+  }
+  return actions.join("")
+}
+
+function toggleMoreMenu(btn) {
+  const menu = btn.nextElementSibling
+  if (!menu) return
+  // close others
+  document.querySelectorAll('.qa-more-menu.show').forEach(m => { if (m !== menu) m.classList.remove('show') })
+  menu.classList.toggle('show')
+  // click outside to close
+  const close = (e) => {
+    if (!menu.contains(e.target) && e.target !== btn) {
+      menu.classList.remove('show')
+      document.removeEventListener('click', close)
+    }
+  }
+  setTimeout(() => document.addEventListener('click', close), 0)
+}
+
+function reportCommentFromMenu(el) {
+  const comment = el.closest('.qa-comment')
+  const dummyBtn = comment.querySelector('.qa-action-btn')
+  reportComment(dummyBtn)
+}
+
+function restrictCommentFromMenu(el) {
+  const comment = el.closest('.qa-comment')
+  const dummyBtn = comment.querySelector('.qa-action-btn')
+  restrictComment(dummyBtn)
+}
+
+function adminDeleteCommentFromMenu(el) {
+  const comment = el.closest('.qa-comment')
+  const dummyBtn = comment.querySelector('.qa-action-btn')
+  adminDeleteComment(dummyBtn)
+}
+
+function updateRepliesToggle(comment) {
+  const repliesContainer = comment.querySelector('.qa-replies')
+  const repliesCount = repliesContainer ? repliesContainer.querySelectorAll('.qa-reply-comment').length : 0
+  let toggle = comment.querySelector('.qa-replies-toggle')
+
+  if (repliesCount > 0) {
+    if (!toggle) {
+      toggle = document.createElement('button')
+      toggle.type = 'button'
+      toggle.className = 'qa-replies-toggle'
+      const actions = comment.querySelector('.qa-comment-actions')
+      if (actions && actions.nextSibling) {
+        actions.parentNode.insertBefore(toggle, actions.nextSibling)
+      } else if (actions) {
+        actions.after(toggle)
+      } else {
+        comment.appendChild(toggle)
+      }
+
+      toggle.addEventListener('click', () => {
+        const container = comment.querySelector('.qa-replies')
+        if (!container) return
+        const visible = container.style.display !== 'none'
+        container.style.display = visible ? 'none' : 'block'
+        toggle.textContent = (visible ? 'Xem ' : 'Ẩn ') + (container.querySelectorAll('.qa-reply-comment').length) + ' trả lời'
+      })
+    }
+
+    if (repliesContainer) {
+      repliesContainer.style.display = 'none'
+      repliesContainer.style.marginTop = '8px'
+    }
+    toggle.textContent = 'Xem ' + repliesCount + ' trả lời'
+  } else if (toggle) {
+    toggle.remove()
+  }
+}
+
+function updateAllRepliesToggle() {
+  document.querySelectorAll('.qa-comment').forEach(updateRepliesToggle)
+}
+
+function startEditComment(btn) {
+  const comment = btn.closest('.qa-comment')
+  const textEl = comment.querySelector('.qa-comment-text')
+  if (!textEl) return
+  const current = textEl.innerText
+  // 使用独立的编辑表单类，避免与回复表单冲突
+  const editor = document.createElement('div')
+  editor.className = 'qa-edit-form'
+  editor.innerHTML = `
+    <div class="qa-reply-input-wrapper">
+      <input type="text" class="qa-reply-input" value="${current.replace(/"/g, '&quot;')}">
+      <button class="qa-reply-send-btn" onclick="commitEditComment(this)">Lưu</button>
+      <button class="qa-reply-send-btn" onclick="cancelEditComment(this)">Hủy</button>
+    </div>`
+  textEl.style.display = 'none'
+  // 正确地插入到与文本同一父节点下，显示在文本后面
+  const parent = textEl.parentNode
+  parent.insertBefore(editor, textEl.nextSibling)
+  editor.querySelector('.qa-reply-input').focus()
+}
+
+function commitEditComment(btn) {
+  const wrap = btn.closest('.qa-edit-form')
+  const comment = btn.closest('.qa-comment')
+  const textEl = comment.querySelector('.qa-comment-text')
+  const input = wrap.querySelector('.qa-reply-input')
+  const newText = input.value.trim()
+  if (!newText) { return }
+
+  const commentId = comment.getAttribute('data-comment-id') || ''
+  if (!commentId) { alert('Không có mã bình luận để cập nhật. Vui lòng thử lại sau.'); return }
+  const base = document.body.getAttribute('data-context') || ''
+
+  // 禁用按钮避免重复提交
+  const btns = wrap.querySelectorAll('button')
+  btns.forEach(b => b.setAttribute('disabled','disabled'))
+
+  // 先持久化到后端，成功后再更新 UI
+  const form = new URLSearchParams()
+  form.append('commentID', commentId)
+  form.append('content', newText)
+
+  // 使用 POST + _method=PUT 兼容容器对 PUT 表单解析的问题
+  form.append('_method', 'PUT')
+  fetch(`${base}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  }).then(res => {
+    if (!res.ok) {
+      if (res.status === 401) throw new Error('Bạn cần đăng nhập để chỉnh sửa.')
+      if (res.status === 403) throw new Error('Bạn chỉ có thể chỉnh sửa bình luận của mình.')
+      throw new Error('Update failed')
+    }
+    // 更新 UI
+    textEl.textContent = newText
+    const edited = comment.querySelector('.qa-edited') || document.createElement('span')
+    edited.className = 'qa-edited'
+    edited.textContent = 'Đã chỉnh sửa'
+    const actions = comment.querySelector('.qa-comment-actions')
+    if (actions && !comment.querySelector('.qa-edited')) actions.appendChild(edited)
+    textEl.style.display = ''
+    wrap.remove()
+  }).catch((e) => {
+    alert('Cập nhật bình luận thất bại. ' + (e && e.message ? e.message : 'Vui lòng thử lại!'))
+    btns.forEach(b => b.removeAttribute('disabled'))
+  })
+}
+
+function cancelEditComment(btn) {
+  const wrap = btn.closest('.qa-edit-form')
+  const comment = btn.closest('.qa-comment')
+  const textEl = comment.querySelector('.qa-comment-text')
+  textEl.style.display = ''
+  wrap.remove()
+}
+
+function deleteComment(btn) {
+  const comment = btn.closest('.qa-comment')
+  const parentReplies = comment.closest('.qa-replies')
+  const parentComment = parentReplies ? parentReplies.closest('.qa-comment') : null
+  const commentId = comment.getAttribute('data-comment-id') || ''
+  const base = document.body.getAttribute('data-context') || ''
+  if (!commentId) {
+    comment.remove()
+    updateCommentCount()
+    if (parentComment) updateRepliesToggle(parentComment)
+    return
+  }
+  const form = new URLSearchParams()
+  form.append('commentID', commentId)
+  form.append('_method', 'DELETE')
+  fetch(`${base}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  }).then(res => {
+    if (!res.ok) {
+      if (res.status === 401) throw new Error('Bạn cần đăng nhập để xóa.')
+      if (res.status === 403) throw new Error('Bạn chỉ có thể xóa bình luận của mình.')
+      throw new Error('Delete failed')
+    }
+    comment.remove()
+    updateCommentCount()
+    if (parentComment) updateRepliesToggle(parentComment)
+  }).catch(e => {
+    alert('Xóa bình luận thất bại. ' + (e && e.message ? e.message : 'Vui lòng thử lại!'))
+  })
+}
+
+function adminDeleteComment(btn) {
+  deleteComment(btn)
+}
+
+function reportComment(btn) {
+  const comment = btn.closest('.qa-comment')
+  comment.classList.add('reported')
+  alert('Đã gửi report tới Instructor')
+}
+
+function restrictComment(btn) {
+  const comment = btn.closest('.qa-comment')
+  comment.classList.toggle('restricted')
+  // 受限后禁止回复
+  if (comment.classList.contains('restricted')) {
+    const replyBtn = comment.querySelector('.qa-reply-btn')
+    if (replyBtn) replyBtn.setAttribute('disabled', 'disabled')
+  } else {
+    const replyBtn = comment.querySelector('.qa-reply-btn')
+    if (replyBtn) replyBtn.removeAttribute('disabled')
+  }
 }
 
 // Handle enrollment
@@ -199,26 +553,38 @@ function toggleLike(button) {
 
 function toggleReply(button) {
   const comment = button.closest(".qa-comment")
-  let replyForm = comment.querySelector(".qa-reply-form")
-
-  if (replyForm) {
-    replyForm.remove()
-  } else {
-    replyForm = document.createElement("div")
-    replyForm.className = "qa-reply-form"
-    replyForm.innerHTML = `
-      <div class="qa-reply-input-wrapper">
-        <input type="text" class="qa-reply-input" placeholder="Nhập phản hồi của bạn..." />
-        <button class="qa-reply-send-btn" onclick="submitReply(this)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346272 C3.34915502,0.9 2.40734225,1.00636533 1.77946707,1.4776575 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4380088 C3.03521743,10.5951061 3.19218622,10.7522035 3.50612381,10.7522035 L16.6915026,11.5376905 C16.6915026,11.5376905 17.1624089,11.5376905 17.1624089,12.0089827 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"/>
-          </svg>
-        </button>
-      </div>
-    `
-    comment.appendChild(replyForm)
-    comment.querySelector(".qa-reply-input").focus()
+  // Ensure replies container lives inside content so it stacks vertically
+  const content = comment.querySelector('.qa-comment-content') || comment
+  let replies = content.querySelector('.qa-replies')
+  if (!replies) {
+    replies = document.createElement('div')
+    replies.className = 'qa-replies'
+    content.appendChild(replies)
   }
+  let replyForm = replies.querySelector(".qa-reply-form")
+  if (replyForm) { replyForm.remove(); return }
+  replyForm = document.createElement("div")
+  replyForm.className = "qa-reply-form"
+  replyForm.innerHTML = `
+    <div class="qa-reply-input-wrapper">
+      <input type="text" class="qa-reply-input" placeholder="Nhập phản hồi của bạn..." />
+      <button class="qa-reply-send-btn" onclick="submitReply(this)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346272 C3.34915502,0.9 2.40734225,1.00636533 1.77946707,1.4776575 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99701575 L3.03521743,10.4380088 C3.03521743,10.5951061 3.19218622,10.7522035 3.50612381,10.7522035 L16.6915026,11.5376905 C16.6915026,11.5376905 17.1624089,11.5376905 17.1624089,12.0089827 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"/>
+        </svg>
+      </button>
+    </div>`
+  replies.appendChild(replyForm)
+  replies.style.display = 'block'
+  const input = replyForm.querySelector(".qa-reply-input")
+  input.focus()
+  // 支持回车直接发送（Shift+Enter 换行）
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      replyForm.querySelector('.qa-reply-send-btn').click()
+    }
+  })
 }
 
 function submitReply(button) {
@@ -229,9 +595,11 @@ function submitReply(button) {
     const comment = button.closest(".qa-comment")
     const replyForm = button.closest(".qa-reply-form")
 
-    // Tạo reply comment
+    // Tạo reply comment (nội嵌在父评论的 replies 区域)
     const replyComment = document.createElement("div")
     replyComment.className = "qa-comment qa-reply-comment"
+    const authorId = getUserId()
+    replyComment.setAttribute('data-user-id', authorId)
     replyComment.innerHTML = `
       <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
       <div class="qa-comment-content">
@@ -242,20 +610,44 @@ function submitReply(button) {
         <div class="qa-comment-text">${replyText}</div>
         <div class="qa-comment-actions">
           <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
-          <button class="qa-action-btn qa-reply-btn" onclick="toggleReply(this)">Phản hồi</button>
-          <button class="qa-action-menu">...</button>
+          ${renderActionsForComment(authorId)}
         </div>
       </div>
     `
-
-    // Thêm reply vào sau comment gốc
-    comment.parentNode.insertBefore(replyComment, comment.nextSibling)
+    // 追加到父评论内容区域的回复容器内部，确保纵向展开
+    const content = comment.querySelector('.qa-comment-content') || comment
+    let replies = content.querySelector('.qa-replies')
+    if (!replies) {
+      replies = document.createElement('div')
+      replies.className = 'qa-replies'
+      content.appendChild(replies)
+    }
+    replies.appendChild(replyComment)
+    replies.style.display = 'block'
 
     // Xóa form reply
     replyForm.remove()
 
     // Cập nhật số lượng bình luận
     updateCommentCount()
+    updateRepliesToggle(comment)
+
+    // persist to backend
+    if (currentLessonId) {
+      const parentCommentId = comment.getAttribute('data-comment-id') || ''
+      const form = new URLSearchParams()
+      form.append('lessionID', currentLessonId)
+      form.append('content', replyText)
+      if (parentCommentId) form.append('parentID', parentCommentId)
+      fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form.toString(),
+      })
+      .then(r=>r.ok ? r.json() : Promise.reject())
+      .then(j=>{ if (j && j.commentID) replyComment.setAttribute('data-comment-id', j.commentID) })
+      .catch(()=>{})
+    }
   }
 }
 
@@ -281,6 +673,8 @@ function submitComment() {
   if (commentText) {
     const newComment = document.createElement("div")
     newComment.className = "qa-comment"
+    const authorId = getUserId()
+    newComment.setAttribute('data-user-id', authorId)
     newComment.innerHTML = `
       <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
       <div class="qa-comment-content">
@@ -291,8 +685,7 @@ function submitComment() {
         <div class="qa-comment-text">${commentText}</div>
         <div class="qa-comment-actions">
           <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
-          <button class="qa-action-btn qa-reply-btn" onclick="toggleReply(this)">Phản hồi</button>
-          <button class="qa-action-menu">...</button>
+          ${renderActionsForComment(authorId)}
         </div>
       </div>
     `
@@ -304,7 +697,271 @@ function submitComment() {
 
     // Cập nhật số lượng bình luận
     updateCommentCount()
+
+    // persist to backend
+    if (currentLessonId) {
+      const form = new URLSearchParams()
+      form.append('lessionID', currentLessonId)
+      form.append('content', commentText)
+      fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form.toString(),
+      })
+      .then(r=>r.json()).then(j=>{ if (j && j.commentID) newComment.setAttribute('data-comment-id', j.commentID) }).catch(()=>{})
+    }
   }
+}
+
+function fetchComments(lessonId) {
+  const base = document.body.getAttribute('data-context') || ''
+  fetch(`${base}/api/comments?lessionID=${encodeURIComponent(lessonId)}`)
+    .then(r=>r.json())
+    .then(list => renderComments(list))
+    .catch(()=>{})
+}
+
+function fetchAssignments(sectionId) {
+  const base = document.body.getAttribute('data-context') || ''
+  fetch(`${base}/api/assignments?sectionID=${encodeURIComponent(sectionId)}`)
+    .then(r=>r.json())
+    .then(list => renderAssignments(list))
+    .catch(()=>{})
+}
+
+function fetchTestsForLesson(lessonId) {
+  const base = document.body.getAttribute('data-context') || ''
+  const testContainer = document.querySelector(`.test-list-container[data-lesson-id="${lessonId}"]`)
+  if (!testContainer) {
+    console.warn('[fetchTestsForLesson] Test container not found for lesson:', lessonId)
+    return
+  }
+  
+  console.log('[fetchTestsForLesson] Fetching tests for lesson:', lessonId)
+  const url = `${base}/api/assignments?lessionID=${encodeURIComponent(lessonId)}`
+  console.log('[fetchTestsForLesson] Request URL:', url)
+  
+  fetch(url)
+    .then(r => {
+      console.log('[fetchTestsForLesson] Response status:', r.status, 'Content-Type:', r.headers.get('Content-Type'))
+      if (!r.ok) {
+        return r.text().then(text => {
+          console.error('[fetchTestsForLesson] Error response:', text)
+          throw new Error(`HTTP ${r.status}: ${text}`)
+        })
+      }
+      return r.text().then(text => {
+        console.log('[fetchTestsForLesson] Raw response:', text)
+        try {
+          return JSON.parse(text)
+        } catch (e) {
+          console.error('[fetchTestsForLesson] JSON parse error:', e, 'Response text:', text)
+          throw e
+        }
+      })
+    })
+    .then(list => {
+      console.log('[fetchTestsForLesson] Parsed tests:', list)
+      if (!Array.isArray(list)) {
+        console.error('[fetchTestsForLesson] Response is not an array:', list, 'Type:', typeof list)
+        // 即使不是数组，也尝试渲染（可能是空对象或错误对象）
+        renderTestsForLesson(testContainer, [])
+        return
+      }
+      renderTestsForLesson(testContainer, list)
+    })
+    .catch(err => {
+      console.error('[fetchTestsForLesson] Error fetching tests:', err)
+      // 即使出错也显示空状态
+      renderTestsForLesson(testContainer, [])
+    })
+}
+
+function renderTestsForLesson(container, list) {
+  if (!container) {
+    console.warn('[renderTestsForLesson] Container is null')
+    return
+  }
+  
+  const lessonId = container.getAttribute('data-lesson-id')
+  if (!lessonId) {
+    console.warn('[renderTestsForLesson] Lesson ID is missing')
+    return
+  }
+  
+  console.log('[renderTestsForLesson] Rendering tests for lesson:', lessonId, 'Count:', list ? list.length : 0)
+  
+  // 如果没有test，显示一个按钮
+  if (!Array.isArray(list) || list.length === 0) {
+    console.log('[renderTestsForLesson] No tests found, showing empty button')
+    container.innerHTML = `
+      <div class="test-empty-button" onclick="openTestModal('${lessonId}')">
+        <div class="test-button-header">
+          <svg class="test-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+          </svg>
+          <span class="test-button-text">Bài test</span>
+          <span class="test-empty-badge">0</span>
+        </div>
+      </div>
+    `
+    container.style.display = 'block'
+    return
+  }
+  
+  // 有test时，显示test列表和一个按钮
+  console.log('[renderTestsForLesson] Found', list.length, 'tests, rendering list')
+  container.innerHTML = ''
+  
+  const testButton = document.createElement('div')
+  testButton.className = 'test-button'
+  testButton.onclick = () => openTestModal(lessonId)
+  testButton.innerHTML = `
+    <div class="test-button-header">
+      <svg class="test-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+      </svg>
+      <span class="test-button-text">Bài test</span>
+      <span class="test-count-badge">${list.length}</span>
+    </div>
+  `
+  container.appendChild(testButton)
+  
+  // 显示test容器
+  container.style.display = 'block'
+  console.log('[renderTestsForLesson] Test container displayed')
+}
+
+function openTestModal(lessonId) {
+  const modal = document.getElementById('testModalOverlay')
+  if (!modal) {
+    // 创建modal
+    const newModal = document.createElement('div')
+    newModal.id = 'testModalOverlay'
+    newModal.className = 'test-modal-overlay'
+    newModal.innerHTML = `
+      <div class="test-modal-container">
+        <div class="test-modal-header">
+          <h3 class="test-modal-title">Bài test</h3>
+          <button class="test-close-btn" onclick="closeTestModal()">×</button>
+        </div>
+        <div class="test-modal-content" id="testModalContent">
+          <div class="test-loading">Đang tải...</div>
+        </div>
+      </div>
+    `
+    document.body.appendChild(newModal)
+  }
+  
+  const modalEl = document.getElementById('testModalOverlay')
+  modalEl.style.display = 'flex'
+  modalEl.style.visibility = 'visible'
+  modalEl.style.opacity = '1'
+  
+  // 加载test列表
+  const content = document.getElementById('testModalContent')
+  content.innerHTML = '<div class="test-loading">Đang tải...</div>'
+  
+  const base = document.body.getAttribute('data-context') || ''
+  fetch(`${base}/api/assignments?lessionID=${encodeURIComponent(lessonId)}`)
+    .then(r => r.json())
+    .then(list => renderTestModalContent(content, list, lessonId))
+    .catch(() => {
+      content.innerHTML = '<div class="test-error">Lỗi khi tải danh sách test</div>'
+    })
+}
+
+function closeTestModal() {
+  const modal = document.getElementById('testModalOverlay')
+  if (modal) {
+    modal.style.display = 'none'
+    modal.style.visibility = 'hidden'
+    modal.style.opacity = '0'
+  }
+}
+
+function renderTestModalContent(container, list, lessonId) {
+  if (!Array.isArray(list) || list.length === 0) {
+    container.innerHTML = `
+      <div class="test-empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>Chưa có bài test cho bài học này</p>
+      </div>
+    `
+    return
+  }
+  
+  const base = document.body.getAttribute('data-context') || ''
+  let html = '<div class="test-modal-list">'
+  
+  list.forEach((a, idx) => {
+    const title = a.name || `Bài test ${idx + 1}`
+    html += `
+      <div class="test-modal-item">
+        <div class="test-modal-item-info">
+          <span class="test-modal-item-number">${idx + 1}</span>
+          <div class="test-modal-item-details">
+            <h4 class="test-modal-item-title">${title}</h4>
+            ${a.description ? `<p class="test-modal-item-desc">${a.description}</p>` : ''}
+          </div>
+        </div>
+        <a class="test-modal-item-btn" href="${base}/learner/test?assignment=${a.assignmentID}">
+          Làm bài
+        </a>
+      </div>
+    `
+  })
+  
+  html += '</div>'
+  container.innerHTML = html
+}
+
+function renderComments(list) {
+  const container = document.getElementById('qaCommentsList')
+  if (!container) return
+  container.innerHTML = ''
+  const byParent = {}
+  list.forEach(c => {
+    const p = c.parentID || 'root'
+    ;(byParent[p] = byParent[p] || []).push(c)
+  })
+  const renderOne = (c, isReply) => {
+    const div = document.createElement('div')
+    div.className = isReply ? 'qa-comment qa-reply-comment' : 'qa-comment'
+    div.setAttribute('data-comment-id', c.commentID)
+    div.setAttribute('data-user-id', c.userID)
+    const authorId = c.userID
+    const avatar = c.avatarUrl && c.avatarUrl.trim() ? c.avatarUrl : getRandomAvatar()
+    const authorName = c.authorName && c.authorName.trim() ? c.authorName : 'Người dùng'
+    div.innerHTML = `
+      <div class="qa-comment-avatar" style="background-image: url('${avatar}')"></div>
+      <div class="qa-comment-content">
+        <div class="qa-comment-header">
+          <span class="qa-comment-author">${authorName}</span>
+          <span class="qa-comment-time"></span>
+        </div>
+        <div class="qa-comment-text">${c.content || ''}</div>
+        <div class="qa-comment-actions">
+          <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
+          ${renderActionsForComment(authorId)}
+        </div>
+      </div>`
+    return div
+  }
+  ;(byParent['root'] || []).forEach(c => {
+    const el = renderOne(c, false)
+    container.appendChild(el)
+    const children = byParent[c.commentID] || []
+    if (children.length) {
+      const replies = document.createElement('div')
+      replies.className = 'qa-replies'
+      children.forEach(rc => replies.appendChild(renderOne(rc, true)))
+      const content = el.querySelector('.qa-comment-content') || el
+      content.appendChild(replies)
+      updateRepliesToggle(el)
+    }
+  })
+  updateCommentCount()
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -349,6 +1006,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize avatars for existing comments
   initializeAvatars()
+
+  // Initialize replies toggle
+  updateAllRepliesToggle()
+
+  // 增强：为静态示例评论注入三点菜单与 Report
+  enhanceExistingActions()
+
+  // 确定当前 lesson（优先 active，没有则取第一个），用于首次打开时能拉取 DB 数据
+  initializeCurrentLesson()
+  
+  // 为所有lesson加载test（即使没有点击）
+  setTimeout(() => {
+    const allTestContainers = document.querySelectorAll('.test-list-container')
+    console.log('[DOMContentLoaded] Found', allTestContainers.length, 'test containers')
+    allTestContainers.forEach(container => {
+      const lessonId = container.getAttribute('data-lesson-id')
+      if (lessonId) {
+        console.log('[DOMContentLoaded] Loading tests for lesson:', lessonId)
+        fetchTestsForLesson(lessonId)
+      }
+    })
+  }, 500) // 延迟500ms确保DOM完全加载
 })
 
 // Function to initialize avatars for existing comments
@@ -356,6 +1035,41 @@ function initializeAvatars() {
   const existingAvatars = document.querySelectorAll('.qa-comment-avatar:not([style*="background-image"])')
   existingAvatars.forEach((avatar) => {
     avatar.style.backgroundImage = `url('${getRandomAvatar()}')`
+  })
+}
+
+function initializeCurrentLesson() {
+  if (currentLessonId) return
+  const active = document.querySelector('.lesson-item.active')
+  const first = active || document.querySelector('.lesson-item')
+  if (first) {
+    currentLessonId = first.getAttribute('data-lesson-id') || null
+    // Load tests for the first/active lesson
+    if (currentLessonId) {
+      fetchTestsForLesson(currentLessonId)
+    }
+  }
+}
+
+// 为已有的 .qa-action-menu（纯"..."按钮）注入可用的菜单结构
+function enhanceExistingActions() {
+  document.querySelectorAll('.qa-comment').forEach((comment) => {
+    const actions = comment.querySelector('.qa-comment-actions')
+    if (!actions) return
+    // 已经是增强版则跳过
+    if (actions.querySelector('.qa-more')) return
+    const oldDot = actions.querySelector('.qa-action-menu')
+    if (!oldDot) return
+    // 构建新菜单
+    const more = document.createElement('div')
+    more.className = 'qa-more'
+    more.innerHTML = `
+      <button class="qa-more-btn" onclick="toggleMoreMenu(this)">...</button>
+      <div class="qa-more-menu">
+        <button class="qa-more-item" onclick="reportCommentFromMenu(this)">Report</button>
+      </div>`
+    // 替换旧的 ... 按钮
+    oldDot.replaceWith(more)
   })
 }
 

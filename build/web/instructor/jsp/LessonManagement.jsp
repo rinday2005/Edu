@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
-    <div class="main-container">
+    <div class="main-container" data-context-path="${pageContext.request.contextPath}" data-section-id="${section.sectionID}" data-has-lesson="${not empty lesson ? 'true' : 'false'}" data-is-edit="${isEdit ? 'true' : 'false'}" data-is-create="${isCreate ? 'true' : 'false'}">
          <!-- ===== HEADER ===== -->
     <jsp:include page="/instructor/common/header.jsp" />
 
@@ -221,40 +221,7 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/instructor/js/instructorsHome.js"></script>
-    
-    <script>
-        function toggleCreateLessonForm() {
-            const form = document.getElementById('createLessonForm');
-            const btn = document.getElementById('toggleCreateBtn');
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                btn.innerHTML = '<i class="fas fa-chevron-up"></i> Ẩn Form';
-            } else {
-                form.style.display = 'none';
-                btn.innerHTML = '<i class="fas fa-chevron-down"></i> Hiển thị Form';
-            }
-        }
-        
-        function cancelEdit() {
-            window.location.href = '${pageContext.request.contextPath}/ManageLesson?action=list&section=${section.sectionID}';
-        }
-        
-        // Tự động hiển thị form khi có lesson để edit
-        <c:if test="${not empty lesson and isEdit}">
-            document.addEventListener('DOMContentLoaded', function() {
-                toggleCreateLessonForm();
-                document.getElementById('lessonName').focus();
-            });
-        </c:if>
-        
-        // Tự động hiển thị form khi isCreate = true
-        <c:if test="${isCreate}">
-            document.addEventListener('DOMContentLoaded', function() {
-                toggleCreateLessonForm();
-                document.getElementById('lessonName').focus();
-            });
-        </c:if>
-    </script>
+    <script src="${pageContext.request.contextPath}/instructor/js/LessonManagement.js"></script>
 </body>
 </html>
 

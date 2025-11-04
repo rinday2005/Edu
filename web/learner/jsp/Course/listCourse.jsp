@@ -36,7 +36,17 @@
                     <div class="pro-course-card"
                          onclick="window.location.href='${pageContext.request.contextPath}/CourseServletController?action=detail&id=${course.courseID}'">
                       <div class="course-image">
-                        <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                        <c:choose>
+                          <c:when test="${fn:startsWith(course.imgURL, 'http')}">
+                            <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                          </c:when>
+                          <c:when test="${fn:startsWith(course.imgURL, '/')}">
+                            <img src="${pageContext.request.contextPath}${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                          </c:when>
+                          <c:otherwise>
+                            <img src="${pageContext.request.contextPath}/${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                          </c:otherwise>
+                        </c:choose>
                       </div>
                       <div class="course-content">
                         <h3>${course.name}</h3>

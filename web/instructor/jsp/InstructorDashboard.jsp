@@ -1,4 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN" />
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -45,7 +48,13 @@
                     </div>
                     <div class="stat-card">
                         <h3><i class="fas fa-dollar-sign"></i> Tổng Thu nhập</h3>
-                        <div class="stat-number">$15,420</div>
+                        
+                        
+                        <div class="stat-number">
+                            <fmt:formatNumber value="${price}" type="number" groupingUsed="true" /> ₫
+                        </div>
+                        
+                        
                         <div class="stat-description">Thu nhập từ các khóa học</div>
                     </div>
                     <div class="stat-card">

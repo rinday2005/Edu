@@ -15,7 +15,8 @@ public class AssignmentDAO implements IAssignment {
 
     @Override
     public void create(Assignment a) {
-        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID) VALUES (?, ?, ?, ?, ?)";
+        // 先尝试包含lessionID的插入
+        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID, lessionID) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
@@ -23,9 +24,35 @@ public class AssignmentDAO implements IAssignment {
             ps.setString(3, a.getDescription());
             ps.setInt(4, a.getOrder());
             ps.setObject(5, a.getSectionID());
+            ps.setObject(6, a.getLessionID());
             ps.executeUpdate();
+            System.out.println("[AssignmentDAO] Successfully created assignment: " + a.getAssignmentID());
         } catch (SQLException e) {
-            e.printStackTrace();
+            // 如果包含lessionID失败，尝试不包含lessionID（兼容旧数据库）
+            if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
+                System.out.println("[AssignmentDAO] lessionID column not found, trying without lessionID...");
+                try {
+                    String sqlOld = "INSERT INTO Assignment (userID, name, description, [Order], sectionID) VALUES (?, ?, ?, ?, ?)";
+                    try (Connection con2 = DBConnection.getConnection();
+                         PreparedStatement ps2 = con2.prepareStatement(sqlOld)) {
+                        ps2.setObject(1, a.getUserID());
+                        ps2.setString(2, a.getName());
+                        ps2.setString(3, a.getDescription());
+                        ps2.setInt(4, a.getOrder());
+                        ps2.setObject(5, a.getSectionID());
+                        ps2.executeUpdate();
+                        System.out.println("[AssignmentDAO] Successfully created assignment (without lessionID): " + a.getAssignmentID());
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("[AssignmentDAO] Error creating assignment: " + e2.getMessage());
+                    e2.printStackTrace();
+                    throw new RuntimeException("Failed to create assignment: " + e2.getMessage(), e2);
+                }
+            } else {
+                System.err.println("[AssignmentDAO] Error creating assignment: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Failed to create assignment: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -53,18 +80,58 @@ public class AssignmentDAO implements IAssignment {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+            int count = 0;
             while (rs.next()) {
-                list.add(extractAssignment(rs));
+                Assignment a = extractAssignment(rs);
+                list.add(a);
+                count++;
             }
+            System.out.println("[AssignmentDAO] findAll() found " + count + " assignments");
         } catch (SQLException e) {
+            System.err.println("[AssignmentDAO] Error in findAll(): " + e.getMessage());
             e.printStackTrace();
         }
         return list;
     }
 
     @Override
+    public List<Assignment> findByLessionID(UUID lessionID) {
+        List<Assignment> list = new ArrayList<>();
+        // 先检查lessionID字段是否存在
+        try {
+            String sql = "SELECT * FROM Assignment WHERE lessionID = ? ORDER BY [Order] ASC";
+            try (Connection con = DBConnection.getConnection();
+                 PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setObject(1, lessionID);
+                System.out.println("[AssignmentDAO] Executing SQL: " + sql + " with lessionID: " + lessionID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    int count = 0;
+                    while (rs.next()) {
+                        Assignment a = extractAssignment(rs);
+                        list.add(a);
+                        count++;
+                        System.out.println("[AssignmentDAO] Found assignment: " + a.getAssignmentID() + ", name: " + a.getName());
+                    }
+                    System.out.println("[AssignmentDAO] Total assignments found: " + count);
+                }
+            }
+        } catch (SQLException e) {
+            // 如果lessionID字段不存在，返回空列表
+            if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
+                System.out.println("[AssignmentDAO] lessionID column not found, returning empty list");
+                return list;
+            } else {
+                System.err.println("[AssignmentDAO] Error finding assignments by lessionID: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    @Override
     public int update(Assignment a) {
-        String sql = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ? WHERE assignmentID = ?";
+        // 先尝试包含lessionID的更新
+        String sql = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ?, lessionID = ? WHERE assignmentID = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
@@ -72,11 +139,39 @@ public class AssignmentDAO implements IAssignment {
             ps.setString(3, a.getDescription());
             ps.setInt(4, a.getOrder());
             ps.setObject(5, a.getSectionID());
-            ps.setObject(6, a.getAssignmentID());
-            return ps.executeUpdate();
+            ps.setObject(6, a.getLessionID());
+            ps.setObject(7, a.getAssignmentID());
+            int result = ps.executeUpdate();
+            System.out.println("[AssignmentDAO] Successfully updated assignment: " + a.getAssignmentID());
+            return result;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
+            // 如果包含lessionID失败，尝试不包含lessionID（兼容旧数据库）
+            if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
+                System.out.println("[AssignmentDAO] lessionID column not found, trying update without lessionID...");
+                try {
+                    String sqlOld = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ? WHERE assignmentID = ?";
+                    try (Connection con2 = DBConnection.getConnection();
+                         PreparedStatement ps2 = con2.prepareStatement(sqlOld)) {
+                        ps2.setObject(1, a.getUserID());
+                        ps2.setString(2, a.getName());
+                        ps2.setString(3, a.getDescription());
+                        ps2.setInt(4, a.getOrder());
+                        ps2.setObject(5, a.getSectionID());
+                        ps2.setObject(6, a.getAssignmentID());
+                        int result = ps2.executeUpdate();
+                        System.out.println("[AssignmentDAO] Successfully updated assignment (without lessionID): " + a.getAssignmentID());
+                        return result;
+                    }
+                } catch (SQLException e2) {
+                    System.err.println("[AssignmentDAO] Error updating assignment: " + e2.getMessage());
+                    e2.printStackTrace();
+                    return 0;
+                }
+            } else {
+                System.err.println("[AssignmentDAO] Error updating assignment: " + e.getMessage());
+                e.printStackTrace();
+                return 0;
+            }
         }
     }
 
@@ -125,6 +220,22 @@ public class AssignmentDAO implements IAssignment {
             a.setSectionID(UUID.fromString(String.valueOf(sectionObj)));
         } else {
             a.setSectionID(null);
+        }
+        
+        // lessionID (có thể null hoặc cột không tồn tại)
+        try {
+            Object lessionObj = rs.getObject("lessionID");
+            if (lessionObj instanceof UUID) {
+                a.setLessionID((UUID) lessionObj);
+            } else if (lessionObj != null) {
+                a.setLessionID(UUID.fromString(String.valueOf(lessionObj)));
+            } else {
+                a.setLessionID(null);
+            }
+        } catch (SQLException e) {
+            // Cột lessionID không tồn tại，设置为null
+            System.out.println("[AssignmentDAO] lessionID column not found, setting to null");
+            a.setLessionID(null);
         }
         
         return a;

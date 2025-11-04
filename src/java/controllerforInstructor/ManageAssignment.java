@@ -18,8 +18,11 @@ import model.User;
 import service.AssignmentService;
 import service.SectionsService;
 import service.CourseServiceImpl;
+import LessionDAO.LessionDAO;
+import LessionDAO.ILessionDAO;
 import model.Sections;
 import model.Courses;
+import model.Lession;
 
 /**
  *
@@ -31,6 +34,7 @@ public class ManageAssignment extends HttpServlet {
     AssignmentService assignmentService = new AssignmentService();
     SectionsService sectionsService = new SectionsService();
     CourseServiceImpl courseService = new CourseServiceImpl();
+    ILessionDAO lessonDAO = new LessionDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -96,21 +100,27 @@ public class ManageAssignment extends HttpServlet {
                 return;
             }
 
+            System.out.println("[ManageAssignment] Listing assignments for userID: " + userID);
+            
             // Lấy danh sách assignments của instructor
             List<Assignment> assignments = assignmentService.findByUserID(userID);
+            System.out.println("[ManageAssignment] Found " + (assignments != null ? assignments.size() : 0) + " assignments for user");
             
             // Lấy danh sách courses và sections để hiển thị trong form
             List<Courses> courses = courseService.findAll();
             List<Sections> sections = sectionsService.findAll();
+            List<Lession> lessons = lessonDAO.findAll();
 
             request.setAttribute("assignments", assignments);
             request.setAttribute("courses", courses);
             request.setAttribute("sections", sections);
+            request.setAttribute("lessons", lessons);
             request.setAttribute("fromServlet", "true");
             
             request.getRequestDispatcher("/instructor/jsp/AssignmentDetails.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println("[ManageAssignment] Error in listAssignments: " + e.getMessage());
             request.setAttribute("error", "Lỗi khi tải danh sách bài tập: " + e.getMessage());
             request.getRequestDispatcher("/instructor/jsp/AssignmentDetails.jsp").forward(request, response);
         }
@@ -135,6 +145,7 @@ public class ManageAssignment extends HttpServlet {
             String description = request.getParameter("assignmentDescription");
             String orderStr = request.getParameter("assignmentOrder");
             String sectionIDStr = request.getParameter("sectionID");
+            String lessionIDStr = request.getParameter("lessionID");
 
             if (name == null || name.trim().isEmpty()) {
                 request.setAttribute("error", "Tên bài tập không được để trống!");
@@ -145,6 +156,11 @@ public class ManageAssignment extends HttpServlet {
             UUID sectionID = null;
             if (sectionIDStr != null && !sectionIDStr.isEmpty()) {
                 sectionID = UUID.fromString(sectionIDStr);
+            }
+
+            UUID lessionID = null;
+            if (lessionIDStr != null && !lessionIDStr.isEmpty()) {
+                lessionID = UUID.fromString(lessionIDStr);
             }
 
             int order = 1;
@@ -163,12 +179,21 @@ public class ManageAssignment extends HttpServlet {
             assignment.setDescription(description != null ? description : "");
             assignment.setOrder(order);
             assignment.setSectionID(sectionID);
+            assignment.setLessionID(lessionID);
 
-            assignmentService.create(assignment);
-
-            response.sendRedirect(request.getContextPath() + "/ManageAssignment?action=list");
+            try {
+                assignmentService.create(assignment);
+                request.setAttribute("message", "✅ Tạo bài tập thành công!");
+                response.sendRedirect(request.getContextPath() + "/ManageAssignment?action=list");
+            } catch (Exception createEx) {
+                createEx.printStackTrace();
+                System.err.println("[ManageAssignment] Error creating assignment: " + createEx.getMessage());
+                request.setAttribute("error", "Lỗi khi tạo bài tập: " + createEx.getMessage());
+                listAssignments(request, response);
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println("[ManageAssignment] Unexpected error in createAssignment: " + e.getMessage());
             request.setAttribute("error", "Lỗi khi tạo bài tập: " + e.getMessage());
             listAssignments(request, response);
         }
@@ -206,10 +231,12 @@ public class ManageAssignment extends HttpServlet {
 
             List<Courses> courses = courseService.findAll();
             List<Sections> sections = sectionsService.findAll();
+            List<Lession> lessons = lessonDAO.findAll();
 
             request.setAttribute("assignment", assignment);
             request.setAttribute("courses", courses);
             request.setAttribute("sections", sections);
+            request.setAttribute("lessons", lessons);
             request.setAttribute("isEdit", true);
             request.setAttribute("fromServlet", "true");
 
@@ -256,6 +283,7 @@ public class ManageAssignment extends HttpServlet {
             String description = request.getParameter("assignmentDescription");
             String orderStr = request.getParameter("assignmentOrder");
             String sectionIDStr = request.getParameter("sectionID");
+            String lessionIDStr = request.getParameter("lessionID");
 
             if (name == null || name.trim().isEmpty()) {
                 request.setAttribute("error", "Tên bài tập không được để trống!");
@@ -266,6 +294,11 @@ public class ManageAssignment extends HttpServlet {
             UUID sectionID = null;
             if (sectionIDStr != null && !sectionIDStr.isEmpty()) {
                 sectionID = UUID.fromString(sectionIDStr);
+            }
+
+            UUID lessionID = null;
+            if (lessionIDStr != null && !lessionIDStr.isEmpty()) {
+                lessionID = UUID.fromString(lessionIDStr);
             }
 
             int order = assignment.getOrder();
@@ -281,6 +314,7 @@ public class ManageAssignment extends HttpServlet {
             assignment.setDescription(description != null ? description : "");
             assignment.setOrder(order);
             assignment.setSectionID(sectionID);
+            assignment.setLessionID(lessionID);
 
             int updated = assignmentService.update(assignment);
             if (updated > 0) {

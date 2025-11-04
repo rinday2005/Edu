@@ -14,10 +14,12 @@ import java.io.IOException;
 import java.util.UUID;
 import model.User;
 import service.CartService;
+import service.WalletService;
 
 @WebServlet(name = "AfterPayServlet", urlPatterns = {"/AfterPayServlet"})
 public class AfterPayServlet extends HttpServlet {
     private CartService cartService = new CartService();
+    private WalletService walletServicce = new WalletService();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -32,8 +34,10 @@ public class AfterPayServlet extends HttpServlet {
         HttpSession session = request.getSession(false); 
         User user = (User) session.getAttribute("user"); 
         if (user != null) {
-        UUID userID = UUID.fromString(user.getUserID()); 
+        UUID userID = UUID.fromString(user.getUserID());
+        walletServicce.addBalanceForCourseOwners(userID);
         cartService.moveCoursesFromCartToUserCourse(userID);
+        
     
     
         }

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/QR/css/common.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/QR/css/QR.css">
 </head>
-<body>
+<body class="light-mode">
     <!-- Header -->
     <jsp:include page="/QR/common/header.jsp" />
 

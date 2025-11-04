@@ -4,8 +4,6 @@
  */
 package model;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.UUID;
 
 
@@ -20,6 +18,7 @@ public class Assignment {
     private String description;
     private int order;
     private UUID sectionID;
+    private UUID lessionID;
 
     public Assignment(UUID assignmentID, UUID userID, String name, String description, int order, UUID sectionID) {
         this.assignmentID = assignmentID;
@@ -28,6 +27,16 @@ public class Assignment {
         this.description = description;
         this.order = order;
         this.sectionID = sectionID;
+    }
+    
+    public Assignment(UUID assignmentID, UUID userID, String name, String description, int order, UUID sectionID, UUID lessionID) {
+        this.assignmentID = assignmentID;
+        this.userID = userID;
+        this.name = name;
+        this.description = description;
+        this.order = order;
+        this.sectionID = sectionID;
+        this.lessionID = lessionID;
     }
 
     public Assignment() {
@@ -81,9 +90,17 @@ public class Assignment {
         this.sectionID = sectionID;
     }
 
+    public UUID getLessionID() {
+        return lessionID;
+    }
+
+    public void setLessionID(UUID lessionID) {
+        this.lessionID = lessionID;
+    }
+
     @Override
     public String toString() {
-        return "Assignment{" + "assignmentID=" + assignmentID + ", userID=" + userID + ", name=" + name + ", description=" + description + ", order=" + order + ", sectionID=" + sectionID + '}';
+        return "Assignment{" + "assignmentID=" + assignmentID + ", userID=" + userID + ", name=" + name + ", description=" + description + ", order=" + order + ", sectionID=" + sectionID + ", lessionID=" + lessionID + '}';
     }
 
     

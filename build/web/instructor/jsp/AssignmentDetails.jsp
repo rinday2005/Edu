@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
-    <div class="main-container">
+    <div class="main-container" data-context-path="${pageContext.request.contextPath}" data-has-assignment="${not empty assignment ? 'true' : 'false'}">
          <!-- ===== HEADER ===== -->
     <jsp:include page="/instructor/common/header.jsp" />
 
@@ -55,18 +55,40 @@
                         <div style="display: flex; gap: 20px; margin-bottom: 20px;">
                             <div style="flex: 1;">
                                 <span class="step-badge" style="display: inline-block; width: 40px; height: 40px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 10px;">1</span>
-                                <h4 style="margin: 0 0 10px 0; color: var(--text-dark);">Chọn Phần (Section)</h4>
-                                <div class="form-group">
+                                <h4 style="margin: 0 0 10px 0; color: var(--text-dark);">Chọn Chương và Phần</h4>
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label for="courseSelect">Chương (Course)</label>
+                                    <select id="courseSelect" class="form-control">
+                                        <option value="">-- Chọn khóa học --</option>
+                                        <c:forEach var="course" items="${courses}">
+                                            <option value="${course.courseID}">${fn:escapeXml(course.name)}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:12px;">
                                     <label for="sectionSelect">Phần (Section) *</label>
                                     <select id="sectionSelect" name="sectionID" class="form-control" required>
                                         <option value="">-- Chọn phần --</option>
                                         <c:forEach var="section" items="${sections}">
-                                            <option value="${section.sectionID}" 
+                                            <option value="${section.sectionID}" data-course-id="${section.courseID}"
                                                     ${not empty assignment && assignment.sectionID != null && assignment.sectionID.equals(section.sectionID) ? 'selected' : ''}>
                                                 ${section.name != null ? section.name : 'Section ' + section.sectionID}
                                             </option>
                                         </c:forEach>
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lessionSelect">Bài học (Lesson) - Tùy chọn</label>
+                                    <select id="lessionSelect" name="lessionID" class="form-control">
+                                        <option value="">-- Chọn bài học (để test hiển thị trong lesson) --</option>
+                                        <c:forEach var="lesson" items="${lessons}">
+                                            <option value="${lesson.lessionID}" data-section-id="${lesson.sectionID}"
+                                                    ${not empty assignment && assignment.lessionID != null && assignment.lessionID.equals(lesson.lessionID) ? 'selected' : ''}>
+                                                ${lesson.name != null ? lesson.name : 'Lesson ' + lesson.lessionID}
+                                            </option>
+                                        </c:forEach>
+                                    </select>
+                                    <small style="color: #666; font-size: 12px;">Nếu chọn bài học, test sẽ hiển thị trong lesson đó</small>
                                 </div>
                             </div>
                             
@@ -152,7 +174,7 @@
                                                     <td>${assignment.order}</td>
                                                     <td>${assignment.sectionID}</td>
                                                     <td>
-                                                        <div class="table-actions" style="display: flex; gap: 10px;">
+                                                        <div class="table-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                                                             <a href="<c:url value='/ManageQuestion?action=list&assignment=${assignment.assignmentID}'/>" 
                                                                class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">
                                                                 <i class="fas fa-question-circle"></i> Quản lý câu hỏi
@@ -182,36 +204,6 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/instructor/js/instructorsHome.js"></script>
-    
-    <script>
-        // Auto show form if editing
-        <c:if test="${not empty assignment}">
-            document.getElementById('createAssignmentForm').style.display = 'block';
-            document.getElementById('toggleCreateBtn').innerHTML = '<i class="fas fa-chevron-up"></i> Ẩn Form';
-        </c:if>
-
-        function toggleCreateAssignmentForm() {
-            const form = document.getElementById('createAssignmentForm');
-            const toggleBtn = document.getElementById('toggleCreateBtn');
-            
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Ẩn Form';
-            } else {
-                form.style.display = 'none';
-                toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Hiển thị Form';
-            }
-        }
-        
-        function cancelForm() {
-            // Reset form and hide
-            document.getElementById('assignmentForm').reset();
-            toggleCreateAssignmentForm();
-            // Remove edit mode if exists
-            <c:if test="${not empty assignment}">
-                window.location.href = '<c:url value="/ManageAssignment?action=list"/>';
-            </c:if>
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/instructor/js/AssignmentDetails.js"></script>
     </body>
 </html>

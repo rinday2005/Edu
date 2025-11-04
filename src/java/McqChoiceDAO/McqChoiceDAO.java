@@ -24,25 +24,25 @@ public class McqChoiceDAO implements IMcqChoiceDAO {
     private static final String TABLE = "dbo.McqChoices";
     
     private static final String INSERT_SQL = "INSERT INTO " + TABLE + 
-        " (id, content, isCorrect, mcqQuestionId) " +
+        " ([Id], [Content], [IsCorrect], [McqQuestionId]) " +
         "VALUES (?, ?, ?, ?)";
     
-    private static final String SELECT_BY_ID_SQL = "SELECT id, content, isCorrect, mcqQuestionId " +
-        "FROM " + TABLE + " WHERE id = ?";
+    private static final String SELECT_BY_ID_SQL = "SELECT [Id], [Content], [IsCorrect], [McqQuestionId] " +
+        "FROM " + TABLE + " WHERE [Id] = ?";
     
-    private static final String SELECT_ALL_SQL = "SELECT id, content, isCorrect, mcqQuestionId " +
-        "FROM " + TABLE + " ORDER BY content ASC";
+    private static final String SELECT_ALL_SQL = "SELECT [Id], [Content], [IsCorrect], [McqQuestionId] " +
+        "FROM " + TABLE + " ORDER BY [Content] ASC";
     
-    private static final String SELECT_BY_QUESTION_SQL = "SELECT id, content, isCorrect, mcqQuestionId " +
-        "FROM " + TABLE + " WHERE mcqQuestionId = ? ORDER BY content ASC";
+    private static final String SELECT_BY_QUESTION_SQL = "SELECT [Id], [Content], [IsCorrect], [McqQuestionId] " +
+        "FROM " + TABLE + " WHERE [McqQuestionId] = ? ORDER BY [Content] ASC";
     
     private static final String UPDATE_SQL = "UPDATE " + TABLE + 
-        " SET content=?, isCorrect=?, mcqQuestionId=? " +
-        "WHERE id=?";
+        " SET [Content]=?, [IsCorrect]=?, [McqQuestionId]=? " +
+        "WHERE [Id]=?";
     
-    private static final String DELETE_SQL = "DELETE FROM " + TABLE + " WHERE id = ?";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE + " WHERE [Id] = ?";
     
-    private static final String DELETE_BY_QUESTION_SQL = "DELETE FROM " + TABLE + " WHERE mcqQuestionId = ?";
+    private static final String DELETE_BY_QUESTION_SQL = "DELETE FROM " + TABLE + " WHERE [McqQuestionId] = ?";
     
     private void setNullableUuid(PreparedStatement ps, int idx, UUID value) throws SQLException {
         if (value == null) {
@@ -59,10 +59,18 @@ public class McqChoiceDAO implements IMcqChoiceDAO {
     
     private McqChoices mapRow(ResultSet rs) throws SQLException {
         McqChoices c = new McqChoices();
-        c.setId(getUuid(rs, "id"));
-        c.setContent(rs.getString("content"));
-        c.setIsCorrect(rs.getBoolean("isCorrect"));
-        c.setMcqQuestionId(getUuid(rs, "mcqQuestionId"));
+        c.setId(getUuid(rs, "Id"));
+        c.setContent(rs.getString("Content"));
+        c.setIsCorrect(rs.getBoolean("IsCorrect"));
+        // Try McqQuestionId first (as per database), then fallback to other variations
+        UUID questionId = getUuid(rs, "McqQuestionId");
+        if (questionId == null) {
+            questionId = getUuid(rs, "mcqQuestionId");
+        }
+        if (questionId == null) {
+            questionId = getUuid(rs, "mcqQuestionID");
+        }
+        c.setMcqQuestionId(questionId);
         return c;
     }
 
@@ -78,6 +86,79 @@ public class McqChoiceDAO implements IMcqChoiceDAO {
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean insertWithConnection(McqChoices choice, Connection con) {
+        // Validate connection
+        if (con == null) {
+            System.err.println("[McqChoiceDAO] insertWithConnection - Connection is NULL!");
+            return false;
+        }
+        
+        // Validate connection is not closed
+        try {
+            if (con.isClosed()) {
+                System.err.println("[McqChoiceDAO] insertWithConnection - Connection is CLOSED!");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("[McqChoiceDAO] insertWithConnection - Error checking connection status: " + e.getMessage());
+            return false;
+        }
+        
+        try (PreparedStatement ps = con.prepareStatement(INSERT_SQL)) {
+            
+            String choiceId = choice.getId().toString();
+            String content = choice.getContent();
+            boolean isCorrect = choice.isIsCorrect();
+            String questionId = choice.getMcqQuestionId() != null ? choice.getMcqQuestionId().toString() : "NULL";
+            
+            System.out.println("[McqChoiceDAO] insertWithConnection - Choice ID: " + choiceId);
+            System.out.println("[McqChoiceDAO] insertWithConnection - Content: " + content);
+            System.out.println("[McqChoiceDAO] insertWithConnection - IsCorrect: " + isCorrect);
+            System.out.println("[McqChoiceDAO] insertWithConnection - Question ID: " + questionId);
+            System.out.println("[McqChoiceDAO] insertWithConnection - SQL: " + INSERT_SQL);
+            System.out.println("[McqChoiceDAO] insertWithConnection - Connection valid: " + (con != null && !con.isClosed()));
+            
+            ps.setString(1, choiceId);
+            ps.setString(2, content);
+            ps.setBoolean(3, isCorrect);
+            
+            // Debug: Check mcqQuestionId before setting
+            UUID questionIdValue = choice.getMcqQuestionId();
+            System.out.println("[McqChoiceDAO] insertWithConnection - Setting McqQuestionId parameter: " + questionIdValue);
+            if (questionIdValue == null) {
+                System.err.println("[McqChoiceDAO] insertWithConnection - ERROR: McqQuestionId is NULL!");
+                return false;
+            }
+            
+            setNullableUuid(ps, 4, questionIdValue);
+            
+            // Execute the insert
+            System.out.println("[McqChoiceDAO] insertWithConnection - Executing INSERT statement...");
+            int result = ps.executeUpdate();
+            System.out.println("[McqChoiceDAO] insertWithConnection - ExecuteUpdate result: " + result);
+            
+            if (result > 0) {
+                System.out.println("[McqChoiceDAO] insertWithConnection - Choice inserted successfully");
+            } else {
+                System.err.println("[McqChoiceDAO] insertWithConnection - No rows affected");
+            }
+            
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("[McqChoiceDAO] insertWithConnection - SQLException: " + e.getMessage());
+            System.err.println("[McqChoiceDAO] insertWithConnection - SQLState: " + e.getSQLState());
+            System.err.println("[McqChoiceDAO] insertWithConnection - ErrorCode: " + e.getErrorCode());
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            System.err.println("[McqChoiceDAO] insertWithConnection - Unexpected exception: " + e.getClass().getName());
+            System.err.println("[McqChoiceDAO] insertWithConnection - Error message: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

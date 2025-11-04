@@ -1,5 +1,5 @@
-import { Chart } from "@/components/ui/chart"
 // instructorsHome.js - Vanilla JavaScript for JSP pages (NO ES6 modules)
+// Note: Chart.js should be loaded from CDN, not ES6 imports
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Instructor Home scripts loaded.")

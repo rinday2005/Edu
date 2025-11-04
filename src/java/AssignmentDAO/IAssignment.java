@@ -15,6 +15,7 @@ public interface IAssignment {
     void create(Assignment a);                // C
     Assignment findById(UUID id);             // R1
     List<Assignment> findAll();               // R2
+    List<Assignment> findByLessionID(UUID lessionID); // R3 - Find by lesson ID
     int update(Assignment a);                 // U
     int deleteById(UUID id);                  // D
 }

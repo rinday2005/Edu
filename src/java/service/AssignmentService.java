@@ -49,6 +49,10 @@ public class AssignmentService {
         return result;
     }
     
+    public List<Assignment> findByLessionID(UUID lessionID) {
+        return dao.findByLessionID(lessionID);
+    }
+    
     public int update(Assignment a) {
         return dao.update(a);
     }

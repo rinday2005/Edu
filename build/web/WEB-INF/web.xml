@@ -23,6 +23,16 @@
     </servlet-mapping>
     <context-param>
         <param-name>CLOUDFLARE_API_BASE</param-name>
-        <param-value>https://organized-maintaining-run-exchange.trycloudflare.com</param-value>
+        <param-value>https://shuttle-surf-leadership-critics.trycloudflare.com</param-value>
     </context-param>
+
+    <!-- Comments API for Q&A (ensure persistence across refresh) -->
+    <servlet>
+        <servlet-name>CommentsApiServlet</servlet-name>
+        <servlet-class>controller.CommentsApiServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CommentsApiServlet</servlet-name>
+        <url-pattern>/api/comments</url-pattern>
+    </servlet-mapping>
 </web-app>

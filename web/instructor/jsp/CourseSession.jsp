@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
-    <div class="main-container">
+    <div class="main-container" data-context-path="${pageContext.request.contextPath}" data-has-section="${not empty section ? 'true' : 'false'}" data-course-id="${courseID}">
          <!-- ===== HEADER ===== -->
     <jsp:include page="/instructor/common/header.jsp" />
 
@@ -249,44 +249,7 @@
     </div>
 
     <script src="${pageContext.request.contextPath}/instructor/js/instructorsHome.js"></script>
-    
-    <script>
-        // Auto show form if editing
-        <c:if test="${not empty section}">
-            document.getElementById('createSectionForm').style.display = 'block';
-            document.getElementById('toggleCreateBtn').innerHTML = '<i class="fas fa-chevron-up"></i> Ẩn Form';
-        </c:if>
-
-        function toggleCreateSectionForm() {
-            const form = document.getElementById('createSectionForm');
-            const toggleBtn = document.getElementById('toggleCreateBtn');
-            
-            if (form.style.display === 'none') {
-                form.style.display = 'block';
-                toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Ẩn Form';
-            } else {
-                form.style.display = 'none';
-                toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Hiển thị Form';
-            }
-        }
-        
-        function cancelForm() {
-            // Reset form and hide
-            document.getElementById('sectionForm').reset();
-            toggleCreateSectionForm();
-            // Remove edit mode if exists
-            <c:if test="${not empty section}">
-                <c:choose>
-                    <c:when test="${not empty courseID}">
-                        window.location.href = '<c:url value="/ManageSection?course=${courseID}"/>';
-                    </c:when>
-                    <c:otherwise>
-                        window.location.href = '<c:url value="/ManageSection"/>';
-                    </c:otherwise>
-                </c:choose>
-            </c:if>
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/instructor/js/CourseSession.js"></script>
     </body>
 </html>
 

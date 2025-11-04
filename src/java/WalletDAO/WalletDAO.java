@@ -124,6 +124,74 @@ public class WalletDAO implements IWalletDAO {
             return 0;
         }
     }
+    @Override
+    public void addBalanceForCourseOwners(UUID userID) {
+    String selectQuery = "SELECT c.courseID, c.userID AS ownerID, c.price " +
+                         "FROM Cart ca " +
+                         "JOIN Courses c ON ca.courseID = c.courseID " +
+                         "WHERE ca.userID = ?";
+
+    String checkWalletQuery = "SELECT COUNT(*) FROM Wallet WHERE userID = ?";
+    String insertWalletQuery = "INSERT INTO Wallet (walletID, userID, BankName, BankAccount, Balance) " +
+                               "VALUES (NEWID(), ?, NULL, NULL, 0)";
+    String updateWalletQuery = "UPDATE Wallet SET Balance = Balance + ? WHERE userID = ?";
+
+    try (Connection con = DBConnection.getConnection();
+         PreparedStatement psSelect = con.prepareStatement(selectQuery);
+         PreparedStatement psCheck = con.prepareStatement(checkWalletQuery);
+         PreparedStatement psInsert = con.prepareStatement(insertWalletQuery);
+         PreparedStatement psUpdate = con.prepareStatement(updateWalletQuery)) {
+
+        psSelect.setString(1, userID.toString());
+        ResultSet rs = psSelect.executeQuery();
+
+        while (rs.next()) {
+            String ownerID = rs.getString("ownerID");
+            int price = rs.getInt("price");
+            int amountToTransfer = price; // 75% cho chủ course
+
+            // Kiểm tra nếu chủ course chưa có Wallet -> tạo mới
+            psCheck.setString(1, ownerID);
+            ResultSet rsCheck = psCheck.executeQuery();
+            boolean hasWallet = false;
+            if (rsCheck.next()) {
+                hasWallet = rsCheck.getInt(1) > 0;
+            }
+
+            if (!hasWallet) {
+                psInsert.setString(1, ownerID);
+                psInsert.executeUpdate();
+            }
+
+            psUpdate.setInt(1, amountToTransfer);
+            psUpdate.setString(2, ownerID);
+            psUpdate.executeUpdate();
+        }
+        rs.close();
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    @Override
+    public int getBalanceByUserID(UUID userID) {
+        String sql = "SELECT Balance FROM Wallet WHERE userID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, userID.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("Balance");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0; // trả về 0 nếu không tìm thấy
+    }
+
 
     private Wallet mapResultSet(ResultSet rs) throws SQLException {
         Wallet w = new Wallet();
@@ -133,5 +201,23 @@ public class WalletDAO implements IWalletDAO {
         w.setBankAccount(rs.getString("BankAccount"));
         w.setBalance(rs.getInt("Balance"));
         return w;
+    }
+    
+     public static void main(String[] args) {
+        try {
+            // Tạo DAO
+            WalletDAO walletDAO = new WalletDAO();
+
+            // UUID của user (người mua khóa học) — đổi sang ID thật trong DB nha
+            UUID buyerID = UUID.fromString("EAB8A44A-FBB9-43BE-9C43-B202F9FDE5B0");
+
+            // Gọi hàm để chuyển tiền cho các chủ khóa học
+            walletDAO.addBalanceForCourseOwners(buyerID);
+
+            System.out.println("✅ Đã xử lý chuyển tiền cho các chủ khóa học của user: " + buyerID);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

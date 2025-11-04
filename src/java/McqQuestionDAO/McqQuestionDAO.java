@@ -24,23 +24,23 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
     private static final String TABLE = "dbo.McqQuestions";
     
     private static final String INSERT_SQL = "INSERT INTO " + TABLE + 
-        " (id, content, assignmentId) " +
+        " ([Id], [Content], [AssignmentId]) " +
         "VALUES (?, ?, ?)";
     
-    private static final String SELECT_BY_ID_SQL = "SELECT id, content, assignmentId " +
-        "FROM " + TABLE + " WHERE id = ?";
+    private static final String SELECT_BY_ID_SQL = "SELECT [Id], [Content], [AssignmentId] " +
+        "FROM " + TABLE + " WHERE [Id] = ?";
     
-    private static final String SELECT_ALL_SQL = "SELECT id, content, assignmentId " +
-        "FROM " + TABLE + " ORDER BY content ASC";
+    private static final String SELECT_ALL_SQL = "SELECT [Id], [Content], [AssignmentId] " +
+        "FROM " + TABLE + " ORDER BY [Content] ASC";
     
-    private static final String SELECT_BY_ASSIGNMENT_SQL = "SELECT id, content, assignmentId " +
-        "FROM " + TABLE + " WHERE assignmentId = ? ORDER BY content ASC";
+    private static final String SELECT_BY_ASSIGNMENT_SQL = "SELECT [Id], [Content], [AssignmentId] " +
+        "FROM " + TABLE + " WHERE [AssignmentId] = ? ORDER BY [Content] ASC";
     
     private static final String UPDATE_SQL = "UPDATE " + TABLE + 
-        " SET content=?, assignmentId=? " +
-        "WHERE id=?";
+        " SET [Content]=?, [AssignmentId]=? " +
+        "WHERE [Id]=?";
     
-    private static final String DELETE_SQL = "DELETE FROM " + TABLE + " WHERE id = ?";
+    private static final String DELETE_SQL = "DELETE FROM " + TABLE + " WHERE [Id] = ?";
     
     private void setNullableUuid(PreparedStatement ps, int idx, UUID value) throws SQLException {
         if (value == null) {
@@ -57,9 +57,17 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
     
     private McqQuestions mapRow(ResultSet rs) throws SQLException {
         McqQuestions q = new McqQuestions();
-        q.setId(getUuid(rs, "id"));
-        q.setContent(rs.getString("content"));
-        q.setAssignmentId(getUuid(rs, "assignmentId"));
+        q.setId(getUuid(rs, "Id"));
+        q.setContent(rs.getString("Content"));
+        // Try AssignmentId first (as per database), then fallback to other variations
+        UUID assignmentId = getUuid(rs, "AssignmentId");
+        if (assignmentId == null) {
+            assignmentId = getUuid(rs, "assignmentId");
+        }
+        if (assignmentId == null) {
+            assignmentId = getUuid(rs, "assignmentID");
+        }
+        q.setAssignmentId(assignmentId);
         return q;
     }
 
@@ -74,6 +82,76 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
             
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean insertWithConnection(McqQuestions question, Connection con) {
+        // Validate connection
+        if (con == null) {
+            System.err.println("[McqQuestionDAO] insertWithConnection - Connection is NULL!");
+            return false;
+        }
+        
+        // Validate connection is not closed
+        try {
+            if (con.isClosed()) {
+                System.err.println("[McqQuestionDAO] insertWithConnection - Connection is CLOSED!");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("[McqQuestionDAO] insertWithConnection - Error checking connection status: " + e.getMessage());
+            return false;
+        }
+        
+        try (PreparedStatement ps = con.prepareStatement(INSERT_SQL)) {
+            
+            String questionId = question.getId().toString();
+            String content = question.getContent();
+            String assignmentId = question.getAssignmentId() != null ? question.getAssignmentId().toString() : "NULL";
+            
+            System.out.println("[McqQuestionDAO] insertWithConnection - Question ID: " + questionId);
+            System.out.println("[McqQuestionDAO] insertWithConnection - Content: " + content);
+            System.out.println("[McqQuestionDAO] insertWithConnection - Assignment ID: " + assignmentId);
+            System.out.println("[McqQuestionDAO] insertWithConnection - SQL: " + INSERT_SQL);
+            System.out.println("[McqQuestionDAO] insertWithConnection - Connection valid: " + (con != null && !con.isClosed()));
+            
+            ps.setString(1, questionId);
+            ps.setString(2, content);
+            
+            // Debug: Check assignmentId before setting
+            UUID assignmentIdValue = question.getAssignmentId();
+            System.out.println("[McqQuestionDAO] insertWithConnection - Setting AssignmentId parameter: " + assignmentIdValue);
+            if (assignmentIdValue == null) {
+                System.err.println("[McqQuestionDAO] insertWithConnection - ERROR: AssignmentId is NULL!");
+                return false;
+            }
+            
+            setNullableUuid(ps, 3, assignmentIdValue);
+            
+            // Execute the insert
+            System.out.println("[McqQuestionDAO] insertWithConnection - Executing INSERT statement...");
+            int result = ps.executeUpdate();
+            System.out.println("[McqQuestionDAO] insertWithConnection - ExecuteUpdate result: " + result);
+            
+            if (result > 0) {
+                System.out.println("[McqQuestionDAO] insertWithConnection - Question inserted successfully");
+            } else {
+                System.err.println("[McqQuestionDAO] insertWithConnection - No rows affected");
+            }
+            
+            return result > 0;
+        } catch (SQLException e) {
+            System.err.println("[McqQuestionDAO] insertWithConnection - SQLException: " + e.getMessage());
+            System.err.println("[McqQuestionDAO] insertWithConnection - SQLState: " + e.getSQLState());
+            System.err.println("[McqQuestionDAO] insertWithConnection - ErrorCode: " + e.getErrorCode());
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            System.err.println("[McqQuestionDAO] insertWithConnection - Unexpected exception: " + e.getClass().getName());
+            System.err.println("[McqQuestionDAO] insertWithConnection - Error message: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -119,15 +197,27 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(SELECT_BY_ASSIGNMENT_SQL)) {
             
+            System.out.println("[McqQuestionDAO] findByAssignmentId - Querying for assignment: " + assignmentId);
+            System.out.println("[McqQuestionDAO] findByAssignmentId - SQL: " + SELECT_BY_ASSIGNMENT_SQL);
+            
             setNullableUuid(ps, 1, assignmentId);
             
             try (ResultSet rs = ps.executeQuery()) {
+                int count = 0;
                 while (rs.next()) {
-                    list.add(mapRow(rs));
+                    McqQuestions question = mapRow(rs);
+                    list.add(question);
+                    count++;
+                    System.out.println("[McqQuestionDAO] findByAssignmentId - Found question " + count + ": " + question.getId() + " - " + question.getContent());
                 }
+                System.out.println("[McqQuestionDAO] findByAssignmentId - Total questions found: " + count);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.err.println("[McqQuestionDAO] findByAssignmentId - Error querying questions by assignmentId: " + e.getMessage());
+            System.err.println("[McqQuestionDAO] findByAssignmentId - SQLState: " + e.getSQLState());
+            System.err.println("[McqQuestionDAO] findByAssignmentId - ErrorCode: " + e.getErrorCode());
+            System.err.println("[McqQuestionDAO] findByAssignmentId - AssignmentId: " + assignmentId);
         }
         return list;
     }

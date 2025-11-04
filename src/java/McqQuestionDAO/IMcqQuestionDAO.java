@@ -4,6 +4,7 @@
  */
 package McqQuestionDAO;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.UUID;
 import model.McqQuestions;
@@ -14,6 +15,7 @@ import model.McqQuestions;
  */
 public interface IMcqQuestionDAO {
     boolean insert(McqQuestions question);
+    boolean insertWithConnection(McqQuestions question, Connection con);
     McqQuestions findById(UUID questionId);
     List<McqQuestions> findAll();
     List<McqQuestions> findByAssignmentId(UUID assignmentId);

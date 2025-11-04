@@ -2,63 +2,35 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.util.UUID" %>
+<%@ page import="service.CourseServiceImpl" %>
+<%@ page import="service.CourseDetailDTO" %>
+<%@ page import="model.Courses" %>
+<%@ page import="model.Sections" %>
+<%@ page import="model.Lession" %>
 
 <%
     String courseID = request.getParameter("courseID");
-    
-    // Mock data - Replace with actual database queries
-    java.util.Map<String, Object> courseData = new java.util.HashMap<>();
-    java.util.List<java.util.Map<String, String>> sections = new java.util.ArrayList<>();
-    java.util.Map<String, java.util.List<java.util.Map<String, String>>> lessonsMap = new java.util.HashMap<>();
-    
-    if (courseID != null && !courseID.isEmpty()) {
-        // Sample course data - Replace with database query
-        courseData.put("courseID", courseID);
-        courseData.put("name", "Kiến Thức Nhập Môn IT");
-        courseData.put("description", "Khóa học cơ bản về IT");
-        courseData.put("thumbnailUrl", "${pageContext.request.contextPath}/assets/images/course-thumb.jpg");
-        courseData.put("level", "Beginner");
-        courseData.put("instructorName", "Hoàng Lộc");
-        
-        // Sample sections
-        java.util.Map<String, String> section1 = new java.util.HashMap<>();
-        section1.put("sectionID", "1");
-        section1.put("name", "Khái niệm kỹ thuật cần biết");
-        sections.add(section1);
-        
-        java.util.Map<String, String> section2 = new java.util.HashMap<>();
-        section2.put("sectionID", "2");
-        section2.put("name", "Môi trường, con người IT");
-        sections.add(section2);
-        
-        // Sample lessons for section 1
-        java.util.List<java.util.Map<String, String>> lessons1 = new java.util.ArrayList<>();
-        java.util.Map<String, String> lesson1 = new java.util.HashMap<>();
-        lesson1.put("lessonID", "1");
-        lesson1.put("name", "Mô hình Client - Server là gì?");
-        lesson1.put("videoDuration", "11:35");
-        lessons1.add(lesson1);
-        
-        java.util.Map<String, String> lesson2 = new java.util.HashMap<>();
-        lesson2.put("lessonID", "2");
-        lesson2.put("name", "Domain là gì? Tên miền là gì?");
-        lesson2.put("videoDuration", "10:34");
-        lessons1.add(lesson2);
-        
-        lessonsMap.put("1", lessons1);
-        
-        // Sample lessons for section 2
-        java.util.List<java.util.Map<String, String>> lessons2 = new java.util.ArrayList<>();
-        java.util.Map<String, String> lesson3 = new java.util.HashMap<>();
-        lesson3.put("lessonID", "3");
-        lesson3.put("name", "Lập trình là gì?");
-        lesson3.put("videoDuration", "15:20");
-        lessons2.add(lesson3);
-        
-        lessonsMap.put("2", lessons2);
+
+    Courses course = null;
+    List<Sections> sections = java.util.Collections.emptyList();
+    Map<java.util.UUID, List<Lession>> lessonsMap = java.util.Collections.emptyMap();
+
+    try {
+        if (courseID != null && !courseID.isEmpty()) {
+            UUID courseUuid = UUID.fromString(courseID);
+            CourseServiceImpl svc = new CourseServiceImpl();
+            CourseDetailDTO dto = svc.getCourseDetail(courseUuid);
+            course = dto.course;
+            sections = dto.sections != null ? dto.sections : java.util.Collections.emptyList();
+            lessonsMap = dto.lessonsMap != null ? dto.lessonsMap : java.util.Collections.emptyMap();
+        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
     }
-    
-    request.setAttribute("course", courseData);
+
+    request.setAttribute("course", course);
     request.setAttribute("sections", sections);
     request.setAttribute("lessonsMap", lessonsMap);
 %>
@@ -72,10 +44,17 @@
     <c:if test="${not empty sessionScope.user.avatarUrl}">
         <meta name="user-avatar" content="${sessionScope.user.avatarUrl}">
     </c:if>
+    <c:if test="${not empty sessionScope.user}">
+        <meta name="user-role" content="${sessionScope.user.role}">
+        <meta name="user-id" content="${sessionScope.user.userID}">
+    </c:if>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/common.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/course.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+<%-- base contextPath for JS --%>
+<script>document.addEventListener('DOMContentLoaded',function(){document.body.setAttribute('data-context','<%= request.getContextPath() %>')});</script>
 <jsp:include page="/learner/common/header.jsp" />
 
 <div class="main-container">
@@ -96,7 +75,7 @@
 
                 <!-- Video Title and Meta -->
                 <div class="video-info">
-                    <h1 class="video-title">${course.name}</h1>
+                    <h1 class="video-title">${course != null ? course.name : 'Khoá học'}</h1>
                     <p class="video-meta">Cập nhật tháng 11 năm 2022</p>
                 </div>
 
@@ -133,11 +112,17 @@
                                         <c:choose>
                                             <c:when test="${not empty lessons}">
                                                 <c:forEach var="lesson" items="${lessons}" varStatus="lessonStatus">
-                                                    <div class="lesson-item">
-                                                        <span class="lesson-number">${lessonStatus.count}</span>
-                                                        <span class="lesson-dot">●</span>
-                                                        <span class="lesson-name">${lesson.name}</span>
-                                                        <span class="lesson-time">${lesson.videoDuration}</span>
+                                                    <div class="lesson-wrapper-item">
+                                                        <div class="lesson-item" data-lesson-id="${lesson.lessionID}" data-section-id="${section.sectionID}" data-video-url="${lesson.videoUrl}" data-lesson-name="${lesson.name}" onclick="loadLessonVideo(this)">
+                                                            <span class="lesson-number">${lessonStatus.count}</span>
+                                                            <span class="lesson-dot">●</span>
+                                                            <span class="lesson-name">${lesson.name}</span>
+                                                            <span class="lesson-time">${lesson.videoDuration}s</span>
+                                                        </div>
+                                                        <div class="test-list-container" data-lesson-id="${lesson.lessionID}" style="display: block;">
+                                                            <!-- Tests will be loaded here dynamically -->
+                                                            <div style="padding: 8px 14px; color: #999; font-size: 12px;">Đang tải...</div>
+                                                        </div>
                                                     </div>
                                                 </c:forEach>
                                             </c:when>

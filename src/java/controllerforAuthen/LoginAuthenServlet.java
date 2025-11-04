@@ -8,13 +8,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.UUID;
 import model.User;
 import service.UserServiceImpl;
+import service.WalletService;
 
 @WebServlet(name = "LoginAuthenServlet", urlPatterns = {"/login"})
 public class LoginAuthenServlet extends HttpServlet {
 
     private UserServiceImpl userService;
+    private WalletService walletServicce = new WalletService(); 
 
     @Override
     public void init() throws ServletException {
@@ -61,7 +64,10 @@ public class LoginAuthenServlet extends HttpServlet {
                     response.sendRedirect(ctx + "/admin/dashboard");
                     break;
                 case "Instructor":
-                    response.sendRedirect(ctx + "/instructor/jsp/InstructorDashboard.jsp");
+                    UUID userID = UUID.fromString(user.getUserID());
+                    int price = walletServicce.getBalanceByUserID(userID);
+                    request.setAttribute("price", price);
+                    request.getRequestDispatcher("/instructor/jsp/InstructorDashboard.jsp").forward(request, response);
                     break;
                 default:
                     response.sendRedirect(ctx + "/CourseServletController");

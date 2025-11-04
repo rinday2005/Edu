@@ -254,68 +254,6 @@
         </div>
 
         <script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
-        <script src="${pageContext.request.contextPath}/instructor/js/articleManage.js"></script>
-        <script>
-            function showArticleForm() {
-                document.getElementById('articleFormModal').style.display = 'block';
-                // Reset form
-                document.getElementById('createArticleForm').reset();
-            }
-
-            function hideArticleForm() {
-                document.getElementById('articleFormModal').style.display = 'none';
-            }
-
-            function showEditArticle(articleId) {
-                // Tìm button đã click để lấy dữ liệu
-                const buttons = document.querySelectorAll('.btn-edit[data-article-id]');
-                let articleData = null;
-                
-                for (let btn of buttons) {
-                    if (btn.getAttribute('data-article-id') === articleId) {
-                        articleData = {
-                            id: btn.getAttribute('data-article-id'),
-                            title: btn.getAttribute('data-article-title'),
-                            content: btn.getAttribute('data-article-content'),
-                            status: btn.getAttribute('data-article-status')
-                        };
-                        break;
-                    }
-                }
-                
-                if (!articleData) {
-                    alert('Không tìm thấy dữ liệu bài viết!');
-                    return;
-                }
-                
-                // Fill form với dữ liệu bài viết
-                document.getElementById('editArticleId').value = articleData.id;
-                document.getElementById('editArticleTitle').value = articleData.title || '';
-                document.getElementById('editArticleContent').value = articleData.content || '';
-                document.getElementById('editArticleStatus').value = articleData.status || 'Draft';
-                
-                // Hiển thị modal
-                document.getElementById('editArticleModal').style.display = 'block';
-            }
-
-            function hideEditArticle() {
-                document.getElementById('editArticleModal').style.display = 'none';
-                // Reset form
-                document.getElementById('editArticleForm').reset();
-            }
-
-            // Close modal when clicking outside
-            window.onclick = function (event) {
-                const createModal = document.getElementById('articleFormModal');
-                const editModal = document.getElementById('editArticleModal');
-                
-                if (event.target === createModal) {
-                    hideArticleForm();
-                }
-                if (event.target === editModal) {
-                    hideEditArticle();
-                }
-            }
-        </script>
+        <script src="${pageContext.request.contextPath}/instructor/js/ArticleManage.js"></script>
     </body>
 </html>

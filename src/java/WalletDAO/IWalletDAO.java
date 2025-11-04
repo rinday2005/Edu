@@ -25,5 +25,9 @@ public interface IWalletDAO {
 
     List<Wallet> findAll();                // R2
 
-    int updateBalance(UUID walletId, int delta); // cộng/trừ số dư
+    int updateBalance(UUID walletId, int delta);
+    
+    public void addBalanceForCourseOwners(UUID userID);// cộng/trừ số dư
+    
+    public int getBalanceByUserID(UUID userID);
 }
