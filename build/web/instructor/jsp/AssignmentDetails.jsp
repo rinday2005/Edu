@@ -153,6 +153,10 @@
                                                     <td>${assignment.sectionID}</td>
                                                     <td>
                                                         <div class="table-actions" style="display: flex; gap: 10px;">
+                                                            <a href="<c:url value='/ManageQuestion?action=list&assignment=${assignment.assignmentID}'/>" 
+                                                               class="btn btn-info" style="padding: 5px 10px; font-size: 12px;">
+                                                                <i class="fas fa-question-circle"></i> Quản lý câu hỏi
+                                                            </a>
                                                             <a href="<c:url value='/ManageAssignment?action=edit&id=${assignment.assignmentID}'/>" 
                                                                class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
                                                                 <i class="fas fa-edit"></i> Sửa

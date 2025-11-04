@@ -34,7 +34,7 @@
 
                   <c:forEach var="course" items="${courses}">
                     <div class="pro-course-card"
-                         onclick="window.location.href='${pageContext.request.contextPath}/course?action=detail&id=${course.courseID}'">
+                         onclick="window.location.href='${pageContext.request.contextPath}/CourseServletController?action=detail&id=${course.courseID}'">
                       <div class="course-image">
                         <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
                       </div>

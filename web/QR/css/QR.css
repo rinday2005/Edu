@@ -1,0 +1,308 @@
+/* QR.css - Styles for QR Payment Page with Dark Mode */
+
+/* CSS Variables */
+:root {
+  --bg-color: #f8f9fa;
+  --container-bg: #ffffff;
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --border-color: #e2e8f0;
+  --highlight-color: #4299e1;
+  --sub-bg: #f7fafc;
+  --hover-bg: #edf2f7;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --btn-gradient: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  --btn-gradient-hover: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 🌙 Dark Mode Variables */
+.dark-mode {
+  --bg-color: #1a1a1a;
+  --container-bg: #2b2b2b;
+  --text-primary: #f1f1f1;
+  --text-secondary: #cccccc;
+  --border-color: #404040;
+  --highlight-color: #4dabf7;
+  --sub-bg: #333;
+  --hover-bg: #3d3d3d;
+  --gradient: linear-gradient(135deg, #4a4e91 0%, #6b3fa0 100%);
+  --btn-gradient: linear-gradient(135deg, #4dabf7 0%, #2b6cb0 100%);
+  --btn-gradient-hover: linear-gradient(135deg, #2b6cb0 0%, #1a4b80 100%);
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Main Layout */
+.qr-main-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.qr-main-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 250px;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Page Title */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* QR Payment Container */
+.qrpay-container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  background: var(--container-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Course Section */
+.qrpay-course-section {
+  padding-right: 2rem;
+  border-right: 2px solid var(--border-color);
+}
+
+.qrpay-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--highlight-color);
+}
+
+/* Course List */
+.qrpay-course-list {
+  list-style: none;
+  margin-bottom: 2rem;
+}
+
+.qrpay-course-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background-color: var(--sub-bg);
+  border-radius: 8px;
+  border-left: 4px solid var(--highlight-color);
+  transition: all 0.3s ease;
+}
+
+.qrpay-course-item:hover {
+  background-color: var(--hover-bg);
+  transform: translateX(4px);
+}
+
+.qrpay-course-name {
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.qrpay-course-price {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 120px;
+  text-align: right;
+}
+
+/* Total Section */
+.qrpay-total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--gradient);
+  border-radius: 8px;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.qrpay-total-amount {
+  font-size: 1.5rem;
+  color: #fefcbf;
+}
+
+/* Payment Section */
+.qrpay-payment-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.qrpay-code-container {
+  text-align: center;
+}
+
+.qrpay-code-placeholder {
+  width: 300px;
+  height: 300px;
+  border: 3px dashed var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--sub-bg);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.qrpay-code-placeholder:hover {
+  border-color: var(--highlight-color);
+  background-color: var(--hover-bg);
+}
+
+.qrpay-code-placeholder i {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.qrpay-code-placeholder span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Home Button */
+.qrpay-home-button {
+  padding: 12px 32px;
+  background: var(--btn-gradient);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+}
+
+.qrpay-home-button:hover {
+  background: var(--btn-gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(66, 153, 225, 0.4);
+}
+
+.qrpay-home-button:active {
+  transform: translateY(0);
+}
+
+/* Animation for QR Code Placeholder */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(66, 153, 225, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(66, 153, 225, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(66, 153, 225, 0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .qrpay-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .qrpay-course-section {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1.5rem;
+  }
+
+  .qr-main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .qrpay-container {
+    padding: 1rem;
+  }
+
+  .qrpay-course-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .qrpay-course-price {
+    text-align: left;
+    min-width: auto;
+  }
+
+  .qrpay-code-placeholder {
+    width: 250px;
+    height: 250px;
+  }
+
+  .qrpay-total-section {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .qrpay-code-placeholder {
+    width: 200px;
+    height: 200px;
+  }
+
+  .qrpay-code-placeholder i {
+    font-size: 3rem;
+  }
+
+  .qrpay-section-title {
+    font-size: 1.25rem;
+  }
+
+  .qrpay-total-section {
+    font-size: 1rem;
+  }
+
+  .qrpay-total-amount {
+    font-size: 1.25rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .qrpay-home-button {
+    display: none;
+  }
+
+  .qrpay-container {
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+  }
+}

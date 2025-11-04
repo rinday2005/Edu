@@ -86,6 +86,8 @@
 
                 <div class="course-info-card">
 <!--                    <div class="course-price"><span class="price-label">Miễn phí</span></div>-->
+                <c:choose>
+                    <c:when test="${checkCourse == false}">    
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
                             <!-- Đã đăng nhập: chuyển đến room.jsp -->
@@ -96,9 +98,25 @@
                         </c:when>
                         <c:otherwise>
                             <!-- Chưa đăng nhập: chuyển đến trang đăng nhập với redirect về room.jsp -->
-                            <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/course/room.jsp?courseID=${course.courseID}" class="btn-enroll">ĐĂNG KÝ HỌC</a>
-                        </c:otherwise>
+                            <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/learner/jsp/Course/room.jsp?courseID=${course.courseID}" class="btn-enroll">ĐĂNG KÝ HỌC</a>
+                        </c:otherwise> 
                     </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <c:choose>
+                        <c:when test="${not empty sessionScope.user}">
+                            <form action="${pageContext.request.contextPath}/learner/jsp/Course/room.jsp">
+                            <input type="hidden" name="courseID" value="${course.courseID}">
+                            <button type="submit" class="btn-enroll">VÀO HỌC</button>
+                            </form>
+                        </c:when>
+                        <c:otherwise>
+                            <!-- Chưa đăng nhập: chuyển đến trang đăng nhập với redirect về room.jsp -->
+                            <a href="${pageContext.request.contextPath}/login?redirect=${pageContext.request.contextPath}/learner/jsp/Course/room.jsp?courseID=${course.courseID}" class="btn-enroll">ĐĂNG KÝ HỌC</a>
+                        </c:otherwise>
+                        </c:choose>
+                    </c:otherwise>
+                </c:choose>
 
                     <div class="course-info-list">
                         <div class="info-item">Trình độ: ${course.level}</div>

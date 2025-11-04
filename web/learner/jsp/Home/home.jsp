@@ -81,7 +81,7 @@
             <section class="pro-courses-section">
                 <div class="section-header">
                     <h2>Khóa học Pro <span class="badge-pro">PRO</span></h2>
-                    <a class="view-all-btn" href="${pageContext.request.contextPath}/course?action=all">Xem tất cả</a>
+                    <a class="view-all-btn" href="${pageContext.request.contextPath}/CourseServletController?action=showall">Xem tất cả</a>
                 </div>
 
                 <div class="pro-courses-grid">

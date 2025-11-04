@@ -4,7 +4,7 @@
 <header class="header">
   <div class="header-container">
     <!-- LOGO -->
-    <div class="logo" onclick="window.location.href='${pageContext.request.contextPath}/learner/jsp/Home/home.jsp'">
+    <div class="logo" onclick="window.location.href='${pageContext.request.contextPath}/CourseServletController'">
       <img src="${pageContext.request.contextPath}/learner/images/logo.jpg"
            alt="Logo" class="logo-img" decoding="async" />
       <span class="logo-text">E-Learning System</span>
@@ -54,7 +54,7 @@
 
             <div class="menu-divider"></div>
 
-            <a href="${pageContext.request.contextPath}/learner/jsp/Cart/Cart.jsp">🛒 Giỏ hàng</a>
+            <a href="${pageContext.request.contextPath}/CartServlett">🛒 Giỏ hàng</a>
             <a href="${pageContext.request.contextPath}/learner/jsp/Cart/Cart.jsp">📝 Bài viết của tôi</a>
             <a href="${pageContext.request.contextPath}/learner/jsp/Setting/setting.jsp">⚙️ Cài đặt</a>
             

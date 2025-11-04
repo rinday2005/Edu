@@ -123,29 +123,16 @@ function proceedToCheckout() {
     showNotification("Giỏ hàng của bạn đang trống!", "warning");
     return;
   }
-
-  // Lấy danh sách khóa học trong giỏ
-  const items = [];
-  cartItems.forEach(item => {
-    const name = item.querySelector(".item-title").textContent.trim();
-
-    // Lấy giá và bỏ ký tự không phải số
-    const priceText = item.querySelector(".price-amount").textContent.replace(/[^\d]/g, "");
-    const price = parseFloat(priceText) || 0;
-
-    items.push({ name, price });
-  });
-
-  // Lấy tổng giá trị từ JSP
-  const totalPrice = parseFloat(document.querySelector(".final-amount .price-amount").textContent.replace(/[^\d]/g, "")) || 0;
-
-  // Loading button
   const checkoutBtn = document.querySelector(".btn-checkout");
   checkoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
   checkoutBtn.disabled = true;
 
   // Gửi dữ liệu sang servlet
-  const servletURL = `${window.location.origin}${window.location.pathname.replace('/cart.jsp','')}/QRServlet?total=${totalPrice}&items=${encodeURIComponent(JSON.stringify(items))}`;
+const servletURL = `${window.location.origin}/EDUFlatForm/QRServlet`;
+
+
+
+
 
   setTimeout(() => {
     window.location.href = servletURL;

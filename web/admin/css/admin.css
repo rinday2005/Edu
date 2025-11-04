@@ -1,0 +1,43 @@
+/* Admin Light Theme */
+:root { --sidebar-width: 264px; --header-height: 64px; --bg: #f8fafc; --panel: #ffffff; --text: #0f172a; --muted: #475569; --border: #e2e8f0; --primary: #4f46e5; --hover: #f1f5f9; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
+.admin-header { height: var(--header-height); display: grid; grid-template-columns: var(--sidebar-width) 1fr auto; align-items: center; gap: 12px; padding: 0 16px; background: linear-gradient(90deg,#2747e3,#6aa0ff); border-bottom: 1px solid rgba(255,255,255,.1); position: sticky; top: 0; z-index: 20; }
+.admin-header .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; }
+.admin-header .brand img { width: 28px; height: 28px; }
+.admin-search { max-width: 640px; width: 100%; }
+.admin-search form { display: flex; gap: 8px; }
+.admin-search input { flex: 1; height: 40px; padding: 0 14px; border: 1px solid var(--border); border-radius: 999px; background: #fff; color: var(--text); box-shadow: 0 2px 10px rgba(0,0,0,.08) inset; }
+.admin-search button { height: 40px; padding: 0 14px; border: 1px solid var(--border); background: #fff; border-radius: 999px; cursor: pointer; }
+.admin-topnav { display: none; }
+.admin-actions { display: flex; align-items: center; gap: 10px; }
+.quick-link { text-decoration: none; color: #fff; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); height: 40px; padding: 0 12px; border-radius: 12px; display: flex; align-items: center; }
+.quick-link:hover { background: rgba(255,255,255,.18); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.6); cursor: pointer; }
+.menu { position: relative; }
+.menu .dropdown { position: absolute; right: 0; top: 48px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; min-width: 220px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: none; }
+.menu.open .dropdown { display: block; }
+.menu .dropdown a { display: block; padding: 10px 12px; text-decoration: none; color: var(--text); }
+.menu .dropdown a:hover { background: var(--hover); }
+
+.admin-container { display: grid; grid-template-columns: var(--sidebar-width) 1fr; min-height: calc(100vh - var(--header-height)); }
+.admin-sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 12px; position: sticky; top: var(--header-height); height: calc(100vh - var(--header-height)); overflow-y: auto; }
+.admin-sidebar .nav { list-style: none; padding: 0; margin: 0; }
+.admin-sidebar a { color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+.admin-sidebar a:hover { background: var(--hover); }
+.admin-sidebar .nav-section { margin: 12px 8px 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.admin-content { padding: 16px; }
+.title { display:flex; align-items:center; gap:10px; margin:0 0 12px 0; }
+.title svg { width:22px; height:22px; color:#334155; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: 0 6px 24px rgba(15,23,42,.06); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 22px; }
+.admin-footer { padding: 16px; border-top: 1px solid var(--border); background: var(--panel); text-align: center; }
+.admin-footer{ display:none; }
+.table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.table th, .table td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; word-break: break-word; }
+.admin-content h1 { margin-top: 0; }
+.btn { display: inline-block; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: #fff; background: var(--primary); border: 1px solid transparent; }
+.btn.secondary { background: #0ea5e9; }
+.btn.ghost { background: #fff; color: var(--text); border-color: var(--border); }
+

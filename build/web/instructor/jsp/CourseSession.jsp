@@ -118,80 +118,6 @@
                             </div>
                         </div>
                         
-                        <!-- Lesson Management Section -->
-                        <div style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <h4 style="margin: 0; color: var(--text-dark);">
-                                    <i class="fas fa-book-open"></i> Quản lý Bài học
-                                </h4>
-                                <button type="button" class="btn btn-info btn-sm" onclick="addLessonRow()" id="addLessonBtn" style="display: none;">
-                                    <i class="fas fa-plus"></i> Thêm bài học
-                                </button>
-                            </div>
-                            
-                            <div id="lessonsContainer" style="display: grid; gap: 15px;">
-                                <!-- Lessons will be added here dynamically or from existing data -->
-                                <c:if test="${not empty section}">
-                                    <!-- Load existing lessons for this section -->
-                                    <c:set var="sectionLessons" value="${requestScope.sectionLessons}" />
-                                    <c:if test="${not empty sectionLessons}">
-                                        <c:forEach var="lesson" items="${sectionLessons}" varStatus="loop">
-                                            <div class="lesson-row" data-lesson-index="${loop.index}">
-                                                <div style="background-color: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                                                        <h5 style="margin: 0; color: var(--text-dark);">Bài học #${loop.index + 1}</h5>
-                                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeLessonRow(this)" style="padding: 3px 8px;">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                                        <div class="form-group">
-                                                            <label>Tên bài học *</label>
-                                                            <input type="text" name="lessonNames" class="form-control" 
-                                                                   value="${fn:escapeXml(lesson.name)}" placeholder="Nhập tên bài học" required>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label>URL Video *</label>
-                                                            <input type="url" name="lessonUrls" class="form-control" 
-                                                                   value="${fn:escapeXml(lesson.videoUrl)}" placeholder="https://..." required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group" style="margin-top: 10px;">
-                                                        <label>Mô tả</label>
-                                                        <textarea name="lessonDescriptions" class="form-control" rows="2" 
-                                                                  placeholder="Mô tả bài học...">${fn:escapeXml(lesson.description)}</textarea>
-                                                    </div>
-                                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                                                        <div class="form-group">
-                                                            <label>Thời lượng (giây)</label>
-                                                            <input type="number" name="lessonDurations" class="form-control" 
-                                                                   value="${lesson.videoDuration}" min="0" placeholder="3600">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label>Trạng thái</label>
-                                                            <select name="lessonStatuses" class="form-control">
-                                                                <option value="true" ${lesson.status ? 'selected' : ''}>Kích hoạt</option>
-                                                                <option value="false" ${!lesson.status ? 'selected' : ''}>Tắt</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <c:if test="${not empty lesson.lessionID}">
-                                                        <input type="hidden" name="lessonIds" value="${lesson.lessionID}">
-                                                    </c:if>
-                                                </div>
-                                            </div>
-                                        </c:forEach>
-                                    </c:if>
-                                </c:if>
-                            </div>
-                            
-                            <div style="margin-top: 15px;">
-                                <button type="button" class="btn btn-info" onclick="addLessonRow()">
-                                    <i class="fas fa-plus"></i> Thêm bài học mới
-                                </button>
-                            </div>
-                        </div>
-                        
                         <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
                             <button type="button" class="btn btn-secondary" onclick="cancelForm()">
                                 <i class="fas fa-times"></i> Hủy
@@ -244,34 +170,7 @@
                                         <tbody>
                                             <c:forEach var="section" items="${sections}">
                                                 <tr>
-                                                    <td>
-                                                        <strong>${fn:escapeXml(section.name)}</strong>
-                                                        <c:set var="sectionIdStr" value="${section.sectionID.toString()}" />
-                                                        <c:set var="sectionLessons" value="${lessonsMap[sectionIdStr]}" />
-                                                        <c:if test="${not empty sectionLessons}">
-                                                            <div style="margin-top: 10px; padding-left: 20px;">
-                                                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">
-                                                                    <i class="fas fa-book-open"></i> Bài học:
-                                                                </div>
-                                                                <c:forEach var="lesson" items="${sectionLessons}">
-                                                                    <div style="padding: 5px 0; border-left: 2px solid var(--primary-color); padding-left: 10px; margin-bottom: 5px;">
-                                                                        <i class="fas fa-video" style="color: var(--primary-color); margin-right: 5px;"></i>
-                                                                        <span style="font-size: 13px;">${fn:escapeXml(lesson.name)}</span>
-                                                                        <c:if test="${not empty lesson.videoUrl}">
-                                                                            <a href="${fn:escapeXml(lesson.videoUrl)}" target="_blank" style="margin-left: 8px; font-size: 11px; color: var(--primary-color);">
-                                                                                <i class="fas fa-external-link-alt"></i>
-                                                                            </a>
-                                                                        </c:if>
-                                                                    </div>
-                                                                </c:forEach>
-                                                            </div>
-                                                        </c:if>
-                                                        <c:if test="${empty sectionLessons}">
-                                                            <div style="margin-top: 8px; padding-left: 20px; font-size: 12px; color: var(--text-muted); font-style: italic;">
-                                                                <i class="fas fa-info-circle"></i> Chưa có bài học
-                                                            </div>
-                                                        </c:if>
-                                                    </td>
+                                                    <td><strong>${fn:escapeXml(section.name)}</strong></td>
                                                     <td>${fn:escapeXml(section.description)}</td>
                                                     <td>
                                                         <c:choose>
@@ -374,9 +273,6 @@
         function cancelForm() {
             // Reset form and hide
             document.getElementById('sectionForm').reset();
-            // Clear lessons container
-            document.getElementById('lessonsContainer').innerHTML = '';
-            lessonIndex = 0;
             toggleCreateSectionForm();
             // Remove edit mode if exists
             <c:if test="${not empty section}">
@@ -390,73 +286,6 @@
                 </c:choose>
             </c:if>
         }
-        
-        let lessonIndex = 0;
-        
-        function addLessonRow() {
-            const container = document.getElementById('lessonsContainer');
-            const lessonRow = document.createElement('div');
-            lessonRow.className = 'lesson-row';
-            lessonRow.setAttribute('data-lesson-index', lessonIndex);
-            
-            lessonRow.innerHTML = `
-                <div style="background-color: var(--bg-card); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <h5 style="margin: 0; color: var(--text-dark);">Bài học mới</h5>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="removeLessonRow(this)" style="padding: 3px 8px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="form-group">
-                            <label>Tên bài học *</label>
-                            <input type="text" name="lessonNames" class="form-control" 
-                                   placeholder="Nhập tên bài học" required>
-                        </div>
-                        <div class="form-group">
-                            <label>URL Video *</label>
-                            <input type="url" name="lessonUrls" class="form-control" 
-                                   placeholder="https://..." required>
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-top: 10px;">
-                        <label>Mô tả</label>
-                        <textarea name="lessonDescriptions" class="form-control" rows="2" 
-                                  placeholder="Mô tả bài học..."></textarea>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                        <div class="form-group">
-                            <label>Thời lượng (giây)</label>
-                            <input type="number" name="lessonDurations" class="form-control" 
-                                   min="0" placeholder="3600">
-                        </div>
-                        <div class="form-group">
-                            <label>Trạng thái</label>
-                            <select name="lessonStatuses" class="form-control">
-                                <option value="true" selected>Kích hoạt</option>
-                                <option value="false">Tắt</option>
-                            </select>
-                        </div>
-                    </div>
-                    <input type="hidden" name="lessonIds" value="">
-                </div>
-            `;
-            
-            container.appendChild(lessonRow);
-            lessonIndex++;
-        }
-        
-        function removeLessonRow(btn) {
-            if (confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
-                const row = btn.closest('.lesson-row');
-                row.remove();
-            }
-        }
-        
-        // Initialize lesson index from existing lessons
-        <c:if test="${not empty sectionLessons}">
-            lessonIndex = ${fn:length(sectionLessons)};
-        </c:if>
     </script>
     </body>
 </html>
