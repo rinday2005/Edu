@@ -3,16 +3,22 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforAuthen/logoutAuthenServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/DAO/DBConnection.java</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/home.js</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/jsp/sections.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Learning/LearningPathBE.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/js/instructorsHome.js</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/cart.js</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Course/lessonNewbie.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/AIFolder/ChatAIServlet.java</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/login/jsp/register.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageQuestion.java</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/articles.js</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Learning/LearningPath.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/InstructorDashboard.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/common/sidebar.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/FinanceReport.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/instructorsHome.css</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/common/sidebar.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/CourseManagement.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/DAO/DBConnection.java</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/ArticleManagement.css</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Article/articles.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/CourseManagement.css</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/learning.js</file>
@@ -22,43 +28,26 @@
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/jsp/dashboard.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/CourseSession.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Learning/LearningPathFE.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/common/footer.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/AssignmentDetails.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Setting/setting.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforAuthen/RegisterAuthenServlet.java</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/common/header.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/setting.js</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/LessonManagement.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/common/header.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Course/room.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageLesson.java</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/js/admin.js</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/ArticleManage.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/common/sidebar.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/components/chatAI.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Article/articlesDetail.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Course/listCourse.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/home.js</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/jsp/sections.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Learning/LearningPathBE.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/js/instructorsHome.js</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/js/articles.js</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/InstructorDashboard.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/common/sidebar.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/FinanceReport.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/instructorsHome.css</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageArtical.java</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/ArticleManagement.css</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/common/footer.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/AssignmentDetails.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageCourse.java</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/common/header.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageAssignment.java</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/css/admin.css</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/admin/common/sidebar.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Home/home.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/common/header.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Cart/Cart.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controller/LearnerControllerServlet.java</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/components/chatAI.jsp</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Article/articlesDetail.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/QuestionManagement.jsp</file>
-            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/src/java/java/controllerforInstructor/ManageSection.java</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/css/Setting.css</file>
+            <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/learner/jsp/Course/listCourse.jsp</file>
             <file>file:/C:/Users/ADMIN/Downloads/FinalProjectPRJ301-main/FinalProjectPRJ301-main/EDUFlatForm_1/web/instructor/jsp/Setting.jsp</file>
         </group>
     </open-files>

@@ -16,8 +16,20 @@
                     <input style="width:100%;height:40px;padding:0 10px;border:1px solid var(--border);border-radius:10px;" name="phoneNumber" value="<%= ((model.User)session.getAttribute("user")).getPhoneNumber() %>"/>
                 </label>
                 <label>Avatar URL
-                    <input style="width:100%;height:40px;padding:0 10px;border:1px solid var(--border);border-radius:10px;" name="avatarUrl" value="<%= ((model.User)session.getAttribute("user")).getAvatarUrl() %>"/>
+                    <input id="avatarUrlInput" style="width:100%;height:40px;padding:0 10px;border:1px solid var(--border);border-radius:10px;" name="avatarUrl" value="<%= ((model.User)session.getAttribute("user")).getAvatarUrl() %>"/>
                 </label>
+            </div>
+            <div style="margin-top:12px; display:flex; align-items:center; gap:16px;">
+                <div style="flex-shrink:0;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">Preview Avatar:</label>
+                    <img id="avatarPreview" src="<%= ((model.User)session.getAttribute("user")).getAvatarUrl() != null ? ((model.User)session.getAttribute("user")).getAvatarUrl() : request.getContextPath() + "/uploads/avatar/default.png" %>" 
+                         alt="Avatar Preview" 
+                         style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid var(--border); background:#f0f0f0;"
+                         onerror="this.src='<%=request.getContextPath()%>/uploads/avatar/default.png';" />
+                </div>
+                <div style="flex:1;">
+                    <p style="margin:0; color:#666; font-size:13px;">Nhập URL ảnh để xem preview. Avatar sẽ được cập nhật khi bạn lưu thay đổi.</p>
+                </div>
             </div>
             <div style="margin-top:12px;">
                 <button class="btn" type="submit">Lưu thay đổi</button>
@@ -28,4 +40,5 @@
     </div>
 </main>
 <jsp:include page="/admin/common/footer.jsp" />
+<script src="<%=request.getContextPath()%>/admin/js/settings.js"></script>
 

@@ -17,7 +17,7 @@ public class DBConnection{
     public static String driverName= "com.microsoft.sqlserver.jdbc.SQLServerDriver";
     private static final String dbURL = "jdbc:sqlserver://localhost:1433;databaseName=DB_PRJ_Assginment;encrypt=false;";
     private static final String userDB = "sa";
-    private static final String passDB = "12345";
+    private static final String passDB = "sa";
     public static Connection getConnection(){
         Connection con = null;
         try {
