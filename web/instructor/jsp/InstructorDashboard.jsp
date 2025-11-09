@@ -38,29 +38,20 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3><i class="fas fa-graduation-cap"></i> Tổng số Khóa học</h3>
-                        <div class="stat-number">12</div>
-                        <div class="stat-description">Khóa học đã tạo (Draft: 3, Published: 9)</div>
+                        <div class="stat-number">${totalCourses != null ? totalCourses : 0}</div>
+                        <div class="stat-description">Khóa học đã tạo (Draft: ${draftCount != null ? draftCount : 0}, Published: ${publishedCount != null ? publishedCount : 0})</div>
                     </div>
                     <div class="stat-card">
                         <h3><i class="fas fa-users"></i> Tổng số Học viên</h3>
-                        <div class="stat-number">1,247</div>
+                        <div class="stat-number">${totalStudents != null ? totalStudents : 0}</div>
                         <div class="stat-description">Học viên đang theo dõi các khóa học</div>
                     </div>
                     <div class="stat-card">
                         <h3><i class="fas fa-dollar-sign"></i> Tổng Thu nhập</h3>
-                        
-                        
                         <div class="stat-number">
                             <fmt:formatNumber value="${price}" type="number" groupingUsed="true" /> ₫
                         </div>
-                        
-                        
-                        <div class="stat-description">Thu nhập từ các khóa học</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3><i class="fas fa-star"></i> Đánh giá Mới</h3>
-                        <div class="stat-number">23</div>
-                        <div class="stat-description">Đánh giá mới trong tuần này</div>
+<div class="stat-description">Thu nhập từ các khóa học</div>
                     </div>
                 </div>
             </section>
@@ -115,7 +106,7 @@
                             <h4>15 học viên mới đăng ký khóa học Python</h4>
                             <p>6 giờ trước • Khóa học Python cơ bản</p>
                         </div>
-                    </div>
+</div>
                     <div class="activity-item">
                         <div class="activity-icon">
                             <i class="fas fa-star"></i>

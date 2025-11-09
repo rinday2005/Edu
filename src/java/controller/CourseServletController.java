@@ -74,18 +74,36 @@ public class CourseServletController extends HttpServlet {
     private void showCourseList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            List<Courses> courses = courseService.getAllCourses();
+            System.out.println("[CourseServletController] showCourseList() called");
+            
+            // Instructor đóng 2 vai trò (Instructor và Learner) nên có thể xem trang learner
+            // Không redirect Instructor nữa, cho phép họ xem trang learner
+List<Courses> courses = courseService.getAllCourses();
+            System.out.println("[CourseServletController] Found " + (courses != null ? courses.size() : 0) + " courses");
+            
+            if (courses == null) {
+                courses = new java.util.ArrayList<>();
+            }
+            
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/learner/jsp/Home/home.jsp").forward(request, response);
         } catch (Exception e) {
+            System.err.println("[CourseServletController] Error in showCourseList: " + e.getMessage());
             e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi tải danh sách khóa học");
+            
+            if (!response.isCommitted()) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi khi tải danh sách khóa học: " + e.getMessage());
+            }
         }
     }
 
     private void showCourseDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false); 
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+    request.getRequestDispatcher("/login/jsp/login.jsp").forward(request, response);
+}else{
+        
         try {
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.isBlank()) {
@@ -125,8 +143,7 @@ public class CourseServletController extends HttpServlet {
                 request.setAttribute("totalLessons", totalLessons);
                 request.setAttribute("totalMinutes", totalMinutes);
                 request.setAttribute("checkCourse", checkCourse);
-                
-                System.out.println("[v0] Course Detail Loaded: " + dto.course.getName() +
+System.out.println("[v0] Course Detail Loaded: " + dto.course.getName() +
                         " | Sections: " + (dto.sections != null ? dto.sections.size() : 0) +
                         " | Lessons: " + totalLessons);
 
@@ -153,7 +170,8 @@ public class CourseServletController extends HttpServlet {
                     "Lỗi khi tải chi tiết khóa học: " + e.getMessage());
         }
     }
-
+}
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

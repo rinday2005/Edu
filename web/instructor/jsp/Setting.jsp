@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!-- Kiểm tra đăng nhập - nếu chưa đăng nhập thì chuyển về trang chủ -->
 <c:if test="${empty sessionScope.user}">
-    <c:redirect url="/instructor/jsp/InstructorDashboard.jsp"/>
+    <c:redirect url="/instructor/dashboard"/>
 </c:if>
 
 <!DOCTYPE html>
@@ -50,7 +50,7 @@
                                         <i class="fas fa-camera"></i>
                                         </div>
                                     </div>
-                                    <input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display: none;">
+<input type="file" id="avatar-upload" name="avatar" accept="image/*" style="display: none;">
                                     <button type="button" class="change-avatar-btn"
                                             onclick="document.getElementById('avatar-upload').click()">
                                     <i class="fas fa-upload"></i> Đổi ảnh đại diện
@@ -87,7 +87,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="bio">Giới thiệu bản thân</label>
-                                        <textarea id="bio" name="bio" rows="4" placeholder="Viết vài dòng giới thiệu về bản thân...">${sessionScope.user.bio != null ? sessionScope.user.bio : ''}</textarea>
+<textarea id="bio" name="bio" rows="4" placeholder="Viết vài dòng giới thiệu về bản thân...">${sessionScope.user.bio != null ? sessionScope.user.bio : ''}</textarea>
                                     </div>
                                     <div class="form-actions">
                                         <button type="button" class="cancel-btn" onclick="resetForm()">
@@ -133,7 +133,7 @@
                                         <div class="strength-fill"></div>
                                     </div>
                                 </div>
-                            </div>
+</div>
                             
                             <div class="form-group">
                                 <label for="confirmPassword">Xác nhận mật khẩu mới *</label>

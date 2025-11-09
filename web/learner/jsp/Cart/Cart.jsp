@@ -54,7 +54,7 @@
 //   for (java.util.Map<String, Object> item : cartItems) {
 //    totalAmount += ((Number) item.get("coursePrice")).longValue();
 //}
-//    
+//
 //    request.setAttribute("cartItems", cartItems);
 //    request.setAttribute("totalItems", totalItems);
 //    request.setAttribute("totalAmount", totalAmount);
@@ -107,7 +107,24 @@
                             <c:forEach var="item" items="${CourseInCart}" varStatus="status">
                                 <div class="cart-item" >
                                     <div class="item-image">
-                                        <img src="${item.imgURL}" alt="${Citem.name}" >
+                                        <c:choose>
+                                            <c:when test="${item.imgURL != null && item.imgURL != ''}">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(item.imgURL, 'http')}">
+                                                        <img src="${item.imgURL}" alt="${item.name}" onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                                                    </c:when>
+                                                    <c:when test="${fn:startsWith(item.imgURL, '/')}">
+<img src="${pageContext.request.contextPath}${item.imgURL}" alt="${item.name}" onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <img src="${pageContext.request.contextPath}/${item.imgURL}" alt="${item.name}" onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <img src="${pageContext.request.contextPath}/learner/images/course-default.jpg" alt="${item.name}" />
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                     
                                     <div class="item-details">
@@ -137,7 +154,7 @@
                                     
                                     <div class="item-price">
                                         <c:choose>
-                                            <c:when test="${item.price == 0}">
+<c:when test="${item.price == 0}">
                                                 <span class="price-free">Miễn phí</span>
                                             </c:when>
                                             <c:otherwise>
@@ -181,8 +198,7 @@
                                             <span class="price-amount">${formattedPrice}</span>
                                         </span>
                                     </div>
-                                    
-                                    <div class="summary-row discount-row">
+<div class="summary-row discount-row">
                                         <label for="discount-code">🎟️ Mã giảm giá:</label>
                                         <div class="discount-input-group">
                                             <input type="text" id="discount-code" placeholder="Nhập mã giảm giá">

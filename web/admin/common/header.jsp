@@ -43,8 +43,8 @@
         </form>
     </div>
     <div class="admin-actions">
-        <a class="quick-link" href="<%=request.getContextPath()%>/instructor/jsp/InstructorDashboard.jsp">Back to Instructor</a>
-        <a class="quick-link" href="<%=request.getContextPath()%>/CourseServletController">Back to Learner</a>
+        <a class="quick-link" href="#" id="headerBackToInstructorBtn">Back to Instructor</a>
+        <a class="quick-link" href="#" id="headerBackToLearnerBtn">Back to Learner</a>
         <div class="menu" id="avatarMenu">
             <%
                 String avatarSrc = null;
@@ -64,7 +64,7 @@
                     avatarSrc = request.getContextPath()+"/uploads/avatar/default.png";
                 }
             %>
-            <img class="avatar" loading="lazy" decoding="async" src="<%= avatarSrc %>?v=<%= System.currentTimeMillis() %>" alt="avatar" onerror="this.src='<%=request.getContextPath()%>/uploads/avatar/default.png'" />
+<img class="avatar" loading="lazy" decoding="async" src="<%= avatarSrc %>?v=<%= System.currentTimeMillis() %>" alt="avatar" onerror="this.src='<%=request.getContextPath()%>/uploads/avatar/default.png'" />
             <div class="dropdown">
                 <a href="<%=request.getContextPath()%>/admin/jsp/settings.jsp">Cài đặt</a>
                 <a href="<%=request.getContextPath()%>/logout">Đăng xuất</a>
@@ -72,5 +72,76 @@
         </div>
     </div>
 </header>
+<script>
+(function(){
+    function initHeaderButtons() {
+        // Handle Back to Instructor button in header - giống như sidebar instructor
+        var headerBackToInstructor = document.getElementById('headerBackToInstructorBtn');
+        if (headerBackToInstructor) {
+            // Remove any existing event listeners by replacing the element
+            var newBtn = headerBackToInstructor.cloneNode(true);
+            headerBackToInstructor.parentNode.replaceChild(newBtn, headerBackToInstructor);
+            
+            newBtn.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation(); // Prevent other listeners
+                // Admin chuyển đến instructor page - giống như từ sidebar instructor
+                var contextPath = '<%= request.getContextPath() %>';
+                if (!contextPath || contextPath === '') {
+                    var path = location.pathname;
+                    var idx = path.indexOf('/admin/');
+                    contextPath = idx >= 0 ? path.substring(0, idx) : '';
+                }
+                window.location.href = contextPath + '/instructor/dashboard';
+                return false;
+            }, true); // Use capture phase to run before other listeners
+        }
+        
+        // Handle Back to Learner button in header - giống như sidebar learner
+        var headerBackToLearner = document.getElementById('headerBackToLearnerBtn');
+        if (headerBackToLearner) {
+            // Remove any existing event listeners by replacing the element
+            var newBtn2 = headerBackToLearner.cloneNode(true);
+            headerBackToLearner.parentNode.replaceChild(newBtn2, headerBackToLearner);
+            
+            newBtn2.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation(); // Prevent other listeners
+                // Admin chuyển đến learner page - giống như từ sidebar learner (CourseServletController)
+                var contextPath = '<%= request.getContextPath() %>';
+                if (!contextPath || contextPath === '') {
+                    var path = location.pathname;
+                    var idx = path.indexOf('/admin/');
+                    contextPath = idx >= 0 ? path.substring(0, idx) : '';
+                }
+                window.location.href = contextPath + '/CourseServletController';
+return false;
+            }, true); // Use capture phase to run before other listeners
+        }
+    }
+    
+    // Run after admin.js has loaded - use setTimeout to ensure it runs after other scripts
+    function runAfterAdminJS() {
+        if (window.EDUAdmin && typeof window.EDUAdmin.init === 'function') {
+            // Wait a bit more to ensure admin.js has finished
+            setTimeout(initHeaderButtons, 100);
+        } else {
+            // If admin.js not loaded yet, wait and retry
+            setTimeout(runAfterAdminJS, 50);
+        }
+    }
+    
+    // Run when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runAfterAdminJS, 100);
+        });
+    } else {
+        // DOM already loaded, run after admin.js
+        setTimeout(runAfterAdminJS, 100);
+    }
+})();
+</script>
 <div class="admin-container">
-

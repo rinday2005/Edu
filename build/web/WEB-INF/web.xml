@@ -10,7 +10,7 @@
     </welcome-file-list>-->
 
     <welcome-file-list>
-        <welcome-file>MainServlet</welcome-file>
+        <welcome-file>CourseServletController</welcome-file>
     </welcome-file-list> 
     <servlet>
         <servlet-name>ManageArtical</servlet-name>

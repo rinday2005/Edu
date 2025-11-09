@@ -64,17 +64,15 @@ public class LoginAuthenServlet extends HttpServlet {
                     response.sendRedirect(ctx + "/admin/dashboard");
                     break;
                 case "Instructor":
-                    UUID userID = UUID.fromString(user.getUserID());
-                    int price = walletServicce.getBalanceByUserID(userID);
-                    request.setAttribute("price", price);
-                    request.getRequestDispatcher("/instructor/jsp/InstructorDashboard.jsp").forward(request, response);
+                    // Redirect to dashboard servlet to load data properly
+                    response.sendRedirect(ctx + "/instructor/dashboard");
                     break;
                 default:
                     response.sendRedirect(ctx + "/CourseServletController");
                     break;
             }
             return;
-        }
+}
 
         request.setAttribute("errorMessage", "Sai tài khoản hoặc mật khẩu!");
         request.getRequestDispatcher("/login/jsp/login.jsp").forward(request, response);

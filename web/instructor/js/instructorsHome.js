@@ -370,3 +370,32 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 })
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const cancelBtn = document.getElementById('cancelWithdrawBtn');
+    const form = document.querySelector('.withdrawal-form-enhanced');
+    
+    console.log('Nút Hủy:', cancelBtn);
+    console.log('Form:', form);
+    
+    if (cancelBtn && form) {
+        cancelBtn.addEventListener('click', function(e) {
+            console.log('Nút Hủy được click!');
+            e.preventDefault();
+            
+            // Xóa từng trường
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('bankAccount').value = '';
+            document.getElementById('accountHolder').value = '';
+            document.getElementById('bankName').selectedIndex = 0;
+            
+            console.log('Đã xóa xong!');
+        });
+    } else {
+        console.log('KHÔNG tìm thấy nút hoặc form!');
+    }
+});
+
+

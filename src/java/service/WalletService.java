@@ -1,7 +1,6 @@
 // WalletService.java
 package service;
 import model.Wallet;
-import DAO.*;
 import WalletDAO.WalletDAO;
 import java.util.UUID;
 public class WalletService{
@@ -12,21 +11,35 @@ public class WalletService{
     public int getBalanceByUserID(UUID userID){
         return WD.getBalanceByUserID(userID);
     }
+    public Wallet findById(UUID walletId){
+        return WD.findByUserId(walletId);
+    }
+    public boolean withdrawByUserId(UUID userId, int price){
+        return WD.withdrawByUserId(userId, price);
+    }
+    public void deductBalance(UUID userId, int price){
+        WD.deductBalance(userId, price);
+    } 
     
-    public static void main(String[] args) {
-        try {
-            WalletService walletService = new WalletService();
+    public boolean existsByUserId(UUID userId){
+        return WD.existsByUserId(userId);
+    }
+    public void create(UUID userID, String bankName, String bankAccount){
+        WD.create(userID, bankName, bankAccount);
+    }
+    
+        public static void main(String[] args) {
+        WalletDAO dao = new WalletDAO();
+        UUID testUserId = UUID.fromString("33C57260-0D72-4EB5-B1E3-4FF6C7EE4016");
+        Wallet wallet = dao.findByUserId(testUserId);
 
-            // UUID của người mua (thay bằng ID có thật trong DB)
-            UUID buyerID = UUID.fromString("EAB8A44A-FBB9-43BE-9C43-B202F9FDE5B0");
-
-            // Gọi xử lý chuyển tiền cho chủ khóa học
-            walletService.addBalanceForCourseOwners(buyerID);
-
-            System.out.println("✅ Đã xử lý chuyển tiền cho các chủ khóa học của user: " + buyerID);
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (wallet != null) {
+            System.out.println("Found wallet for user: " + testUserId);
+            System.out.println("Bank Name: " + wallet.getBankName());
+            System.out.println("Bank Account: " + wallet.getBankAccount());
+            System.out.println("Balance: " + wallet.getBalance());
+        } else {
+            System.out.println("No wallet found for user: " + testUserId);
         }
     }
     

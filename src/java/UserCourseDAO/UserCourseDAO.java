@@ -5,6 +5,7 @@ import DAO.DBConnection;
 import model.UserCourse;
 
 import java.sql.*;
+import java.sql.Types;
 import java.util.*;
 
 public class UserCourseDAO implements IUserCourseDAO {
@@ -78,13 +79,26 @@ public class UserCourseDAO implements IUserCourseDAO {
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setObject(1, userId);
+            // Set userID parameter - try setString first for better compatibility
+            if (userId != null) {
+                ps.setString(1, userId.toString());
+            } else {
+                ps.setNull(1, Types.VARCHAR);
+            }
+            
+            System.out.println("[UserCourseDAO] Executing query: " + sql + " with userID: " + userId);
+            
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(extractUserCourse(rs));
+while (rs.next()) {
+                    UserCourse uc = extractUserCourse(rs);
+                    if (uc != null) {
+                        list.add(uc);
+                    }
                 }
             }
+            System.out.println("[UserCourseDAO] findByUser found " + list.size() + " entries for userID: " + userId);
         } catch (SQLException e) {
+            System.err.println("[UserCourseDAO] Error in findByUser for userID: " + userId);
             e.printStackTrace();
         }
         return list;
@@ -146,9 +160,41 @@ public class UserCourseDAO implements IUserCourseDAO {
 
     private UserCourse extractUserCourse(ResultSet rs) throws SQLException {
         UserCourse uc = new UserCourse();
-        uc.setUserCourseID((UUID) rs.getObject("userCourseID"));
-        uc.setUserID((UUID) rs.getObject("userID"));
-        uc.setCourseID((UUID) rs.getObject("courseID"));
+        try {
+            // Try to get UUID from Object first, if fails try String
+            Object userCourseIDObj = rs.getObject("userCourseID");
+            if (userCourseIDObj instanceof UUID) {
+                uc.setUserCourseID((UUID) userCourseIDObj);
+            } else if (userCourseIDObj instanceof String) {
+                uc.setUserCourseID(UUID.fromString((String) userCourseIDObj));
+            } else {
+                String userCourseIDStr = rs.getString("userCourseID");
+                uc.setUserCourseID(userCourseIDStr != null ? UUID.fromString(userCourseIDStr) : null);
+            }
+Object userIDObj = rs.getObject("userID");
+            if (userIDObj instanceof UUID) {
+                uc.setUserID((UUID) userIDObj);
+            } else if (userIDObj instanceof String) {
+                uc.setUserID(UUID.fromString((String) userIDObj));
+            } else {
+                String userIDStr = rs.getString("userID");
+                uc.setUserID(userIDStr != null ? UUID.fromString(userIDStr) : null);
+            }
+            
+            Object courseIDObj = rs.getObject("courseID");
+            if (courseIDObj instanceof UUID) {
+                uc.setCourseID((UUID) courseIDObj);
+            } else if (courseIDObj instanceof String) {
+                uc.setCourseID(UUID.fromString((String) courseIDObj));
+            } else {
+                String courseIDStr = rs.getString("courseID");
+                uc.setCourseID(courseIDStr != null ? UUID.fromString(courseIDStr) : null);
+            }
+        } catch (Exception e) {
+            System.err.println("[UserCourseDAO] Error extracting UserCourse from ResultSet: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
         return uc;
     }
 }

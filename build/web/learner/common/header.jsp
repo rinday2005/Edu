@@ -34,9 +34,30 @@
 
       <!-- 🔹 NẾU ĐÃ ĐĂNG NHẬP -->
       <c:if test="${not empty sessionScope.user}">
-         
+        <%
+          // Safe access to user object and avatarUrl
+          model.User user = (model.User) session.getAttribute("user");
+          String avatarUrl = null;
+          String userName = "";
+          String userEmail = "";
+          
+          if (user != null) {
+            try {
+              avatarUrl = user.getAvatarUrl();
+              userName = user.getUserName() != null ? user.getUserName() : "";
+              userEmail = user.getEmail() != null ? user.getEmail() : "";
+            } catch (Exception e) {
+              // Ignore errors
+            }
+          }
+          
+          // Default avatar if null or empty
+          if (avatarUrl == null || avatarUrl.trim().isEmpty()) {
+            avatarUrl = request.getContextPath() + "/learner/images/default-avatar.png";
+          }
+        %>
         <div class="user-menu">
-          <img src="${sessionScope.user.avatarUrl != null ? sessionScope.user.avatarUrl : (pageContext.request.contextPath + '/learner/images/default-avatar.png')}"
+          <img src="<%= avatarUrl %>"
                alt="User Avatar"
                class="user-avatar"
                onclick="toggleUserMenu()" />
@@ -44,17 +65,17 @@
           <!-- Dropdown -->
           <div id="dropdownMenu" class="dropdown-menu">
             <div class="menu-header">
-              <img src="${sessionScope.user.avatarUrl != null ? sessionScope.user.avatarUrl : (pageContext.request.contextPath + '/learner/images/default-avatar.png')}"
+              <img src="<%= avatarUrl %>"
                    class="menu-avatar" alt="User"/>
               <div class="menu-info">
-                <span class="user-name">${sessionScope.user.userName}</span>
-                <span class="user-email">${sessionScope.user.email}</span>
+                <span class="user-name"><%= userName %></span>
+                <span class="user-email"><%= userEmail %></span>
               </div>
             </div>
-
-            <div class="menu-divider"></div>
+<div class="menu-divider"></div>
 
             <a href="${pageContext.request.contextPath}/CartServlett">🛒 Giỏ hàng</a>
+            <a href="${pageContext.request.contextPath}/learner/mycourses">📚 Khóa học của tôi</a>
             <a href="${pageContext.request.contextPath}/learner/jsp/Cart/Cart.jsp">📝 Bài viết của tôi</a>
             <a href="${pageContext.request.contextPath}/learner/jsp/Setting/setting.jsp">⚙️ Cài đặt</a>
             

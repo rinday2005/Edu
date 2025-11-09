@@ -18,25 +18,9 @@
                 });
             }
             
-            // FE-only safe navigation for cross-role links to avoid server 500
-            var quickLinks = document.querySelectorAll('.quick-link');
-            if (quickLinks && quickLinks.length) {
-                var base = (function(){
-                    var path = location.pathname;
-                    var idx = path.indexOf('/admin/');
-                    return idx >= 0 ? path.substring(0, idx) : '';
-                })();
-                Array.prototype.forEach.call(quickLinks, function(a){
-                    var label = (a.textContent || a.innerText || '').toLowerCase();
-                    if (label.indexOf('back to instructor') !== -1 || label.indexOf('back to learner') !== -1) {
-                        a.addEventListener('click', function(e){
-                            e.preventDefault();
-                            // Redirect to a safe admin landing instead of hitting server pages that may 500
-                            window.location.href = base + '/admin/index.jsp';
-                        });
-                    }
-                });
-            }
+            // FE-only safe navigation for cross-role links - DISABLED
+            // Các nút "Back to Instructor" và "Back to Learner" trong header đã có logic riêng
+            // Không cần intercept nữa vì đã có script riêng trong header.jsp
             
             // Load avatar from localStorage if available (FE persistence)
             try {
@@ -55,4 +39,3 @@
         window.EDUAdmin.init();
     });
 })();
-

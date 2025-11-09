@@ -13,7 +13,7 @@ import model.Wallet;
 
 public interface IWalletDAO {
 
-    void create(Wallet w);                 // C
+    public void create(UUID userID, String bankName, String bankAccount);                 // C
 
     int update(Wallet w);                 // U
 
@@ -30,4 +30,6 @@ public interface IWalletDAO {
     public void addBalanceForCourseOwners(UUID userID);// cộng/trừ số dư
     
     public int getBalanceByUserID(UUID userID);
+    
+    public boolean withdrawByUserId(UUID userId, int price);
 }

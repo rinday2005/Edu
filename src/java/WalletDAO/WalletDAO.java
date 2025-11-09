@@ -2,31 +2,29 @@ package WalletDAO;
 
 import DAO.DBConnection;
 import model.Wallet;
-
 import java.sql.*;
 import java.util.*;
-import java.math.BigDecimal;
 
 public class WalletDAO implements IWalletDAO {
 
-    @Override
-    public void create(Wallet w) {
-        String sql = "INSERT INTO Wallet (walletID, userID, BankName, BankAccount, Balance) VALUES (?, ?, ?, ?, ?)";
+        @Override
+        public void create(UUID userID, String bankName, String bankAccount) {
+        String sql = "INSERT INTO Wallet (userID, BankName, BankAccount, Balance) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            UUID id = w.getWalletID() != null ? w.getWalletID() : UUID.randomUUID();
-            ps.setObject(1, id, java.sql.Types.OTHER);
-            ps.setObject(2, w.getUserID(), java.sql.Types.OTHER);
-            ps.setString(3, w.getBankName());
-            ps.setString(4, w.getBankAccount());
-            ps.setInt(5, w.getBalance());
-
+            
+            ps.setString(1, userID.toString());
+            ps.setString(2, bankName);
+            ps.setString(3, bankAccount);
+            ps.setInt(4, 0);  // Balance luôn = 0
+            
             ps.executeUpdate();
-        } catch (SQLException e) {
+            
+    }catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public int update(Wallet w) {
@@ -77,21 +75,30 @@ public class WalletDAO implements IWalletDAO {
         return null;
     }
 
-    @Override
-    public Wallet findByUserId(UUID userId) {
-        String sql = "SELECT * FROM Wallet WHERE userID = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+@Override
+public Wallet findByUserId(UUID userId) {
+    String sql = "SELECT * FROM Wallet WHERE userID = ?";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setObject(1, userId, java.sql.Types.OTHER);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return mapResultSet(rs);
+        ps.setString(1, userId.toString());
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            Wallet wallet = new Wallet();
+            wallet.setBankName(rs.getString("bankName"));
+            wallet.setBankAccount(rs.getString("bankAccount"));
+            wallet.setBalance(rs.getInt("balance"));
+            return wallet; // trả về Wallet chứa dữ liệu
         }
-        return null;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return null; // nếu không tìm thấy wallet
+}
+
+
 
     @Override
     public List<Wallet> findAll() {
@@ -191,6 +198,84 @@ public class WalletDAO implements IWalletDAO {
         }
         return 0; // trả về 0 nếu không tìm thấy
     }
+    
+
+    @Override
+    public boolean withdrawByUserId(UUID userId, int price) {
+    if (price < 0) return false; // số tiền không hợp lệ
+
+    String sql = "UPDATE Wallet SET Balance = Balance - ? " +
+                 "WHERE userID = ?";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, price);
+        ps.setString(1, userId.toString());
+
+        int updated = ps.executeUpdate();
+        return updated == 1; // nếu 1 row được update => trừ thành công
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+        public void deductBalance(UUID userId, int price) {
+        if (price <= 0) {
+            System.out.println("❌ Số tiền không hợp lệ!");
+            return;
+        }
+
+        String checkBalanceSql = "SELECT Balance FROM Wallet WHERE userID = ?";
+        String updateBalanceSql = "UPDATE Wallet SET Balance = Balance - ? WHERE userID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement checkPs = conn.prepareStatement(checkBalanceSql);
+             PreparedStatement updatePs = conn.prepareStatement(updateBalanceSql)) {
+
+            checkPs.setString(1, userId.toString());
+
+            ResultSet rs = checkPs.executeQuery();
+            if (rs.next()) {
+                int balance = rs.getInt("Balance");
+
+                if (price > balance) {
+                    System.out.println("❌ Không đủ số dư!");
+                    return;
+                }
+
+                updatePs.setInt(1, price);
+                updatePs.setString(2, userId.toString());
+                updatePs.executeUpdate();
+
+                System.out.println("✅ Đã trừ " + price + " khỏi ví!");
+            } else {
+                System.out.println("❌ Không tìm thấy userID này!");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+        public boolean existsByUserId(UUID userId) {
+    String sql = "SELECT COUNT(*) FROM Wallet WHERE userID = ?";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, userId.toString());
+
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return false;
+}
+
 
 
     private Wallet mapResultSet(ResultSet rs) throws SQLException {
@@ -203,21 +288,15 @@ public class WalletDAO implements IWalletDAO {
         return w;
     }
     
-     public static void main(String[] args) {
-        try {
-            // Tạo DAO
-            WalletDAO walletDAO = new WalletDAO();
+    public static void main(String[] args) {
+        WalletDAO dao = new WalletDAO();
 
-            // UUID của user (người mua khóa học) — đổi sang ID thật trong DB nha
-            UUID buyerID = UUID.fromString("EAB8A44A-FBB9-43BE-9C43-B202F9FDE5B0");
+        // Tạo một userID mẫu (giả sử đã có user này trong bảng User)
+        UUID userID = UUID.fromString("FA7E4C8F-117E-4999-994C-FD82C9BDA333");
 
-            // Gọi hàm để chuyển tiền cho các chủ khóa học
-            walletDAO.addBalanceForCourseOwners(buyerID);
+        // Gọi hàm create để thêm ví mới cho user
+        dao.create(userID, "Vietcombank", "0123456789");
 
-            System.out.println("✅ Đã xử lý chuyển tiền cho các chủ khóa học của user: " + buyerID);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println("Đã thêm ví mới cho user " + userID);
     }
 }

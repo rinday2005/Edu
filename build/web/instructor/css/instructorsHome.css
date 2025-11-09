@@ -2077,4 +2077,30 @@ input:checked + .slider:before {
   }
 }
 
+/* Căn giữa form horizontally */
+form {
+    text-align: center;
+    margin: 20px auto;
+}
+
+/* Style cho button */
+.btn-enroll {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.btn-enroll:hover {
+    background: linear-gradient(135deg, #2980b9, #2573a7);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
 

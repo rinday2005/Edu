@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,40 +17,59 @@
 
     <!-- ===== SIDEBAR ===== -->
     <jsp:include page="/instructor/common/sidebar.jsp" />
-    
     <!-- ===== MAIN CONTENT ===== -->
     <main class="content-area">
         <section class="section">
             <h2><i class="fas fa-wallet"></i> Báo cáo Tài chính</h2>
         </section>
-
+        
+        <c:choose>
+            <c:when test="${check == false}">
+        <div class="wallet-hero">
+            <div class="wallet-card-main">
+                <form action="${pageContext.request.contextPath}/instructor/jsp/wallet-form.jsp">
+                <button type="submit" class="btn-enroll">CHƯA LIÊN KẾT TK! LIÊN KẾT NGAY</button>
+                </form>
+            </div>
+        </div>    
+            </c:when>
+            <c:otherwise>
+        
         <!-- Redesigned wallet card with improved layout and styling -->
         <div class="wallet-hero">
             <div class="wallet-card-main">
+            
                 <div class="wallet-header">
                     <div class="wallet-label"><i class="fas fa-piggy-bank"></i> Ví của bạn</div>
                     <div class="wallet-badge">Hoạt động</div>
                 </div>
                 <div class="wallet-balance-display">
                     <span class="currency-symbol">₫</span>
-                    <span class="wallet-balance-amount">5,250,000</span>
+                    <span class="wallet-balance-amount">
+                        <c:out value="${price.balance}" />
+                    </span>
                 </div>
                 <div class="wallet-info-grid">
                     <div class="wallet-info-item">
                         <span class="info-label">Ngân hàng</span>
-                        <span class="info-value">Vietcombank</span>
+                            <span class="info-value">
+                                <c:out value="${price.bankName}" />
+                            </span>
                     </div>
                     <div class="wallet-info-item">
                         <span class="info-label">Số tài khoản</span>
-                        <span class="info-value">1234567890</span>
+                            <span class="info-value">
+                                <c:out value="${price.bankAccount}" />
+                            </span>
                     </div>
                     <div class="wallet-info-item">
                         <span class="info-label">Cập nhật</span>
                         <span class="info-value">Hôm nay</span>
                     </div>
                 </div>
-            </div>
-        </div>
+             </div>
+        </div>           
+
 
         <!-- Financial statistics with improved visual hierarchy -->
         <section class="section">
@@ -161,56 +181,77 @@
         <section class="section">
             <h3><i class="fas fa-credit-card"></i> Yêu cầu Rút tiền</h3>
             <div class="card">
-                <div class="card-body">
-                    <form class="withdrawal-form-enhanced">
-                        <div class="form-section">
-                            <p class="form-note"><i class="fas fa-info-circle"></i> Điền thông tin tài khoản ngân hàng để yêu cầu rút tiền</p>
-                            
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label for="withdrawAmount"><i class="fas fa-dollar-sign"></i> Số tiền cần rút (₫) *</label>
-                                    <input type="number" id="withdrawAmount" class="form-control" placeholder="1,000,000" min="100000" required>
-                                    <small class="form-hint">Tối thiểu: 100,000 ₫ | Tối đa: 5,250,000 ₫</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bankName"><i class="fas fa-building"></i> Tên ngân hàng *</label>
-                                    <select id="bankName" class="form-control" required>
-                                        <option value="">-- Chọn ngân hàng --</option>
-                                        <option value="Vietcombank">Vietcombank</option>
-                                        <option value="BIDV">BIDV</option>
-                                        <option value="Techcombank">Techcombank</option>
-                                        <option value="ACB">ACB</option>
-                                        <option value="MB Bank">MB Bank</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="bankAccount"><i class="fas fa-credit-card"></i> Số tài khoản ngân hàng *</label>
-                                <input type="text" id="bankAccount" class="form-control" placeholder="1234567890" required>
-                                <small class="form-hint">Nhập số tài khoản đầy đủ 9-18 chữ số</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="accountHolder"><i class="fas fa-user"></i> Tên chủ tài khoản *</label>
-                                <input type="text" id="accountHolder" class="form-control" placeholder="Nguyễn Văn A" required>
-                            </div>
-
-                            <div class="form-note-warning">
-                                <i class="fas fa-warning"></i>
-                                <span>Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Không thể thay đổi sau khi xác nhận.</span>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary"><i class="fas fa-times"></i> Hủy</button>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền</button>
-                        </div>
-                    </form>
+                
+                
+                
+<div class="card-body">
+    <form action="${pageContext.request.contextPath}/tranferServlet" method="post" class="withdrawal-form-enhanced">
+        <div class="form-section">
+            <p class="form-note"><i class="fas fa-info-circle"></i> Điền thông tin tài khoản ngân hàng để yêu cầu rút tiền</p>
+            
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="withdrawAmount"><i class="fas fa-dollar-sign"></i> Số tiền cần rút (₫) *</label>
+                    <input type="number" name="withdrawAmount" id="withdrawAmount" class="form-control" placeholder="1,000,000" min="100000" required>
+                    <small class="form-hint">Tối thiểu: 100,000 ₫ | Tối đa: 5,250,000 ₫ </small>
+                    <small class="form-hint">Nếu điền quá số tiền có trong ví thì giao dịch sẽ không thành công</small>
+                </div>
+                <div class="form-group">
+                    <label for="bankName"><i class="fas fa-building"></i> Tên ngân hàng *</label>
+                    <select name="bankName" id="bankName" class="form-control" required>
+                        <option value="">-- Chọn ngân hàng --</option>
+                        <option value="Vietcombank">Vietcombank</option>
+                        <option value="BIDV">BIDV</option>
+                        <option value="Techcombank">Techcombank</option>
+                        <option value="ACB">ACB</option>
+                        <option value="MBBank">MBBank</option>
+                        <option value="VietinBank">VietinBank</option>
+                        <option value="Agribank">Agribank</option>
+                        <option value="VPBank">VPBank</option>
+                        <option value="TPBank">TPBank</option>
+                        <option value="Sacombank">Sacombank</option>
+                        <option value="HDBank">HDBank</option>
+                        <option value="MB Bank">SHB</option>
+                        <option value="SHB">VIB</option>
+                        <option value="MSB">MSB</option>
+                        <option value="OCB">OCB</option>
+                    </select>
                 </div>
             </div>
-        </section>
 
+            <div class="form-group">
+                <label for="bankAccount"><i class="fas fa-credit-card"></i> Số tài khoản ngân hàng *</label>
+                <input type="text" name="bankAccount" id="bankAccount" class="form-control" placeholder="1234567890" required>
+                <small class="form-hint">Nhập số tài khoản đầy đủ 9-18 chữ số</small>
+            </div>
+
+            <div class="form-group">
+                <label for="accountHolder"><i class="fas fa-user"></i> Tên chủ tài khoản *</label>
+                <input type="text" name="accountHolder" id="accountHolder" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+
+            <div class="form-note-warning">
+                <i class="fas fa-warning"></i>
+                <span>Vui lòng kiểm tra kỹ thông tin trước khi gửi yêu cầu. Không thể thay đổi sau khi xác nhận.</span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" id="cancelWithdrawBtn" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền</button>
+        </div>
+    </form>
+</div>
+
+                
+                
+            </div>
+        </section>
+        
+        </c:otherwise>
+        </c:choose>
     </main>
 </div>
 
