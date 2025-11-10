@@ -39,7 +39,7 @@ public class CommentsApiServlet extends HttpServlet {
                 UUID lessionId = UUID.fromString(lessionIdStr);
                 list = commentsDAO.findByLessionId(lessionId);
             }
-            // 手写 JSON
+            // Manually build JSON
             StringBuilder sb = new StringBuilder();
             sb.append("[");
             UserDAO userDAO = new UserDAO();
@@ -82,7 +82,7 @@ public class CommentsApiServlet extends HttpServlet {
             return;
         }
 
-        // 支持通过 _method=PUT / _method=DELETE 进行更新/删除（部分容器对 PUT/DELETE 的 x-www-form-urlencoded 不解析）
+        // Support update/delete via _method=PUT / _method=DELETE (some containers don't parse x-www-form-urlencoded for PUT/DELETE)
         String methodOverride = req.getParameter("_method");
         if ("PUT".equalsIgnoreCase(methodOverride)) {
             String commentIdStr = req.getParameter("commentID");

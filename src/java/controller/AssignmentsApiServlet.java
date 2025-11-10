@@ -25,7 +25,7 @@ public class AssignmentsApiServlet extends HttpServlet {
         try (PrintWriter out = resp.getWriter()) {
             List<Assignment> list;
             if (lessionIdStr != null && !lessionIdStr.isBlank()) {
-                // 优先通过lessionID查询
+                // Query by lessionID first
                 try {
                     UUID lessionId = UUID.fromString(lessionIdStr);
                     list = assignmentService.findByLessionID(lessionId);
@@ -37,7 +37,7 @@ public class AssignmentsApiServlet extends HttpServlet {
                     return;
                 }
             } else if (sectionIdStr != null && !sectionIdStr.isBlank()) {
-                // 如果没有lessionID，则通过sectionID查询
+                // If no lessionID, query by sectionID
                 try {
                     UUID sectionId = UUID.fromString(sectionIdStr);
                     list = assignmentService.findBySectionID(sectionId);

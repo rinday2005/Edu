@@ -101,7 +101,7 @@ function openQAModal() {
     modal.style.opacity = "1"
     document.getElementById("qaInput").focus()
 
-    // 当已选定 lesson 时，打开弹窗即拉取后端评论，避免刷新/重进丢数据
+    // When lesson is selected, fetch comments from backend when opening modal to avoid data loss on refresh
     if (currentLessonId) {
       fetchComments(currentLessonId)
     }
@@ -362,7 +362,7 @@ function startEditComment(btn) {
   const textEl = comment.querySelector('.qa-comment-text')
   if (!textEl) return
   const current = textEl.innerText
-  // 使用独立的编辑表单类，避免与回复表单冲突
+  // Use separate edit form class to avoid conflict with reply form
   const editor = document.createElement('div')
   editor.className = 'qa-edit-form'
   editor.innerHTML = `
@@ -372,7 +372,7 @@ function startEditComment(btn) {
       <button class="qa-reply-send-btn" onclick="cancelEditComment(this)">Hủy</button>
     </div>`
   textEl.style.display = 'none'
-  // 正确地插入到与文本同一父节点下，显示在文本后面
+  // Insert correctly under the same parent node as text, display after text
   const parent = textEl.parentNode
   parent.insertBefore(editor, textEl.nextSibling)
   editor.querySelector('.qa-reply-input').focus()
@@ -390,16 +390,16 @@ function commitEditComment(btn) {
   if (!commentId) { alert('Không có mã bình luận để cập nhật. Vui lòng thử lại sau.'); return }
   const base = document.body.getAttribute('data-context') || ''
 
-  // 禁用按钮避免重复提交
+  // Disable buttons to prevent duplicate submission
   const btns = wrap.querySelectorAll('button')
   btns.forEach(b => b.setAttribute('disabled','disabled'))
 
-  // 先持久化到后端，成功后再更新 UI
+  // Persist to backend first, then update UI on success
   const form = new URLSearchParams()
   form.append('commentID', commentId)
   form.append('content', newText)
 
-  // 使用 POST + _method=PUT 兼容容器对 PUT 表单解析的问题
+  // Use POST + _method=PUT to fix container parsing issues with PUT forms
   form.append('_method', 'PUT')
   fetch(`${base}/api/comments`, {
     method: 'POST',
@@ -411,7 +411,7 @@ function commitEditComment(btn) {
       if (res.status === 403) throw new Error('Bạn chỉ có thể chỉnh sửa bình luận của mình.')
       throw new Error('Update failed')
     }
-    // 更新 UI
+    // Update UI
     textEl.textContent = newText
     const edited = comment.querySelector('.qa-edited') || document.createElement('span')
     edited.className = 'qa-edited'
@@ -480,7 +480,7 @@ function reportComment(btn) {
 function restrictComment(btn) {
   const comment = btn.closest('.qa-comment')
   comment.classList.toggle('restricted')
-  // 受限后禁止回复
+  // Disable reply after restriction
   if (comment.classList.contains('restricted')) {
     const replyBtn = comment.querySelector('.qa-reply-btn')
     if (replyBtn) replyBtn.setAttribute('disabled', 'disabled')
@@ -578,7 +578,7 @@ function toggleReply(button) {
   replies.style.display = 'block'
   const input = replyForm.querySelector(".qa-reply-input")
   input.focus()
-  // 支持回车直接发送（Shift+Enter 换行）
+  // Support Enter to send directly (Shift+Enter for new line)
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -595,7 +595,7 @@ function submitReply(button) {
     const comment = button.closest(".qa-comment")
     const replyForm = button.closest(".qa-reply-form")
 
-    // Tạo reply comment (nội嵌在父评论的 replies 区域)
+    // Create reply comment (embedded in parent comment's replies area)
     const replyComment = document.createElement("div")
     replyComment.className = "qa-comment qa-reply-comment"
     const authorId = getUserId()
@@ -614,7 +614,7 @@ function submitReply(button) {
         </div>
       </div>
     `
-    // 追加到父评论内容区域的回复容器内部，确保纵向展开
+    // Append to reply container inside parent comment content area, ensuring vertical expansion
     const content = comment.querySelector('.qa-comment-content') || comment
     let replies = content.querySelector('.qa-replies')
     if (!replies) {
@@ -764,7 +764,7 @@ function fetchTestsForLesson(lessonId) {
       console.log('[fetchTestsForLesson] Parsed tests:', list)
       if (!Array.isArray(list)) {
         console.error('[fetchTestsForLesson] Response is not an array:', list, 'Type:', typeof list)
-        // 即使不是数组，也尝试渲染（可能是空对象或错误对象）
+        // Try to render even if not an array (might be empty object or error object)
         renderTestsForLesson(testContainer, [])
         return
       }
@@ -772,7 +772,7 @@ function fetchTestsForLesson(lessonId) {
     })
     .catch(err => {
       console.error('[fetchTestsForLesson] Error fetching tests:', err)
-      // 即使出错也显示空状态
+      // Show empty state even on error
       renderTestsForLesson(testContainer, [])
     })
 }
@@ -791,7 +791,7 @@ function renderTestsForLesson(container, list) {
   
   console.log('[renderTestsForLesson] Rendering tests for lesson:', lessonId, 'Count:', list ? list.length : 0)
   
-  // 如果没有test，显示一个按钮
+  // If no tests, show a button
   if (!Array.isArray(list) || list.length === 0) {
     console.log('[renderTestsForLesson] No tests found, showing empty button')
     container.innerHTML = `
@@ -809,7 +809,7 @@ function renderTestsForLesson(container, list) {
     return
   }
   
-  // 有test时，显示test列表和一个按钮
+  // When tests exist, show test list and a button
   console.log('[renderTestsForLesson] Found', list.length, 'tests, rendering list')
   container.innerHTML = ''
   
@@ -827,7 +827,7 @@ function renderTestsForLesson(container, list) {
   `
   container.appendChild(testButton)
   
-  // 显示test容器
+  // Display test container
   container.style.display = 'block'
   console.log('[renderTestsForLesson] Test container displayed')
 }
@@ -835,7 +835,7 @@ function renderTestsForLesson(container, list) {
 function openTestModal(lessonId) {
   const modal = document.getElementById('testModalOverlay')
   if (!modal) {
-    // 创建modal
+    // Create modal
     const newModal = document.createElement('div')
     newModal.id = 'testModalOverlay'
     newModal.className = 'test-modal-overlay'
@@ -858,7 +858,7 @@ function openTestModal(lessonId) {
   modalEl.style.visibility = 'visible'
   modalEl.style.opacity = '1'
   
-  // 加载test列表
+  // Load test list
   const content = document.getElementById('testModalContent')
   content.innerHTML = '<div class="test-loading">Đang tải...</div>'
   
@@ -1010,13 +1010,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize replies toggle
   updateAllRepliesToggle()
 
-  // 增强：为静态示例评论注入三点菜单与 Report
+  // Enhance: inject three-dot menu and Report for static example comments
   enhanceExistingActions()
 
-  // 确定当前 lesson（优先 active，没有则取第一个），用于首次打开时能拉取 DB 数据
+  // Determine current lesson (prefer active, otherwise first), for fetching DB data on first open
   initializeCurrentLesson()
   
-  // 为所有lesson加载test（即使没有点击）
+  // Load tests for all lessons (even if not clicked)
   setTimeout(() => {
     const allTestContainers = document.querySelectorAll('.test-list-container')
     console.log('[DOMContentLoaded] Found', allTestContainers.length, 'test containers')
@@ -1027,7 +1027,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchTestsForLesson(lessonId)
       }
     })
-  }, 500) // 延迟500ms确保DOM完全加载
+  }, 500) // Delay 500ms to ensure DOM is fully loaded
 })
 
 // Function to initialize avatars for existing comments
@@ -1051,16 +1051,16 @@ function initializeCurrentLesson() {
   }
 }
 
-// 为已有的 .qa-action-menu（纯"..."按钮）注入可用的菜单结构
+// Inject usable menu structure for existing .qa-action-menu (pure "..." button)
 function enhanceExistingActions() {
   document.querySelectorAll('.qa-comment').forEach((comment) => {
     const actions = comment.querySelector('.qa-comment-actions')
     if (!actions) return
-    // 已经是增强版则跳过
+    // Skip if already enhanced
     if (actions.querySelector('.qa-more')) return
     const oldDot = actions.querySelector('.qa-action-menu')
     if (!oldDot) return
-    // 构建新菜单
+    // Build new menu
     const more = document.createElement('div')
     more.className = 'qa-more'
     more.innerHTML = `
@@ -1068,7 +1068,7 @@ function enhanceExistingActions() {
       <div class="qa-more-menu">
         <button class="qa-more-item" onclick="reportCommentFromMenu(this)">Report</button>
       </div>`
-    // 替换旧的 ... 按钮
+    // Replace old ... button
     oldDot.replaceWith(more)
   })
 }

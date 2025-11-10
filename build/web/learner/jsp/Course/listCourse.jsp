@@ -23,7 +23,7 @@
         <main class="main-content">
             <section class="pro-courses-section">
                 <div class="section-header">
-                  <h2>Khóa học Pro <span class="badge-pro">PRO</span></h2>
+                  <h2>Khóa học</h2>
                   <a class="view-all-btn" href="${pageContext.request.contextPath}/course">Trở về trang chủ</a>
                 </div>
 
@@ -37,14 +37,40 @@
                          onclick="window.location.href='${pageContext.request.contextPath}/CourseServletController?action=detail&id=${course.courseID}'">
                       <div class="course-image">
                         <c:choose>
-                          <c:when test="${fn:startsWith(course.imgURL, 'http')}">
-                            <img src="${course.imgURL}" alt="${course.name}" class="course-image-img"/>
-                          </c:when>
-                          <c:when test="${fn:startsWith(course.imgURL, '/')}">
-                            <img src="${pageContext.request.contextPath}${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                          <c:when test="${course.imgURL != null && course.imgURL != ''}">
+                            <c:choose>
+                              <c:when test="${fn:startsWith(course.imgURL, 'http')}">
+                                <img src="${course.imgURL}" 
+                                     alt="${course.name}" 
+                                     class="course-image-img"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                              </c:when>
+                              <c:when test="${fn:startsWith(course.imgURL, '/')}">
+                                <img src="${pageContext.request.contextPath}${course.imgURL}" 
+                                     alt="${course.name}" 
+                                     class="course-image-img"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                              </c:when>
+<c:otherwise>
+                                <img src="${pageContext.request.contextPath}/${course.imgURL}" 
+                                     alt="${course.name}" 
+                                     class="course-image-img"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.src='${pageContext.request.contextPath}/learner/images/course-default.jpg'" />
+                              </c:otherwise>
+                            </c:choose>
                           </c:when>
                           <c:otherwise>
-                            <img src="${pageContext.request.contextPath}/${course.imgURL}" alt="${course.name}" class="course-image-img"/>
+                            <img src="${pageContext.request.contextPath}/learner/images/course-default.jpg" 
+                                 alt="${course.name}" 
+                                 class="course-image-img"
+                                 loading="lazy"
+                                 decoding="async" />
                           </c:otherwise>
                         </c:choose>
                       </div>
