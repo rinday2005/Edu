@@ -69,7 +69,7 @@
         /* Override settings section để có giao diện trắng */
         body .settings-section {
             padding: 1rem 0 !important;
-            margin-top: 0 !important;
+            margin-top: -1rem !important;
             background: #ffffff !important;
         }
         
