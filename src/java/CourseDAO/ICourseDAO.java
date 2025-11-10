@@ -11,7 +11,7 @@ package CourseDAO;
 import java.util.List;
 import java.util.UUID;
 import model.Courses;
-
+import java.sql.SQLException;
 public interface ICourseDAO {
 
     boolean insert(Courses c);                      // CREATE
@@ -25,5 +25,6 @@ public interface ICourseDAO {
 
     boolean delete(UUID courseId);                  // DELETE
     boolean existsById(UUID courseId);              // tiện ích
-
+    
+    UUID getCourseIdBySectionId(UUID sectionID) throws SQLException;
 }

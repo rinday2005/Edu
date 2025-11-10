@@ -1,6 +1,5 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
- <link rel="stylesheet" href="${pageContext.request.contextPath}/learner/css/common.css">
 <header class="header">
   <div class="header-container">
     <!-- LOGO -->
@@ -23,11 +22,11 @@
       <!-- 🔹 NẾU CHƯA ĐĂNG NHẬP -->
       <c:if test="${empty sessionScope.user}">
         <button class="btn-login"
-                onclick="window.location.href='${pageContext.request.contextPath}/login/jsp/login.jsp'">
+                onclick="window.location.href='${pageContext.request.contextPath}/login'">
           Đăng nhập
         </button>
         <button class="btn-signup"
-                onclick="window.location.href='${pageContext.request.contextPath}/login/jsp/register.jsp'">
+                onclick="window.location.href='${pageContext.request.contextPath}/register'">
           Đăng ký
         </button>
       </c:if>

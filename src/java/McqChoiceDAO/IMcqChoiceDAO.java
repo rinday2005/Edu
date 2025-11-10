@@ -5,6 +5,8 @@
 package McqChoiceDAO;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import model.McqChoices;
@@ -18,9 +20,10 @@ public interface IMcqChoiceDAO {
     boolean insertWithConnection(McqChoices choice, Connection con);
     McqChoices findById(UUID choiceId);
     List<McqChoices> findAll();
-    List<McqChoices> findByQuestionId(UUID questionId);
+    List<McqChoices> findByQuestionId1(UUID questionId);
     boolean update(McqChoices choice);
     boolean deleteById(UUID choiceId);
     boolean deleteByQuestionId(UUID questionId);
+    Collection<McqChoices> findByQuestionId(UUID questionId) throws SQLException;
 }
 

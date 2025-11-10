@@ -35,4 +35,17 @@
         <servlet-name>CommentsApiServlet</servlet-name>
         <url-pattern>/api/comments</url-pattern>
     </servlet-mapping>
+
+    <!-- Filter để đảm bảo static resources (CSS, JS, images) được phục vụ đúng cách -->
+    <filter>
+        <filter-name>StaticResourceFilter</filter-name>
+        <filter-class>util.StaticResourceFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>StaticResourceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
 </web-app>

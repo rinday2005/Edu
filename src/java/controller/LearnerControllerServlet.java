@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import model.User;
 import service.UserServiceImpl;
 import util.AvatarUploadUtil;
+import util.StaticResourceUtil;
 
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024)
 @WebServlet(name = "LearnerControllerServlet", urlPatterns = {"/learner"})
@@ -35,6 +36,13 @@ public class LearnerControllerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Bỏ qua static resources (CSS, JS, images, etc.)
+        String path = request.getRequestURI();
+        if (StaticResourceUtil.isStaticResource(path)) {
+            // Không xử lý, để container phục vụ static resources
+            return;
+        }
+        
         String action = request.getParameter("action");
         if (action == null || action.isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu tham số action");
@@ -54,6 +62,13 @@ public class LearnerControllerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Bỏ qua static resources (CSS, JS, images, etc.)
+        String path = request.getRequestURI();
+        if (StaticResourceUtil.isStaticResource(path)) {
+            // Không xử lý, để container phục vụ static resources
+            return;
+        }
+        
         String action = request.getParameter("action");
 
         if (action == null || action.isEmpty()) {
@@ -236,6 +251,7 @@ public class LearnerControllerServlet extends HttpServlet {
         // ➤ Nếu bạn có trang learner chính, đổi đường dẫn tại đây
         response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
     }
+
 
     @Override
     public String getServletInfo() {

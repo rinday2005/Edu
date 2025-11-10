@@ -1,16 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
+import java.util.List;
 import java.util.UUID;
 
-
-/**
- *
- * @author ADMIN
- */
 public class Assignment {
     private UUID assignmentID;
     private UUID userID;
@@ -18,7 +10,11 @@ public class Assignment {
     private String description;
     private int order;
     private UUID sectionID;
-    private UUID lessionID;
+
+    // 🔹 Danh sách câu hỏi liên quan – không có trong DB, chỉ dùng trong logic Java
+    private List<McqQuestions> questions;
+
+    public Assignment() {}
 
     public Assignment(UUID assignmentID, UUID userID, String name, String description, int order, UUID sectionID) {
         this.assignmentID = assignmentID;
@@ -27,19 +23,6 @@ public class Assignment {
         this.description = description;
         this.order = order;
         this.sectionID = sectionID;
-    }
-    
-    public Assignment(UUID assignmentID, UUID userID, String name, String description, int order, UUID sectionID, UUID lessionID) {
-        this.assignmentID = assignmentID;
-        this.userID = userID;
-        this.name = name;
-        this.description = description;
-        this.order = order;
-        this.sectionID = sectionID;
-        this.lessionID = lessionID;
-    }
-
-    public Assignment() {
     }
 
     public UUID getAssignmentID() {
@@ -90,18 +73,24 @@ public class Assignment {
         this.sectionID = sectionID;
     }
 
-    public UUID getLessionID() {
-        return lessionID;
+    // 🔹 Thêm getter/setter cho danh sách câu hỏi
+    public List<McqQuestions> getQuestions() {
+        return questions;
     }
 
-    public void setLessionID(UUID lessionID) {
-        this.lessionID = lessionID;
+    public void setQuestions(List<McqQuestions> questions) {
+        this.questions = questions;
     }
 
     @Override
     public String toString() {
-        return "Assignment{" + "assignmentID=" + assignmentID + ", userID=" + userID + ", name=" + name + ", description=" + description + ", order=" + order + ", sectionID=" + sectionID + ", lessionID=" + lessionID + '}';
+        return "Assignment{" +
+                "assignmentID=" + assignmentID +
+                ", userID=" + userID +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", order=" + order +
+                ", sectionID=" + sectionID +
+                '}';
     }
-
-    
 }

@@ -47,8 +47,9 @@ public class AdminUsersServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login/jsp/login.jsp");
             return;
         }
-        String action = request.getParameter("action");
-        String userId = request.getParameter("userID");
+        String action = trim(request.getParameter("action"));
+        String userId = trim(request.getParameter("userID"));
+        boolean shouldRedirect = true;
         try {
             if ("lock".equals(action)) {
                 // 置 status = 0
@@ -77,11 +78,89 @@ public class AdminUsersServlet extends HttpServlet {
                     ps.setString(2, userId);
                     ps.executeUpdate();
                 }
+            } else if ("create".equals(action)) {
+                shouldRedirect = handleCreateUser(request, response);
+                if (!shouldRedirect) return;
             }
         } catch (Exception e) {
             request.getSession().setAttribute("error", e.getMessage());
         }
-        response.sendRedirect(request.getContextPath() + "/admin/users");
+        if (shouldRedirect) {
+            response.sendRedirect(request.getContextPath() + "/admin/users");
+        }
+    }
+
+    private boolean handleCreateUser(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        String fullName = trim(request.getParameter("fullName"));
+        String email = trim(request.getParameter("email"));
+        String phone = trim(request.getParameter("phone"));
+        String role = trim(request.getParameter("role"));
+        String password = trim(request.getParameter("password"));
+        String confirmPassword = trim(request.getParameter("confirmPassword"));
+        String statusRaw = trim(request.getParameter("status"));
+
+        if (role.isEmpty()) {
+            role = "Learner";
+        }
+        if (statusRaw.isEmpty()) {
+            statusRaw = "Active";
+        }
+
+        java.util.Map<String, String> formData = new java.util.HashMap<>();
+        formData.put("fullName", fullName);
+        formData.put("email", email);
+        formData.put("phone", phone);
+        formData.put("role", role);
+        formData.put("status", statusRaw);
+
+        java.util.List<String> errors = new java.util.ArrayList<>();
+        if (fullName.isEmpty()) errors.add("Họ và tên không được để trống.");
+        if (email.isEmpty()) {
+            errors.add("Email không được để trống.");
+        } else if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            errors.add("Email không hợp lệ.");
+        }
+        if (password.isEmpty()) errors.add("Mật khẩu không được để trống.");
+        if (!password.equals(confirmPassword)) errors.add("Mật khẩu xác nhận không khớp.");
+
+        model.User existed = userDAO.getUserByEmail(email);
+        if (existed != null) {
+            errors.add("Email đã tồn tại trong hệ thống.");
+        }
+
+        if (!errors.isEmpty()) {
+            request.setAttribute("formErrors", errors);
+            request.setAttribute("formData", formData);
+            doGet(request, response);
+            return false;
+        }
+
+        model.User newUser = new model.User();
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setUserName(email);
+        newUser.setPassword(password);
+        newUser.setPhoneNumber(phone);
+        newUser.setRole(role);
+        boolean active = !"Locked".equalsIgnoreCase(statusRaw);
+        newUser.setStatus(active);
+        Object adminId = request.getSession().getAttribute("userID");
+        if (adminId != null) {
+            newUser.setLastModifiedID(String.valueOf(adminId));
+        }
+
+        boolean ok = userDAO.createUser(newUser);
+        if (ok) {
+            request.getSession().setAttribute("flashSuccess", "Tạo tài khoản mới thành công.");
+        } else {
+            request.getSession().setAttribute("flashError", "Không thể tạo tài khoản. Vui lòng thử lại.");
+        }
+        return true;
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
 

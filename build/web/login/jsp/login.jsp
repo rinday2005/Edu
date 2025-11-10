@@ -26,7 +26,7 @@
         <!-- Nút đăng nhập Google -->
     <div id="g_id_onload"
          data-client_id="241470665821-3vbsh1pbsp17rd1vb6dctv2qlh5c721g.apps.googleusercontent.com"
-         data-login_uri="http://localhost:9999/PRJ_Assginment_EDUCATION/google-login"
+         data-login_uri="http://localhost:8080/EDUFlatForm/google-login"
          data-auto_prompt="false">
     </div>
 

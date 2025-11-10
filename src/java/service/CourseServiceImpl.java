@@ -11,7 +11,7 @@ import SectionsDAO.ISectionDAO;
 import model.Courses;
 import model.Lession;
 import model.Sections;
-
+import java.sql.SQLException;
 public class CourseServiceImpl {
 
     private final ICourseDAO courseDAO;
@@ -84,5 +84,7 @@ public class CourseServiceImpl {
     public Courses getCourseById(UUID courseId) {
         return courseDAO.findById(courseId);
     }
-
+     public UUID getCourseIdBySectionId(UUID sectionID) throws SQLException {
+        return courseDAO.getCourseIdBySectionId(sectionID);
+    }
 }

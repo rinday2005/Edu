@@ -125,7 +125,7 @@ navigateToRoom(courseID);
 
         function navigateToRoom(courseID) {
             if (courseID) {
-                window.location.href = '${pageContext.request.contextPath}/learner/jsp/Course/room.jsp?courseID=' + courseID;
+                window.location.href = '${pageContext.request.contextPath}/room?courseID=' + courseID;
             }
         }
     </script>

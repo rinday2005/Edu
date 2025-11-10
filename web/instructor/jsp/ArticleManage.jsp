@@ -253,7 +253,7 @@
             </main>
         </div>
 
-        <script src="${pageContext.request.contextPath}/assets/js/instructorsHome.js"></script>
+        <script src="${pageContext.request.contextPath}/instructor/js/instructorsHome.js"></script>
         <script src="${pageContext.request.contextPath}/instructor/js/ArticleManage.js"></script>
     </body>
 </html>

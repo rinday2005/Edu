@@ -11,8 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import model.McqChoices;
 import model.McqQuestions;
 
 /**
@@ -249,6 +252,64 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    @Override
+    public List<McqQuestions> getQuestionsByAssignment(UUID assignmentId) throws SQLException {
+        String sql = """
+            SELECT q.Id AS QuestionId,
+                   q.Content AS QuestionContent,
+                   c.Id AS ChoiceId,
+                   c.Content AS ChoiceContent,
+                   c.IsCorrect
+            FROM McqQuestions q
+            LEFT JOIN McqChoices c
+              ON q.Id = c.McqQuestionId
+            WHERE q.AssignmentId = ?
+            ORDER BY q.Id
+        """;
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setObject(1, assignmentId);
+            ResultSet rs = ps.executeQuery();
+            Map<UUID, McqQuestions> map = new LinkedHashMap<>();
+            while (rs.next()) {
+                UUID qid = UUID.fromString(rs.getString("QuestionId"));
+                McqQuestions q = map.get(qid);
+                if (q == null) {
+                    q = new McqQuestions();
+                    q.setId(qid);
+                    q.setContent(rs.getString("QuestionContent"));
+                    q.setAssignmentId(assignmentId);
+                    q.setMcqChoicesCollection(new ArrayList<>());
+                    map.put(qid, q);
+                }
+                String cidStr = rs.getString("ChoiceId");
+                if (cidStr != null) {
+                    McqChoices c = new McqChoices();
+                    c.setId(UUID.fromString(cidStr));
+                    c.setContent(rs.getString("ChoiceContent"));
+                    c.setIsCorrect(rs.getBoolean("IsCorrect"));
+                    c.setMcqQuestionId(qid);
+                    q.getMcqChoicesCollection().add(c);
+                }
+            }
+            return new ArrayList<>(map.values());
+    }
+}
+
+    @Override
+    public void saveUserAnswers(UUID submissionId, Map<UUID, UUID> userAnswers) throws SQLException {
+        String sql = "INSERT INTO McqUserAnswer (SubmissionId, McqChoiceId) VALUES (?, ?)";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            for (UUID choiceId : userAnswers.values()) {
+                ps.setObject(1, submissionId);
+                ps.setObject(2, choiceId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
         }
     }
 }

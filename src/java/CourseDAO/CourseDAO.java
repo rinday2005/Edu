@@ -190,4 +190,19 @@ public class CourseDAO implements ICourseDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
+    @Override
+    public UUID getCourseIdBySectionId(UUID sectionID) throws SQLException {
+        String sql = "SELECT courseID FROM Sections WHERE sectionID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, sectionID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UUID courseID = (UUID) rs.getObject("courseID");
+                    return courseID;
+                }
+            }
+        }
+        return null;
+    }
 }

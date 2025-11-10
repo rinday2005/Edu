@@ -22,4 +22,8 @@ public interface IMcqUserAnswerDAO {
 
     // Tuỳ chọn: insert nhiều dòng một lần
     int[] bulkInsert(List<McqUserAnswerPK> keys) throws SQLException;
+    
+    void saveUserAnswers(UUID submissionId, List<UUID> selectedChoiceIds) throws SQLException ;
+    void deleteBySubmissionID(UUID submissionId) throws SQLException;
+    List<UUID> findChoicesBySubmissionID(UUID submissionID)throws SQLException;
 }

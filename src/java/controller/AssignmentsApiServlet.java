@@ -58,10 +58,7 @@ public class AssignmentsApiServlet extends HttpServlet {
                 list = new java.util.ArrayList<>();
             }
             
-            System.out.println("[AssignmentsApiServlet] Returning " + list.size() + " assignments");
-            if (list.size() > 0) {
-                System.out.println("[AssignmentsApiServlet] First assignment: " + list.get(0).getName() + " (lessionID: " + list.get(0).getLessionID() + ")");
-            }
+           
             
             StringBuilder sb = new StringBuilder();
             sb.append("[");

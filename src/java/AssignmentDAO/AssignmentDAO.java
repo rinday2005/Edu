@@ -7,16 +7,19 @@ package AssignmentDAO;
 
 import model.Assignment;
 import DAO.DBConnection;
+import McqQuestionDAO.IMcqQuestionDAO;
+import McqQuestionDAO.McqQuestionDAO;
 
 import java.sql.*;
 import java.util.*;
+import model.McqQuestions;
 
 public class AssignmentDAO implements IAssignment {
 
     @Override
     public void create(Assignment a) {
         // 先尝试包含lessionID的插入
-        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID, lessionID) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
@@ -24,7 +27,6 @@ public class AssignmentDAO implements IAssignment {
             ps.setString(3, a.getDescription());
             ps.setInt(4, a.getOrder());
             ps.setObject(5, a.getSectionID());
-            ps.setObject(6, a.getLessionID());
             ps.executeUpdate();
             System.out.println("[AssignmentDAO] Successfully created assignment: " + a.getAssignmentID());
         } catch (SQLException e) {
@@ -95,15 +97,15 @@ public class AssignmentDAO implements IAssignment {
     }
 
     @Override
-    public List<Assignment> findByLessionID(UUID lessionID) {
+    public List<Assignment> findBySectionsID(UUID sectionID) {
         List<Assignment> list = new ArrayList<>();
         // 先检查lessionID字段是否存在
         try {
-            String sql = "SELECT * FROM Assignment WHERE lessionID = ? ORDER BY [Order] ASC";
+            String sql = "SELECT * FROM Assignment WHERE sectionID = ? ORDER BY [Order] ASC";
             try (Connection con = DBConnection.getConnection();
                  PreparedStatement ps = con.prepareStatement(sql)) {
-                ps.setObject(1, lessionID);
-                System.out.println("[AssignmentDAO] Executing SQL: " + sql + " with lessionID: " + lessionID);
+                ps.setObject(1, sectionID);
+                
                 try (ResultSet rs = ps.executeQuery()) {
                     int count = 0;
                     while (rs.next()) {
@@ -131,7 +133,7 @@ public class AssignmentDAO implements IAssignment {
     @Override
     public int update(Assignment a) {
         // 先尝试包含lessionID的更新
-        String sql = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ?, lessionID = ? WHERE assignmentID = ?";
+        String sql = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ? WHERE assignmentID = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
@@ -139,8 +141,7 @@ public class AssignmentDAO implements IAssignment {
             ps.setString(3, a.getDescription());
             ps.setInt(4, a.getOrder());
             ps.setObject(5, a.getSectionID());
-            ps.setObject(6, a.getLessionID());
-            ps.setObject(7, a.getAssignmentID());
+            ps.setObject(6, a.getAssignmentID());
             int result = ps.executeUpdate();
             System.out.println("[AssignmentDAO] Successfully updated assignment: " + a.getAssignmentID());
             return result;
@@ -221,23 +222,75 @@ public class AssignmentDAO implements IAssignment {
         } else {
             a.setSectionID(null);
         }
-        
-        // lessionID (có thể null hoặc cột không tồn tại)
-        try {
-            Object lessionObj = rs.getObject("lessionID");
-            if (lessionObj instanceof UUID) {
-                a.setLessionID((UUID) lessionObj);
-            } else if (lessionObj != null) {
-                a.setLessionID(UUID.fromString(String.valueOf(lessionObj)));
-            } else {
-                a.setLessionID(null);
-            }
-        } catch (SQLException e) {
-            // Cột lessionID không tồn tại，设置为null
-            System.out.println("[AssignmentDAO] lessionID column not found, setting to null");
-            a.setLessionID(null);
-        }
-        
         return a;
+    }
+
+    @Override
+    public Assignment getBySectionId(UUID sectionID) throws SQLException {
+    String sql = "SELECT assignmentID, userID, name, description, [Order], sectionID "
+               + "FROM Assignment WHERE sectionID = ?";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setObject(1, sectionID);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                Assignment a = new Assignment();
+
+                String assignmentIdStr = rs.getString("assignmentID");
+                UUID assignmentID = UUID.fromString(assignmentIdStr);
+                a.setAssignmentID(assignmentID);
+
+                String userIdStr = rs.getString("userID");
+                UUID userID = UUID.fromString(userIdStr);
+                a.setUserID(userID);
+
+                a.setName(rs.getString("name"));
+                a.setDescription(rs.getString("description"));
+                a.setOrder(rs.getInt("Order"));
+
+                String sectionIdStr = rs.getString("sectionID");
+                UUID sectionIdFromDb = UUID.fromString(sectionIdStr);
+                a.setSectionID(sectionIdFromDb);
+
+                // Lấy các câu hỏi
+                IMcqQuestionDAO qDao = new McqQuestionDAO();
+                List<McqQuestions> questions = qDao.getQuestionsByAssignment(a.getAssignmentID());
+                a.setQuestions(questions);
+
+                return a;
+            }
+        }
+    }
+    return null;
+}
+
+    @Override
+    public Assignment getByAssignmentId(UUID assignmentID) throws SQLException {
+        String sql = "SELECT assignmentID, userID, name, description, [Order], sectionID "
+                   + "FROM Assignment WHERE assignmentID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, assignmentID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Assignment a = new Assignment();
+                    a.setAssignmentID(UUID.fromString(rs.getString("assignmentID")));
+                    a.setUserID(UUID.fromString(rs.getString("userID")));
+                    a.setName(rs.getString("name"));
+                    a.setDescription(rs.getString("description"));
+                    a.setOrder(rs.getInt("Order"));
+                    a.setSectionID(UUID.fromString(rs.getString("sectionID")));
+
+                    // Lấy danh sách câu hỏi
+                    McqQuestionDAO qDao = new McqQuestionDAO();
+                    List<McqQuestions> questions = qDao.getQuestionsByAssignment(assignmentID);
+                    a.setQuestions(questions);
+
+                    return a;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -179,7 +179,6 @@ public class ManageAssignment extends HttpServlet {
             assignment.setDescription(description != null ? description : "");
             assignment.setOrder(order);
             assignment.setSectionID(sectionID);
-            assignment.setLessionID(lessionID);
 
             try {
                 assignmentService.create(assignment);
@@ -314,7 +313,7 @@ public class ManageAssignment extends HttpServlet {
             assignment.setDescription(description != null ? description : "");
             assignment.setOrder(order);
             assignment.setSectionID(sectionID);
-            assignment.setLessionID(lessionID);
+            
 
             int updated = assignmentService.update(assignment);
             if (updated > 0) {

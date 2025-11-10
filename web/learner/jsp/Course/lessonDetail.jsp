@@ -6,7 +6,7 @@
 <!-- Added script to handle room navigation -->
 <script>
     function navigateToRoom(courseId) {
-        window.location.href = '${pageContext.request.contextPath}/course/room.jsp?id=' + courseId;
+        window.location.href = '${pageContext.request.contextPath}/room?courseID=' + courseId;
     }
 </script>
 </body>

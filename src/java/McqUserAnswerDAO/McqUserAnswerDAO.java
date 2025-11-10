@@ -5,6 +5,8 @@ import java.util.*;
 import model.McqUserAnswer;
 import model.McqUserAnswerPK;
 import DAO.DBConnection;
+import java.lang.System.Logger.Level;
+import org.jboss.logging.Logger;
 
 public class McqUserAnswerDAO implements IMcqUserAnswerDAO {
 
@@ -138,5 +140,45 @@ public class McqUserAnswerDAO implements IMcqUserAnswerDAO {
             }
             return ps.executeBatch();
         }
+    }
+    @Override
+     public void saveUserAnswers(UUID submissionId, List<UUID> selectedChoiceIds) throws SQLException {
+        String sql = "INSERT INTO McqUserAnswer (SubmissionId, McqChoiceId) VALUES (?, ?)";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        for (UUID choiceId : selectedChoiceIds) {
+            ps.setString(1, submissionId.toString());
+            ps.setString(2, choiceId.toString());
+            ps.addBatch();
+        }
+
+        ps.executeBatch();
+    }
+    }
+
+    @Override
+     public void deleteBySubmissionID(UUID submissionId) throws SQLException {
+        String sql = "DELETE FROM McqUserAnswer WHERE SubmissionId = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, submissionId.toString());
+            ps.executeUpdate();
+        }
+    }
+    @Override
+    public List<UUID> findChoicesBySubmissionID(UUID submissionID) throws SQLException {
+        List<UUID> choiceIds = new ArrayList<>();
+    String sql = "SELECT McqChoiceId FROM McqUserAnswer WHERE SubmissionId = ?";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, submissionID.toString());
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                choiceIds.add(UUID.fromString(rs.getString("McqChoiceId")));
+            }
+        }
+    }   
+    return choiceIds;
     }
 }

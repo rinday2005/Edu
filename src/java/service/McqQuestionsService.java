@@ -208,7 +208,7 @@ public class McqQuestionsService{
     }
     
     public List<McqChoices> getChoicesByQuestion(UUID questionId) {
-        return choiceDAO.findByQuestionId(questionId);
+        return choiceDAO.findByQuestionId1(questionId);
     }
     
     public McqChoices getChoiceById(UUID choiceId) {

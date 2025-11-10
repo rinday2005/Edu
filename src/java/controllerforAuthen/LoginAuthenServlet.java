@@ -12,6 +12,7 @@ import java.util.UUID;
 import model.User;
 import service.UserServiceImpl;
 import service.WalletService;
+import util.StaticResourceUtil;
 
 @WebServlet(name = "LoginAuthenServlet", urlPatterns = {"/login"})
 public class LoginAuthenServlet extends HttpServlet {
@@ -27,6 +28,13 @@ public class LoginAuthenServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Bỏ qua static resources (CSS, JS, images, etc.)
+        String path = request.getRequestURI();
+        if (StaticResourceUtil.isStaticResource(path)) {
+            // Không xử lý, để container phục vụ static resources
+            return;
+        }
+        
         // ✅ hiển thị form login
         request.getRequestDispatcher("/login/jsp/login.jsp").forward(request, response);
     }
@@ -34,6 +42,12 @@ public class LoginAuthenServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Bỏ qua static resources (CSS, JS, images, etc.)
+        String path = request.getRequestURI();
+        if (StaticResourceUtil.isStaticResource(path)) {
+            // Không xử lý, để container phục vụ static resources
+            return;
+        }
 
         String username = request.getParameter("input") != null ? request.getParameter("input").trim() : "";
         String password = request.getParameter("password") != null ? request.getParameter("password").trim() : "";
@@ -77,6 +91,7 @@ public class LoginAuthenServlet extends HttpServlet {
         request.setAttribute("errorMessage", "Sai tài khoản hoặc mật khẩu!");
         request.getRequestDispatcher("/login/jsp/login.jsp").forward(request, response);
     }
+
 
     @Override
     public String getServletInfo() {

@@ -491,6 +491,24 @@ box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
   display: block;
   margin-bottom: 16px;
   text-align: center;
+  line-height: 1;
+  min-height: 32px;
+  width: 100%;
+  visibility: visible;
+  opacity: 1;
+}
+
+.feature-icon:empty::before {
+  content: "📜";
+  font-size: 32px;
+  display: block;
+}
+
+.feature-item:nth-child(4) .feature-icon {
+  font-size: 32px;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .feature-item h4 {

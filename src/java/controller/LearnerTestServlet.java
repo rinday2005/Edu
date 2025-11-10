@@ -11,9 +11,8 @@ import java.util.UUID;
 import model.Assignment;
 import model.McqQuestions;
 import model.McqChoices;
-import AssignmentDAO.AssignmentDAO;
-import AssignmentDAO.IAssignment;
 import service.McqQuestionsService;
+import service.AssignmentService;
 
 /**
  * Servlet for learner to take tests
@@ -22,7 +21,7 @@ import service.McqQuestionsService;
 public class LearnerTestServlet extends HttpServlet {
 
     private McqQuestionsService questionService = new McqQuestionsService();
-    private IAssignment assignmentDAO = new AssignmentDAO();
+    private AssignmentService assignmentService = new AssignmentService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,7 +37,7 @@ public class LearnerTestServlet extends HttpServlet {
             UUID assignmentId = UUID.fromString(assignmentIdParam);
             
             // Lấy assignment
-            Assignment assignment = assignmentDAO.findById(assignmentId);
+            Assignment assignment = assignmentService.findById(assignmentId);
             if (assignment == null) {
                 request.setAttribute("error", "Không tìm thấy bài test");
                 request.getRequestDispatcher("/learner/jsp/Test/test.jsp").forward(request, response);
@@ -78,7 +77,7 @@ public class LearnerTestServlet extends HttpServlet {
             }
 
             UUID assignmentId = UUID.fromString(assignmentIdParam);
-            Assignment assignment = assignmentDAO.findById(assignmentId);
+            Assignment assignment = assignmentService.findById(assignmentId);
             if (assignment == null) {
                 request.setAttribute("error", "Không tìm thấy bài test");
                 doGet(request, response);

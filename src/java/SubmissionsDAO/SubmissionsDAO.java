@@ -154,5 +154,86 @@ public class SubmissionsDAO implements ISubmissionsDAO {
         s.setAssignmentID((UUID) rs.getObject("assignmentID"));
         return s;
     }
+
+    @Override
+    public void insertSubmission(UUID submissionID, UUID userID, UUID assignmentID) throws SQLException {
+        String sql = "INSERT INTO Submissions (submissionID, userID, createAt, status, assignmentID) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, submissionID);
+            ps.setObject(2, userID);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, "SUBMITTED");
+            ps.setObject(5, assignmentID);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void insertUserAnswers(UUID submissionID, List<UUID> choiceIds)throws SQLException {
+        String sql = "INSERT INTO McqUserAnswer (SubmissionId, McqChoiceId) VALUES (?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (UUID choiceId : choiceIds) {
+                ps.setObject(1, submissionID);
+                ps.setObject(2, choiceId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        }
+    }
+
+    @Override
+    public Map<UUID, UUID> getUserAnswersBySubmission(UUID submissionID) throws SQLException {
+        String sql = "SELECT mq.McqQuestionId, mua.McqChoiceId FROM McqUserAnswer mua "
+                   + "JOIN McqChoices mq ON mua.McqChoiceId = mq.Id "
+                   + "WHERE mua.SubmissionId = ?";
+        Map<UUID, UUID> map = new HashMap<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, submissionID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    UUID qId = (UUID) rs.getObject("McqQuestionId");
+                    UUID cId = (UUID) rs.getObject("McqChoiceId");
+                    map.put(qId, cId);
+                }
+            }
+        }
+        return map;
+    }
+
+    @Override
+     public void saveSubmission(UUID submissionId, UUID userId, UUID assignmentId) throws SQLException {
+        String sql = "INSERT INTO Submissions (submissionID, userID, createAt, status, assignmentID) VALUES (?, ?, GETDATE(), ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, submissionId.toString());
+            ps.setString(2, userId.toString());
+            ps.setString(3, "SUBMITTED");
+            ps.setString(4, assignmentId.toString());
+            ps.executeUpdate();
+        }
+    }
+
+
+    @Override
+    public UUID findByUserAndAssignment(UUID userId, UUID assignmentId) throws SQLException {
+        String sql = "SELECT submissionID FROM Submissions WHERE userID = ? AND assignmentID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, userId.toString());
+            ps.setString(2, assignmentId.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String subIdStr = rs.getString("submissionID");
+                    return subIdStr != null ? UUID.fromString(subIdStr) : null;
+                }
+            }
+        }
+        return null;
+    }
+    
+    
 }
 

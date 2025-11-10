@@ -5,15 +5,18 @@
 package McqChoiceDAO;
 
 import DAO.DBConnection;
+import java.lang.System.Logger.Level;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import model.McqChoices;
+import org.jboss.logging.Logger;
 
 /**
  *
@@ -199,7 +202,7 @@ public class McqChoiceDAO implements IMcqChoiceDAO {
     }
 
     @Override
-    public List<McqChoices> findByQuestionId(UUID questionId) {
+    public List<McqChoices> findByQuestionId1(UUID questionId) {
         List<McqChoices> list = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(SELECT_BY_QUESTION_SQL)) {
@@ -260,6 +263,26 @@ public class McqChoiceDAO implements IMcqChoiceDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    @Override
+    public Collection<McqChoices> findByQuestionId(UUID questionId) throws SQLException {
+        String sql = "SELECT Id, Content, IsCorrect, McqQuestionId FROM McqChoices WHERE McqQuestionId = ?";
+        Collection<McqChoices> list = new ArrayList<>();
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, questionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    McqChoices c = new McqChoices();
+                    c.setId((UUID) rs.getObject("Id"));
+                    c.setContent(rs.getString("Content"));
+                    c.setIsCorrect(rs.getBoolean("IsCorrect"));
+                    c.setMcqQuestionId((UUID) rs.getObject("McqQuestionId"));
+                    list.add(c);
+                }
+            }
+        } 
+        return list;
     }
 }
 
