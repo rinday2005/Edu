@@ -47,8 +47,10 @@ public class AdminApprovalsServlet extends HttpServlet {
             java.util.UUID id = java.util.UUID.fromString(courseId);
             if ("approve".equals(action)) {
                 courseDAO.updateIsApproved(id, true);
+                request.getSession().setAttribute("success", "Đã duyệt khóa học thành công! Khóa học đã được thêm vào quản lý khóa học.");
             } else if ("reject".equals(action)) {
-                courseDAO.updateIsApproved(id, false);
+                // Từ chối: giữ isApproved=false, khóa học tiếp tục ở trang duyệt
+                request.getSession().setAttribute("success", "Đã từ chối khóa học.");
             }
         } catch (Exception e) {
             request.getSession().setAttribute("error", e.getMessage());

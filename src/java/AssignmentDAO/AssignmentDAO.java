@@ -9,6 +9,8 @@ import model.Assignment;
 import DAO.DBConnection;
 import McqQuestionDAO.IMcqQuestionDAO;
 import McqQuestionDAO.McqQuestionDAO;
+import McqChoiceDAO.McqChoiceDAO;
+import model.McqChoices;
 
 import java.sql.*;
 import java.util.*;
@@ -18,8 +20,8 @@ public class AssignmentDAO implements IAssignment {
 
     @Override
     public void create(Assignment a) {
-        // 先尝试包含lessionID的插入
-        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID) VALUES (?, ?, ?, ?, ?, ?)";
+        // Thử chèn có chứa lessionID trước
+        String sql = "INSERT INTO Assignment (userID, name, description, [Order], sectionID) VALUES (?, ?, ?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, a.getUserID());
@@ -30,7 +32,7 @@ public class AssignmentDAO implements IAssignment {
             ps.executeUpdate();
             System.out.println("[AssignmentDAO] Successfully created assignment: " + a.getAssignmentID());
         } catch (SQLException e) {
-            // 如果包含lessionID失败，尝试不包含lessionID（兼容旧数据库）
+            // Nếu chèn có lessionID thất bại, thử không chứa lessionID (tương thích với database cũ)
             if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
                 System.out.println("[AssignmentDAO] lessionID column not found, trying without lessionID...");
                 try {
@@ -99,7 +101,7 @@ public class AssignmentDAO implements IAssignment {
     @Override
     public List<Assignment> findBySectionsID(UUID sectionID) {
         List<Assignment> list = new ArrayList<>();
-        // 先检查lessionID字段是否存在
+        // Kiểm tra xem trường lessionID có tồn tại không
         try {
             String sql = "SELECT * FROM Assignment WHERE sectionID = ? ORDER BY [Order] ASC";
             try (Connection con = DBConnection.getConnection();
@@ -118,7 +120,7 @@ public class AssignmentDAO implements IAssignment {
                 }
             }
         } catch (SQLException e) {
-            // 如果lessionID字段不存在，返回空列表
+            // Nếu trường lessionID không tồn tại, trả về danh sách rỗng
             if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
                 System.out.println("[AssignmentDAO] lessionID column not found, returning empty list");
                 return list;
@@ -132,7 +134,7 @@ public class AssignmentDAO implements IAssignment {
 
     @Override
     public int update(Assignment a) {
-        // 先尝试包含lessionID的更新
+        // Thử cập nhật có chứa lessionID trước
         String sql = "UPDATE Assignment SET userID = ?, name = ?, description = ?, [Order] = ?, sectionID = ? WHERE assignmentID = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -146,7 +148,7 @@ public class AssignmentDAO implements IAssignment {
             System.out.println("[AssignmentDAO] Successfully updated assignment: " + a.getAssignmentID());
             return result;
         } catch (SQLException e) {
-            // 如果包含lessionID失败，尝试不包含lessionID（兼容旧数据库）
+            // Nếu chèn có lessionID thất bại, thử không chứa lessionID (tương thích với database cũ)
             if (e.getMessage() != null && (e.getMessage().contains("lessionID") || e.getMessage().contains("Invalid column"))) {
                 System.out.println("[AssignmentDAO] lessionID column not found, trying update without lessionID...");
                 try {
@@ -253,10 +255,63 @@ public class AssignmentDAO implements IAssignment {
                 UUID sectionIdFromDb = UUID.fromString(sectionIdStr);
                 a.setSectionID(sectionIdFromDb);
 
-                // Lấy các câu hỏi
+                // Lấy các câu hỏi - sử dụng phương thức giống như phía instructor
+                System.out.println("[AssignmentDAO] getBySectionId - Assignment ID to search: " + a.getAssignmentID());
+                System.out.println("[AssignmentDAO] getBySectionId - Assignment ID type: " + (a.getAssignmentID() != null ? a.getAssignmentID().getClass().getName() : "NULL"));
+                System.out.println("[AssignmentDAO] getBySectionId - Assignment ID string: " + (a.getAssignmentID() != null ? a.getAssignmentID().toString() : "NULL"));
+                
                 IMcqQuestionDAO qDao = new McqQuestionDAO();
-                List<McqQuestions> questions = qDao.getQuestionsByAssignment(a.getAssignmentID());
+                McqChoiceDAO choiceDao = new McqChoiceDAO();
+                List<McqQuestions> questions = null;
+                try {
+                    // Sử dụng findByAssignmentId để lấy danh sách câu hỏi trước (giống như phía instructor)
+                    questions = qDao.findByAssignmentId(a.getAssignmentID());
+                    System.out.println("[AssignmentDAO] getBySectionId - Using findByAssignmentId, found: " + 
+                            (questions != null ? questions.size() : 0) + " questions");
+                    
+                    // Nếu không tìm thấy, thử truy vấn database trực tiếp
+                    if (questions == null || questions.isEmpty()) {
+                        System.out.println("[AssignmentDAO] getBySectionId - No questions found, checking database directly...");
+                        try (Connection checkConn = DBConnection.getConnection();
+                             PreparedStatement checkPs = checkConn.prepareStatement("SELECT COUNT(*) as cnt FROM [dbo].[McqQuestions] WHERE [AssignmentId] = ?")) {
+                            checkPs.setString(1, a.getAssignmentID().toString());
+                            try (ResultSet checkRs = checkPs.executeQuery()) {
+                                if (checkRs.next()) {
+                                    int count = checkRs.getInt("cnt");
+                                    System.out.println("[AssignmentDAO] getBySectionId - Direct DB query found " + count + " questions with AssignmentId = " + a.getAssignmentID().toString());
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.err.println("[AssignmentDAO] getBySectionId - Error checking database directly: " + e.getMessage());
+                        }
+                    }
+                    
+                    // Tải choices cho mỗi câu hỏi (giống như phía instructor)
+                    if (questions != null && !questions.isEmpty()) {
+                        for (McqQuestions q : questions) {
+                            try {
+                                List<McqChoices> choices = choiceDao.findByQuestionId1(q.getId());
+                                q.setMcqChoicesCollection(choices != null ? choices : new java.util.ArrayList<>());
+                                System.out.println("[AssignmentDAO] getBySectionId - Question " + q.getId() + 
+                                        " has " + (choices != null ? choices.size() : 0) + " choices");
+                            } catch (Exception e) {
+                                System.err.println("[AssignmentDAO] getBySectionId - Error loading choices for question " + q.getId() + ": " + e.getMessage());
+                                q.setMcqChoicesCollection(new java.util.ArrayList<>());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("[AssignmentDAO] getBySectionId - Error loading questions: " + e.getMessage());
+                    e.printStackTrace();
+                    questions = new java.util.ArrayList<>();
+                }
+                if (questions == null) {
+                    questions = new java.util.ArrayList<>();
+                }
                 a.setQuestions(questions);
+                
+                System.out.println("[AssignmentDAO] getBySectionId - Assignment ID: " + a.getAssignmentID() + 
+                        ", Questions count: " + (questions != null ? questions.size() : 0));
 
                 return a;
             }
@@ -282,10 +337,24 @@ public class AssignmentDAO implements IAssignment {
                     a.setOrder(rs.getInt("Order"));
                     a.setSectionID(UUID.fromString(rs.getString("sectionID")));
 
-                    // Lấy danh sách câu hỏi
-                    McqQuestionDAO qDao = new McqQuestionDAO();
-                    List<McqQuestions> questions = qDao.getQuestionsByAssignment(assignmentID);
-                    a.setQuestions(questions);
+                    // Lấy danh sách câu hỏi - sử dụng phương thức giống như phía instructor
+                    IMcqQuestionDAO qDao = new McqQuestionDAO();
+                    McqChoiceDAO choiceDao = new McqChoiceDAO();
+                    List<McqQuestions> questions = qDao.findByAssignmentId(assignmentID);
+                    
+                    // Tải choices cho mỗi câu hỏi (giống như phía instructor)
+                    if (questions != null && !questions.isEmpty()) {
+                        for (McqQuestions q : questions) {
+                            try {
+                                List<McqChoices> choices = choiceDao.findByQuestionId1(q.getId());
+                                q.setMcqChoicesCollection(choices != null ? choices : new java.util.ArrayList<>());
+                            } catch (Exception e) {
+                                System.err.println("[AssignmentDAO] getByAssignmentId - Error loading choices for question " + q.getId() + ": " + e.getMessage());
+                                q.setMcqChoicesCollection(new java.util.ArrayList<>());
+                            }
+                        }
+                    }
+                    a.setQuestions(questions != null ? questions : new java.util.ArrayList<>());
 
                     return a;
                 }

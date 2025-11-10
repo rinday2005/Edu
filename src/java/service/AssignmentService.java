@@ -45,14 +45,22 @@ public class AssignmentService {
     }
     
     public List<Assignment> findBySectionID(UUID sectionID) {
-        List<Assignment> all = dao.findAll();
-        List<Assignment> result = new java.util.ArrayList<>();
-        for (Assignment a : all) {
-            if (a.getSectionID() != null && a.getSectionID().equals(sectionID)) {
-                result.add(a);
+        // Sử dụng phương thức truy vấn database, thay vì duyệt qua tất cả assignments
+        try {
+            return dao.findBySectionsID(sectionID);
+        } catch (Exception e) {
+            System.err.println("[AssignmentService] Error finding assignments by sectionID: " + e.getMessage());
+            e.printStackTrace();
+            // Nếu truy vấn database thất bại, quay lại phương thức duyệt
+            List<Assignment> all = dao.findAll();
+            List<Assignment> result = new java.util.ArrayList<>();
+            for (Assignment a : all) {
+                if (a.getSectionID() != null && a.getSectionID().equals(sectionID)) {
+                    result.add(a);
+                }
             }
+            return result;
         }
-        return result;
     }
     
     public List<Assignment> findByLessionID(UUID lessionID) {

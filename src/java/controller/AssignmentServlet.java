@@ -86,7 +86,91 @@ public class AssignmentServlet extends HttpServlet {
                 userID = UUID.fromString(userIDStr);
             }
 
+            System.out.println("===========================================");
+            System.out.println("[AssignmentServlet] Checking sectionID: " + sectionID);
+            System.out.println("[AssignmentServlet] CourseID: " + courseID);
+            
+            // Kiểm tra xem section này có assignment không
+            List<Assignment> assignmentsInSection = assignmentService.findBySectionID(sectionID);
+            System.out.println("[AssignmentServlet] Found " + (assignmentsInSection != null ? assignmentsInSection.size() : 0) + " assignments in section");
+            
+            // Chẩn đoán: Kiểm tra tất cả assignments trong database để xem có sectionID khớp không
+            try {
+                List<Assignment> allAssignments = assignmentService.findAll();
+                System.out.println("[AssignmentServlet] Total assignments in database: " + (allAssignments != null ? allAssignments.size() : 0));
+                if (allAssignments != null) {
+                    System.out.println("[AssignmentServlet] Checking all assignments for sectionID match...");
+                    for (Assignment a : allAssignments) {
+                        System.out.println("[AssignmentServlet] Assignment: " + a.getAssignmentID() + 
+                                ", SectionID: " + a.getSectionID() + 
+                                ", Match: " + (a.getSectionID() != null && a.getSectionID().equals(sectionID)));
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("[AssignmentServlet] Error checking all assignments: " + e.getMessage());
+            }
+            
+            if (assignmentsInSection != null && !assignmentsInSection.isEmpty()) {
+                for (Assignment a : assignmentsInSection) {
+                    System.out.println("[AssignmentServlet] Assignment found: " + a.getAssignmentID() + ", Name: " + a.getName() + ", SectionID: " + a.getSectionID());
+                }
+            }
+            
+            if (assignmentsInSection == null || assignmentsInSection.isEmpty()) {
+                System.err.println("[AssignmentServlet] ❌ No assignment found for sectionID: " + sectionID);
+                System.err.println("[AssignmentServlet] This section does not have any test/assignment created yet.");
+                System.err.println("[AssignmentServlet] 💡 Solution: Instructor needs to create an assignment for this section.");
+                req.setAttribute("error", "Section này chưa có bài kiểm tra. Vui lòng liên hệ instructor để tạo bài kiểm tra cho section này. (SectionID: " + sectionID + ")");
+                req.setAttribute("courseID", courseID);
+                req.setAttribute("sectionID", sectionID);
+                RequestDispatcher rd = req.getRequestDispatcher("/learner/jsp/Course/quiz.jsp");
+                rd.forward(req, resp);
+                return;
+            }
+            
+            // Sử dụng assignment đầu tiên (thường một section chỉ có một assignment)
+            System.out.println("[AssignmentServlet] Loading assignment with questions...");
             Assignment quizAssignment = assignmentService.getAssignmentWithQuestions(sectionID);
+            
+            // Kiểm tra xem assignment có tồn tại không
+            if (quizAssignment == null) {
+                System.err.println("[AssignmentServlet] No assignment found for sectionID: " + sectionID + " (but found " + assignmentsInSection.size() + " in list)");
+                // Thử sử dụng assignment đầu tiên trong danh sách
+                if (!assignmentsInSection.isEmpty()) {
+                    quizAssignment = assignmentsInSection.get(0);
+                    System.out.println("[AssignmentServlet] Using first assignment from list: " + quizAssignment.getAssignmentID());
+                    // Tải thủ công các câu hỏi và lựa chọn
+                    try {
+                        quizAssignment = assignmentService.getAssignmentWithQuestions(sectionID);
+                    } catch (Exception e) {
+                        System.err.println("[AssignmentServlet] Error loading questions for assignment: " + e.getMessage());
+                    }
+                }
+                
+                if (quizAssignment == null) {
+                    req.setAttribute("error", "Không thể tải bài kiểm tra. Vui lòng liên hệ instructor.");
+                    req.setAttribute("courseID", courseID);
+                    req.setAttribute("sectionID", sectionID);
+                    RequestDispatcher rd = req.getRequestDispatcher("/learner/jsp/Course/quiz.jsp");
+                    rd.forward(req, resp);
+                    return;
+                }
+            }
+            
+            System.out.println("[AssignmentServlet] Found assignment: " + quizAssignment.getAssignmentID() + 
+                    ", Questions: " + (quizAssignment.getQuestions() != null ? quizAssignment.getQuestions().size() : 0));
+            
+            // Kiểm tra xem có câu hỏi không
+            if (quizAssignment.getQuestions() == null || quizAssignment.getQuestions().isEmpty()) {
+                System.err.println("[AssignmentServlet] Assignment found but no questions: " + quizAssignment.getAssignmentID());
+                req.setAttribute("error", "Bài kiểm tra này chưa có câu hỏi. Vui lòng liên hệ instructor.");
+                req.setAttribute("quizAssignment", quizAssignment);
+                req.setAttribute("courseID", courseID);
+                RequestDispatcher rd = req.getRequestDispatcher("/learner/jsp/Course/quiz.jsp");
+                rd.forward(req, resp);
+                return;
+            }
+            
             req.setAttribute("quizAssignment", quizAssignment);
             req.setAttribute("courseID", courseID);
 

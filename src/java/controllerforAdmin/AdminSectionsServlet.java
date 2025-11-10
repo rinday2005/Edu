@@ -43,7 +43,7 @@ public class AdminSectionsServlet extends HttpServlet {
             if ("delete".equals(action)) {
                 sectionDAO.delete(id);
             } else if ("toggle".equals(action)) {
-                // 读取当前状态不方便，这里直接置 active = 1（示例可扩展）
+                // Đọc trạng thái hiện tại không tiện, ở đây trực tiếp đặt active = 1 (có thể mở rộng)
                 sectionDAO.updateStatus(id, true);
             }
         } catch (Exception e) {

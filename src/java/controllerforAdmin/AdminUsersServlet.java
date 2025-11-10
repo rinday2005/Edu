@@ -52,7 +52,7 @@ public class AdminUsersServlet extends HttpServlet {
         boolean shouldRedirect = true;
         try {
             if ("lock".equals(action)) {
-                // 置 status = 0
+                // Đặt status = 0
                 try (java.sql.Connection con = DAO.DBConnection.getConnection();
                      java.sql.PreparedStatement ps = con.prepareStatement("UPDATE [dbo].[User] SET status=0, lastModifiedAt=GETDATE() WHERE userID=?")) {
                     ps.setString(1, userId);

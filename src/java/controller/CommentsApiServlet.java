@@ -2,6 +2,8 @@ package controller;
 
 import CommentsDAO.CommentsDAO;
 import CommentsDAO.ICommentsDAO;
+import CommentReportDAO.CommentReportDAO;
+import CommentReportDAO.ICommentReportDAO;
 import UserDAO.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import model.Comments;
+import model.CommentReport;
 import model.User;
 
 @WebServlet(name = "CommentsApiServlet", urlPatterns = {"/api/comments"})
@@ -107,6 +110,62 @@ public class CommentsApiServlet extends HttpServlet {
             resp.setStatus(ok ? HttpServletResponse.SC_OK : HttpServletResponse.SC_FORBIDDEN);
             if (ok) {
                 try (PrintWriter out = resp.getWriter()) { out.write("{\"success\":true}"); }
+            }
+            return;
+        }
+
+        // Check if this is a report action
+        String reportAction = req.getParameter("action");
+        if ("report".equalsIgnoreCase(reportAction)) {
+            String commentIdStr = req.getParameter("commentID");
+            String reason = req.getParameter("reason");
+            if (commentIdStr == null || commentIdStr.isBlank()) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                try (PrintWriter out = resp.getWriter()) {
+                    out.write("{\"error\":\"Missing commentID\"}");
+                }
+                return;
+            }
+            
+            try {
+                CommentReportDAO reportDAO = new CommentReportDAO();
+                UUID commentID = UUID.fromString(commentIdStr);
+                UUID reporterID = UUID.fromString(user.getUserID());
+                
+                // Check if user already reported this comment
+                if (reportDAO.exists(commentID, reporterID)) {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    try (PrintWriter out = resp.getWriter()) {
+                        out.write("{\"error\":\"Bạn đã báo cáo bình luận này rồi\"}");
+                    }
+                    return;
+                }
+                
+                // Create report
+                model.CommentReport report = new model.CommentReport();
+                report.setReportID(UUID.randomUUID());
+                report.setCommentID(commentID);
+                report.setReporterID(reporterID);
+                report.setReason(reason != null && !reason.isBlank() ? reason : "spam");
+                report.setCreateAt(new Date());
+                report.setStatus("pending");
+                
+                boolean ok = reportDAO.insert(report);
+                if (ok) {
+                    try (PrintWriter out = resp.getWriter()) {
+                        out.write("{\"success\":true,\"message\":\"Đã gửi báo cáo tới admin\"}");
+                    }
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    try (PrintWriter out = resp.getWriter()) {
+                        out.write("{\"error\":\"Không thể gửi báo cáo\"}");
+                    }
+                }
+            } catch (Exception e) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                try (PrintWriter out = resp.getWriter()) {
+                    out.write("{\"error\":\"" + e.getMessage() + "\"}");
+                }
             }
             return;
         }

@@ -78,12 +78,17 @@ public class CourseServletController extends HttpServlet {
             
             // Instructor đóng 2 vai trò (Instructor và Learner) nên có thể xem trang learner
             // Không redirect Instructor nữa, cho phép họ xem trang learner
-List<Courses> courses = courseService.getAllCourses();
-            System.out.println("[CourseServletController] Found " + (courses != null ? courses.size() : 0) + " courses");
-            
-            if (courses == null) {
-                courses = new java.util.ArrayList<>();
+            // Chỉ hiển thị các khóa học đã được duyệt (isApproved=true)
+            List<Courses> allCourses = courseService.getAllCourses();
+            List<Courses> courses = new java.util.ArrayList<>();
+            if (allCourses != null) {
+                for (Courses c : allCourses) {
+                    if (c.isApproved()) {
+                        courses.add(c);
+                    }
+                }
             }
+            System.out.println("[CourseServletController] Found " + courses.size() + " approved courses (out of " + (allCourses != null ? allCourses.size() : 0) + " total)");
             
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/learner/jsp/Home/home.jsp").forward(request, response);
@@ -117,6 +122,12 @@ List<Courses> courses = courseService.getAllCourses();
 
                 if (dto == null || dto.course == null) {
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy khóa học");
+                    return;
+                }
+                
+                // Chỉ cho phép xem các khóa học đã được duyệt
+                if (!dto.course.isApproved()) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Khóa học này chưa được duyệt");
                     return;
                 }
 

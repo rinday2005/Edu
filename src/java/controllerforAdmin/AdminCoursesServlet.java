@@ -21,7 +21,15 @@ public class AdminCoursesServlet extends HttpServlet {
             return;
         }
         try {
-            request.setAttribute("courses", courseDAO.findAll());
+            // Chỉ hiển thị các khóa học đã được duyệt (isApproved=true)
+            java.util.List<model.Courses> allCourses = courseDAO.findAll();
+            java.util.List<model.Courses> approvedCourses = new java.util.ArrayList<>();
+            for (model.Courses c : allCourses) {
+                if (c.isApproved()) {
+                    approvedCourses.add(c);
+                }
+            }
+            request.setAttribute("courses", approvedCourses);
         } catch (Exception e) {
             request.setAttribute("error", e.getMessage());
         }
@@ -40,11 +48,17 @@ public class AdminCoursesServlet extends HttpServlet {
         String courseId = request.getParameter("courseID");
         try {
             java.util.UUID id = java.util.UUID.fromString(courseId);
-            if ("toggleApprove".equals(action)) {
-                model.Courses c = courseDAO.findById(id);
-                if (c != null) courseDAO.updateIsApproved(id, !c.isApproved());
+            if ("remove".equals(action)) {
+                // Gỡ duyệt: đặt isApproved thành false, khóa học sẽ chuyển sang trang duyệt
+                courseDAO.updateIsApproved(id, false);
+                request.getSession().setAttribute("success", "Đã gỡ khóa học khỏi danh sách đã duyệt!");
             } else if ("delete".equals(action)) {
-                courseDAO.delete(id);
+                boolean deleted = courseDAO.delete(id);
+                if (deleted) {
+                    request.getSession().setAttribute("success", "Đã xóa khóa học thành công!");
+                } else {
+                    request.getSession().setAttribute("error", "Không thể xóa khóa học. Có thể do lỗi dữ liệu hoặc ràng buộc.");
+                }
             }
         } catch (Exception e) {
             request.getSession().setAttribute("error", e.getMessage());

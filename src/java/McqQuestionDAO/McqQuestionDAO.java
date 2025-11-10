@@ -197,13 +197,22 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
     @Override
     public List<McqQuestions> findByAssignmentId(UUID assignmentId) {
         List<McqQuestions> list = new ArrayList<>();
+        System.out.println("[McqQuestionDAO] findByAssignmentId - Starting query");
+        System.out.println("[McqQuestionDAO] findByAssignmentId - AssignmentId: " + assignmentId);
+        System.out.println("[McqQuestionDAO] findByAssignmentId - AssignmentId string: " + (assignmentId != null ? assignmentId.toString() : "NULL"));
+        System.out.println("[McqQuestionDAO] findByAssignmentId - SQL: " + SELECT_BY_ASSIGNMENT_SQL);
+        
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(SELECT_BY_ASSIGNMENT_SQL)) {
             
-            System.out.println("[McqQuestionDAO] findByAssignmentId - Querying for assignment: " + assignmentId);
-            System.out.println("[McqQuestionDAO] findByAssignmentId - SQL: " + SELECT_BY_ASSIGNMENT_SQL);
-            
-            setNullableUuid(ps, 1, assignmentId);
+            // Thử sử dụng setObject thay vì setString
+            if (assignmentId != null) {
+                ps.setObject(1, assignmentId);
+                System.out.println("[McqQuestionDAO] findByAssignmentId - Set parameter using setObject: " + assignmentId);
+            } else {
+                ps.setNull(1, Types.VARCHAR);
+                System.out.println("[McqQuestionDAO] findByAssignmentId - Set parameter to NULL");
+            }
             
             try (ResultSet rs = ps.executeQuery()) {
                 int count = 0;
@@ -212,8 +221,27 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
                     list.add(question);
                     count++;
                     System.out.println("[McqQuestionDAO] findByAssignmentId - Found question " + count + ": " + question.getId() + " - " + question.getContent());
+                    System.out.println("[McqQuestionDAO] findByAssignmentId - Question AssignmentId: " + question.getAssignmentId());
                 }
                 System.out.println("[McqQuestionDAO] findByAssignmentId - Total questions found: " + count);
+                
+                // Nếu không tìm thấy, thử sử dụng truy vấn chuỗi
+                if (count == 0 && assignmentId != null) {
+                    System.out.println("[McqQuestionDAO] findByAssignmentId - No results with setObject, trying with setString...");
+                    try (PreparedStatement ps2 = con.prepareStatement(SELECT_BY_ASSIGNMENT_SQL)) {
+                        ps2.setString(1, assignmentId.toString());
+                        try (ResultSet rs2 = ps2.executeQuery()) {
+                            int count2 = 0;
+                            while (rs2.next()) {
+                                McqQuestions question = mapRow(rs2);
+                                list.add(question);
+                                count2++;
+                                System.out.println("[McqQuestionDAO] findByAssignmentId - Found question (setString) " + count2 + ": " + question.getId());
+                            }
+                            System.out.println("[McqQuestionDAO] findByAssignmentId - Total questions found with setString: " + count2);
+                        }
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -257,24 +285,28 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
 
     @Override
     public List<McqQuestions> getQuestionsByAssignment(UUID assignmentId) throws SQLException {
+        System.out.println("[McqQuestionDAO] getQuestionsByAssignment - Looking for questions with assignmentId: " + assignmentId);
         String sql = """
-            SELECT q.Id AS QuestionId,
-                   q.Content AS QuestionContent,
-                   c.Id AS ChoiceId,
-                   c.Content AS ChoiceContent,
-                   c.IsCorrect
-            FROM McqQuestions q
-            LEFT JOIN McqChoices c
-              ON q.Id = c.McqQuestionId
-            WHERE q.AssignmentId = ?
-            ORDER BY q.Id
+            SELECT q.[Id] AS QuestionId,
+                   q.[Content] AS QuestionContent,
+                   c.[Id] AS ChoiceId,
+                   c.[Content] AS ChoiceContent,
+                   c.[IsCorrect]
+            FROM [dbo].[McqQuestions] q
+            LEFT JOIN [dbo].[McqChoices] c
+              ON q.[Id] = c.[McqQuestionId]
+            WHERE q.[AssignmentId] = ?
+            ORDER BY q.[Id]
         """;
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setObject(1, assignmentId);
+            System.out.println("[McqQuestionDAO] getQuestionsByAssignment - Executing SQL with assignmentId: " + assignmentId);
             ResultSet rs = ps.executeQuery();
             Map<UUID, McqQuestions> map = new LinkedHashMap<>();
+            int rowCount = 0;
             while (rs.next()) {
+                rowCount++;
                 UUID qid = UUID.fromString(rs.getString("QuestionId"));
                 McqQuestions q = map.get(qid);
                 if (q == null) {
@@ -284,6 +316,7 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
                     q.setAssignmentId(assignmentId);
                     q.setMcqChoicesCollection(new ArrayList<>());
                     map.put(qid, q);
+                    System.out.println("[McqQuestionDAO] getQuestionsByAssignment - Found question: " + qid + " - " + q.getContent());
                 }
                 String cidStr = rs.getString("ChoiceId");
                 if (cidStr != null) {
@@ -293,9 +326,17 @@ public class McqQuestionDAO implements IMcqQuestionDAO {
                     c.setIsCorrect(rs.getBoolean("IsCorrect"));
                     c.setMcqQuestionId(qid);
                     q.getMcqChoicesCollection().add(c);
+                    System.out.println("[McqQuestionDAO] getQuestionsByAssignment - Added choice: " + cidStr + " to question: " + qid);
                 }
             }
-            return new ArrayList<>(map.values());
+            System.out.println("[McqQuestionDAO] getQuestionsByAssignment - Total rows: " + rowCount + ", Questions found: " + map.size());
+            List<McqQuestions> result = new ArrayList<>(map.values());
+            return result;
+        } catch (SQLException e) {
+            System.err.println("[McqQuestionDAO] getQuestionsByAssignment - SQL Error: " + e.getMessage());
+            System.err.println("[McqQuestionDAO] getQuestionsByAssignment - SQLState: " + e.getSQLState());
+            System.err.println("[McqQuestionDAO] getQuestionsByAssignment - ErrorCode: " + e.getErrorCode());
+            throw e;
     }
 }
 

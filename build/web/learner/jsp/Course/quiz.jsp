@@ -11,6 +11,20 @@
 </head>
 <body>
   <div class="quiz-area">
+    <!-- Hiển thị thông báo lỗi -->
+    <c:if test="${not empty error}">
+      <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <strong>⚠️ Lỗi:</strong> ${error}
+      </div>
+      <div style="text-align:center; margin-top: 20px;">
+        <a class="btn-back" href="${pageContext.request.contextPath}/room?courseID=${courseID}">
+          ← Quay lại khóa học
+        </a>
+      </div>
+    </c:if>
+    
+    <!-- Chỉ hiển thị nội dung quiz khi không có lỗi -->
+    <c:if test="${empty error and not empty quizAssignment}">
     <h3 class="quiz-title">${quizAssignment.name}</h3>
     <p class="quiz-description">${quizAssignment.description}</p>
 
@@ -89,6 +103,7 @@
           ← Quay lại khóa học
         </a>
       </div>
+    </c:if>
     </c:if>
   </div>
 </body>

@@ -171,7 +171,8 @@ public class ManageCourse extends HttpServlet {
             String description = request.getParameter("descriptioncourse");
             int price = Integer.parseInt(request.getParameter("pricecourse"));
             String level = request.getParameter("levelcourse");
-            boolean status = Boolean.parseBoolean(request.getParameter("status")); // Draft/Published/...
+            // Khi Instructor tạo khóa học, isApproved luôn được đặt thành false, cần admin duyệt
+            boolean status = false; // Bắt buộc đặt thành false, chờ admin duyệt
             Part filePart = request.getPart("picturecourse"); // name trùng trong form
             String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
             String uploadPath = request.getServletContext().getRealPath("") + "uploads" + File.separator + "course_images";
@@ -384,10 +385,8 @@ public class ManageCourse extends HttpServlet {
                 }
             }
             
+            // Instructor không thể sửa trạng thái isApproved, chỉ admin mới có thể duyệt/gỡ
             boolean status = existingCourse.isApproved();
-            if (statusStr != null) {
-                status = Boolean.parseBoolean(statusStr);
-            }
             
             // Xử lý ảnh (nếu có upload mới)
             String imagePath = existingCourse.getImgURL();

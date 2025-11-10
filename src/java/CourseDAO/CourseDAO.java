@@ -167,14 +167,174 @@ public class CourseDAO implements ICourseDAO {
 
     @Override
     public boolean delete(UUID courseId) {
-        try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(DELETE_SQL)) {
-
-            ps.setString(1, courseId.toString());
-            return ps.executeUpdate() > 0;
+        // Sử dụng cascade delete để xóa tất cả dữ liệu liên quan
+        return deleteCascade(courseId);
+    }
+    
+    /**
+     * Xóa khóa học và tất cả dữ liệu liên quan (cascade delete)
+     * Xóa theo thứ tự: UserCourse -> Cart -> Comments -> Assignments -> Lessons -> Sections -> Courses
+     */
+    public boolean deleteCascade(UUID courseId) {
+        Connection con = null;
+        try {
+            con = DBConnection.getConnection();
+            con.setAutoCommit(false); // Bắt đầu transaction
+            
+            String courseIdStr = courseId.toString();
+            
+            // 1. Xóa UserCourse (khóa học đã đăng ký)
+            try (PreparedStatement ps = con.prepareStatement("DELETE FROM UserCourse WHERE courseID = ?")) {
+                ps.setString(1, courseIdStr);
+                ps.executeUpdate();
+            }
+            
+            // 2. Xóa Cart (khóa học trong giỏ hàng)
+            try (PreparedStatement ps = con.prepareStatement("DELETE FROM cart WHERE courseID = ?")) {
+                ps.setString(1, courseIdStr);
+                ps.executeUpdate();
+            }
+            
+            // 3. Xóa Comments (bình luận của khóa học)
+            // Comments có thể liên kết qua lessonID, cần xóa qua sections và lessons
+            // Hoặc nếu Comments có courseID trực tiếp thì xóa trực tiếp
+            try (PreparedStatement ps = con.prepareStatement("DELETE FROM Comments WHERE courseID = ?")) {
+                ps.setString(1, courseIdStr);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                // Nếu Comments không có courseID, bỏ qua
+                System.out.println("Comments table may not have courseID column, skipping...");
+            }
+            
+            // 4. Xóa Assignments (bài tập/kiểm tra) - thông qua sections
+            // Lấy tất cả sectionID của khóa học này
+            java.util.List<UUID> sectionIds = new java.util.ArrayList<>();
+            try (PreparedStatement ps = con.prepareStatement("SELECT sectionID FROM Sections WHERE courseID = ?")) {
+                ps.setString(1, courseIdStr);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        UUID sectionId = getUuid(rs, "sectionID");
+                        if (sectionId != null) {
+                            sectionIds.add(sectionId);
+                        }
+                    }
+                }
+            }
+            
+            // Xóa Assignments theo sectionID
+            if (!sectionIds.isEmpty()) {
+                // Xóa Submissions trước (có foreign key đến Assignments)
+                for (UUID sectionId : sectionIds) {
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "DELETE s FROM Submissions s " +
+                            "INNER JOIN Assignments a ON s.assignmentID = a.assignmentID " +
+                            "WHERE a.sectionID = ?")) {
+                        ps.setObject(1, sectionId);
+                        ps.executeUpdate();
+                    }
+                    
+                    // Xóa McqUserAnswer trước (có foreign key đến Submissions)
+                    try (PreparedStatement ps = con.prepareStatement(
+                            "DELETE mua FROM McqUserAnswer mua " +
+                            "INNER JOIN Submissions s ON mua.submissionID = s.submissionID " +
+                            "INNER JOIN Assignments a ON s.assignmentID = a.assignmentID " +
+                            "WHERE a.sectionID = ?")) {
+                        ps.setObject(1, sectionId);
+                        ps.executeUpdate();
+                    }
+                    
+                    // Xóa Assignments
+                    try (PreparedStatement ps = con.prepareStatement("DELETE FROM Assignments WHERE sectionID = ?")) {
+                        ps.setObject(1, sectionId);
+                        ps.executeUpdate();
+                    }
+                }
+            }
+            
+            // 5. Xóa Lessons (bài học) - thông qua sections
+            if (!sectionIds.isEmpty()) {
+                // Lấy tất cả lessonID
+                java.util.List<UUID> lessonIds = new java.util.ArrayList<>();
+                for (UUID sectionId : sectionIds) {
+                    try (PreparedStatement ps = con.prepareStatement("SELECT lessionID FROM Lession WHERE sectionID = ?")) {
+                        ps.setObject(1, sectionId);
+                        try (ResultSet rs = ps.executeQuery()) {
+                            while (rs.next()) {
+                                UUID lessonId = getUuid(rs, "lessionID");
+                                if (lessonId != null) {
+                                    lessonIds.add(lessonId);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Xóa Comments liên kết với lessons
+                if (!lessonIds.isEmpty()) {
+                    for (UUID lessonId : lessonIds) {
+                        try (PreparedStatement ps = con.prepareStatement("DELETE FROM Comments WHERE lessonID = ?")) {
+                            ps.setObject(1, lessonId);
+                            ps.executeUpdate();
+                        } catch (SQLException e) {
+                            // Nếu Comments không có lessonID, bỏ qua
+                            System.out.println("Comments may not have lessonID column, skipping...");
+                        }
+                    }
+                }
+                
+                // Xóa LessionMaterial
+                if (!lessonIds.isEmpty()) {
+                    for (UUID lessonId : lessonIds) {
+                        try (PreparedStatement ps = con.prepareStatement("DELETE FROM LessionMaterial WHERE lessionID = ?")) {
+                            ps.setObject(1, lessonId);
+                            ps.executeUpdate();
+                        }
+                    }
+                }
+                
+                // Xóa Lession
+                for (UUID sectionId : sectionIds) {
+                    try (PreparedStatement ps = con.prepareStatement("DELETE FROM Lession WHERE sectionID = ?")) {
+                        ps.setObject(1, sectionId);
+                        ps.executeUpdate();
+                    }
+                }
+            }
+            
+            // 6. Xóa Sections (chương)
+            try (PreparedStatement ps = con.prepareStatement("DELETE FROM Sections WHERE courseID = ?")) {
+                ps.setString(1, courseIdStr);
+                ps.executeUpdate();
+            }
+            
+            // 7. Cuối cùng xóa Courses
+            try (PreparedStatement ps = con.prepareStatement(DELETE_SQL)) {
+                ps.setString(1, courseIdStr);
+                int result = ps.executeUpdate();
+                
+                con.commit(); // Commit transaction
+                return result > 0;
+            }
+            
         } catch (SQLException e) { 
+            if (con != null) {
+                try {
+                    con.rollback(); // Rollback nếu có lỗi
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
             e.printStackTrace(); 
             return false; 
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true); // Khôi phục auto-commit
+                    con.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

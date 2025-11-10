@@ -101,13 +101,16 @@ function openQAModal() {
     modal.style.opacity = "1"
     document.getElementById("qaInput").focus()
 
-    // When lesson is selected, fetch comments from backend when opening modal to avoid data loss on refresh
-    if (currentLessonId) {
+    // Fetch comments by courseID (preferred) or lessonID
+    const courseID = window.currentCourseID || null
+    if (courseID) {
+      fetchCommentsByCourse(courseID)
+    } else if (currentLessonId) {
       fetchComments(currentLessonId)
     }
 
     // Debug log
-    console.log("Q&A Modal opened")
+    console.log("Q&A Modal opened, courseID:", courseID, "lessonID:", currentLessonId)
   } else {
     console.error("Q&A Modal not found")
   }
@@ -206,10 +209,17 @@ function loadLessonVideo(element) {
   document.querySelectorAll(".lesson-item.active").forEach((el) => el.classList.remove("active"))
   element.classList.add("active")
 
-  // Load comments for this lesson
-  if (currentLessonId) {
+  // Load comments for this lesson or course
+  const courseID = window.currentCourseID || null
+  if (courseID) {
+    // Prefer course-level comments
+    fetchCommentsByCourse(courseID)
+  } else if (currentLessonId) {
     fetchComments(currentLessonId)
-    // Load tests for this lesson
+  }
+  
+  // Load tests for this lesson
+  if (currentLessonId) {
     fetchTestsForLesson(currentLessonId)
   }
   if (currentSectionId) {
@@ -244,13 +254,23 @@ function extractYouTubeId(url) {
 
 /* ===== COMMENTS: EDIT / DELETE / REPORT / MODERATE ===== */
 function getUserRole() {
+  // Try meta tag first
   const m = document.querySelector('meta[name="user-role"]')
-  return m?.content || "Learner"
+  if (m?.content) return m.content
+  // Try body attribute
+  const bodyRole = document.body.getAttribute('data-user-role')
+  if (bodyRole) return bodyRole
+  return "Learner"
 }
 
 function getUserId() {
+  // Try meta tag first
   const m = document.querySelector('meta[name="user-id"]')
-  return m?.content || ""
+  if (m?.content) return m.content
+  // Try body attribute
+  const bodyId = document.body.getAttribute('data-user-id')
+  if (bodyId) return bodyId
+  return ""
 }
 
 function renderActionsForComment(authorId) {
@@ -260,10 +280,18 @@ function renderActionsForComment(authorId) {
   const isInstructor = role === "Instructor"
   const isAdmin = role === "Admin"
 
+  // Debug logging
+  console.log('[renderActionsForComment]', {
+    currentUserId,
+    authorId,
+    isOwner,
+    role
+  })
+
   const actions = []
   if (isOwner) {
-    actions.push('<button class="qa-action-btn" onclick="startEditComment(this)">Chỉnh sửa</button>')
-    actions.push('<button class="qa-action-btn" onclick="deleteComment(this)">Xóa</button>')
+    actions.push('<button class="qa-action-btn qa-edit-btn" onclick="startEditComment(this)">Chỉnh sửa</button>')
+    actions.push('<button class="qa-action-btn qa-delete-btn" onclick="deleteComment(this)">Xóa</button>')
   }
   actions.push('<button class="qa-action-btn qa-reply-btn" onclick="toggleReply(this)">Phản hồi</button>')
   // three-dots menu for report and moderation
@@ -473,8 +501,61 @@ function adminDeleteComment(btn) {
 
 function reportComment(btn) {
   const comment = btn.closest('.qa-comment')
-  comment.classList.add('reported')
-  alert('Đã gửi report tới Instructor')
+  const commentId = comment.getAttribute('data-comment-id')
+  
+  if (!commentId) {
+    alert('Không tìm thấy ID bình luận để báo cáo.')
+    return
+  }
+  
+  // Check if already reported
+  if (comment.classList.contains('reported')) {
+    alert('Bạn đã báo cáo bình luận này rồi.')
+    return
+  }
+  
+  // Confirm report
+  if (!confirm('Bạn có chắc muốn báo cáo bình luận này là spam/nội dung không phù hợp?')) {
+    return
+  }
+  
+  const base = document.body.getAttribute('data-context') || ''
+  const form = new URLSearchParams()
+  form.append('action', 'report')
+  form.append('commentID', commentId)
+  form.append('reason', 'spam')
+  
+  fetch(`${base}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  })
+  .then(r => {
+    if (!r.ok) {
+      return r.json().then(j => Promise.reject(new Error(j.error || 'Failed to report')))
+    }
+    return r.json()
+  })
+  .then(j => {
+    if (j.success) {
+      comment.classList.add('reported')
+      // Disable report button
+      const reportBtn = comment.querySelector('.qa-action-btn[onclick*="reportComment"]')
+      if (reportBtn) {
+        reportBtn.setAttribute('disabled', 'disabled')
+        reportBtn.textContent = 'Đã báo cáo'
+        reportBtn.style.opacity = '0.6'
+        reportBtn.style.cursor = 'not-allowed'
+      }
+      alert('✓ ' + (j.message || 'Đã gửi báo cáo tới admin thành công!'))
+    } else {
+      alert('✗ ' + (j.error || 'Không thể gửi báo cáo. Vui lòng thử lại.'))
+    }
+  })
+  .catch(err => {
+    console.error('Error reporting comment:', err)
+    alert('✗ Có lỗi xảy ra: ' + (err.message || 'Vui lòng thử lại.'))
+  })
 }
 
 function restrictComment(btn) {
@@ -591,134 +672,262 @@ function submitReply(button) {
   const replyInput = button.previousElementSibling
   const replyText = replyInput.value.trim()
 
-  if (replyText) {
-    const comment = button.closest(".qa-comment")
-    const replyForm = button.closest(".qa-reply-form")
+  if (!replyText) return
 
-    // Create reply comment (embedded in parent comment's replies area)
-    const replyComment = document.createElement("div")
-    replyComment.className = "qa-comment qa-reply-comment"
-    const authorId = getUserId()
-    replyComment.setAttribute('data-user-id', authorId)
-    replyComment.innerHTML = `
-      <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
-      <div class="qa-comment-content">
-        <div class="qa-comment-header">
-          <span class="qa-comment-author">Bạn</span>
-          <span class="qa-comment-time">vừa xong</span>
-        </div>
-        <div class="qa-comment-text">${replyText}</div>
-        <div class="qa-comment-actions">
-          <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
-          ${renderActionsForComment(authorId)}
-        </div>
-      </div>
-    `
-    // Append to reply container inside parent comment content area, ensuring vertical expansion
-    const content = comment.querySelector('.qa-comment-content') || comment
-    let replies = content.querySelector('.qa-replies')
-    if (!replies) {
-      replies = document.createElement('div')
-      replies.className = 'qa-replies'
-      content.appendChild(replies)
-    }
-    replies.appendChild(replyComment)
-    replies.style.display = 'block'
+  const comment = button.closest(".qa-comment")
+  const replyForm = button.closest(".qa-reply-form")
 
-    // Xóa form reply
-    replyForm.remove()
-
-    // Cập nhật số lượng bình luận
-    updateCommentCount()
-    updateRepliesToggle(comment)
-
-    // persist to backend
-    if (currentLessonId) {
-      const parentCommentId = comment.getAttribute('data-comment-id') || ''
-      const form = new URLSearchParams()
-      form.append('lessionID', currentLessonId)
-      form.append('content', replyText)
-      if (parentCommentId) form.append('parentID', parentCommentId)
-      fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: form.toString(),
-      })
-      .then(r=>r.ok ? r.json() : Promise.reject())
-      .then(j=>{ if (j && j.commentID) replyComment.setAttribute('data-comment-id', j.commentID) })
-      .catch(()=>{})
+  // Get lessonID for reply (same as parent comment's lesson)
+  const courseID = window.currentCourseID || null
+  let targetLessonId = currentLessonId
+  
+  // If no lesson selected but we have courseID, try to get first lesson
+  if (!targetLessonId && courseID) {
+    const firstLesson = document.querySelector('.lesson-item[data-lesson-id]')
+    if (firstLesson) {
+      targetLessonId = firstLesson.getAttribute('data-lesson-id')
     }
   }
+
+  if (!targetLessonId) {
+    alert('Vui lòng chọn một bài học để phản hồi.')
+    return
+  }
+
+  // Create reply comment (embedded in parent comment's replies area)
+  const replyComment = document.createElement("div")
+  replyComment.className = "qa-comment qa-reply-comment"
+  const authorId = getUserId()
+  replyComment.setAttribute('data-user-id', authorId)
+  replyComment.innerHTML = `
+    <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
+    <div class="qa-comment-content">
+      <div class="qa-comment-header">
+        <span class="qa-comment-author">Bạn</span>
+        <span class="qa-comment-time">vừa xong</span>
+      </div>
+      <div class="qa-comment-text">${replyText}</div>
+      <div class="qa-comment-actions">
+        <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
+        ${renderActionsForComment(authorId)}
+      </div>
+    </div>
+  `
+  // Append to reply container inside parent comment content area, ensuring vertical expansion
+  const content = comment.querySelector('.qa-comment-content') || comment
+  let replies = content.querySelector('.qa-replies')
+  if (!replies) {
+    replies = document.createElement('div')
+    replies.className = 'qa-replies'
+    content.appendChild(replies)
+  }
+  replies.appendChild(replyComment)
+  replies.style.display = 'block'
+
+  // Xóa form reply
+  replyForm.remove()
+
+  // Cập nhật số lượng bình luận
+  updateCommentCount()
+  updateRepliesToggle(comment)
+
+  // persist to backend
+  const parentCommentId = comment.getAttribute('data-comment-id') || ''
+  const form = new URLSearchParams()
+  form.append('lessionID', targetLessonId)
+  form.append('content', replyText)
+  if (parentCommentId) form.append('parentID', parentCommentId)
+  if (courseID) form.append('courseID', courseID)
+  
+  fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  })
+  .then(r => {
+    if (!r.ok) {
+      throw new Error('Failed to submit reply')
+    }
+    return r.json()
+  })
+  .then(j => {
+    if (j && j.commentID) {
+      replyComment.setAttribute('data-comment-id', j.commentID)
+      // Reload comments to get updated list with proper author info
+      if (courseID) {
+        fetchCommentsByCourse(courseID)
+      } else if (targetLessonId) {
+        fetchComments(targetLessonId)
+      }
+    }
+  })
+  .catch(err => {
+    console.error('Error submitting reply:', err)
+    alert('Có lỗi xảy ra khi phản hồi. Vui lòng thử lại.')
+  })
 }
 
 function updateCommentCount() {
   const commentsList = document.getElementById("qaCommentsList")
-  const comments = commentsList.querySelectorAll(".qa-comment")
+  if (!commentsList) return
+  
+  // Count only top-level comments (not replies)
+  const topLevelComments = commentsList.querySelectorAll(".qa-comment:not(.qa-reply-comment)")
+  const totalComments = commentsList.querySelectorAll(".qa-comment")
+  const count = topLevelComments.length
+  const totalCount = totalComments.length
+  
   const countElement = document.querySelector(".qa-count")
-  const badgeElement = document.querySelector(".qa-count-badge")
+  const badgeElement = document.getElementById("qaCountBadge") || document.querySelector(".qa-count-badge")
 
   if (countElement) {
-    countElement.textContent = `${comments.length} bình luận`
+    countElement.textContent = `${count} bình luận`
   }
 
   if (badgeElement) {
-    badgeElement.textContent = comments.length
+    badgeElement.textContent = count
   }
+  
+  console.log('[updateCommentCount] Top-level comments:', count, 'Total comments:', totalCount)
 }
 
 function submitComment() {
   const qaInput = document.getElementById("qaInput")
   const commentText = qaInput.value.trim()
 
-  if (commentText) {
-    const newComment = document.createElement("div")
-    newComment.className = "qa-comment"
-    const authorId = getUserId()
-    newComment.setAttribute('data-user-id', authorId)
-    newComment.innerHTML = `
-      <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
-      <div class="qa-comment-content">
-        <div class="qa-comment-header">
-          <span class="qa-comment-author">Bạn</span>
-          <span class="qa-comment-time">vừa xong</span>
-        </div>
-        <div class="qa-comment-text">${commentText}</div>
-        <div class="qa-comment-actions">
-          <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
-          ${renderActionsForComment(authorId)}
-        </div>
-      </div>
-    `
+  if (!commentText) return
 
-    const commentsList = document.getElementById("qaCommentsList")
-    commentsList.insertBefore(newComment, commentsList.firstChild)
-
-    qaInput.value = ""
-
-    // Cập nhật số lượng bình luận
-    updateCommentCount()
-
-    // persist to backend
-    if (currentLessonId) {
-      const form = new URLSearchParams()
-      form.append('lessionID', currentLessonId)
-      form.append('content', commentText)
-      fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: form.toString(),
-      })
-      .then(r=>r.json()).then(j=>{ if (j && j.commentID) newComment.setAttribute('data-comment-id', j.commentID) }).catch(()=>{})
+  // Get courseID or lessonID for comment submission
+  const courseID = window.currentCourseID || null
+  const lessonId = currentLessonId || null
+  
+  // For course-level comments, we need a lessonID to store the comment
+  // Use the first lesson of the course if available, or current lesson
+  let targetLessonId = lessonId
+  
+  // If no lesson selected but we have courseID, try to get first lesson
+  if (!targetLessonId && courseID) {
+    const firstLesson = document.querySelector('.lesson-item[data-lesson-id]')
+    if (firstLesson) {
+      targetLessonId = firstLesson.getAttribute('data-lesson-id')
     }
   }
+
+  if (!targetLessonId) {
+    alert('Vui lòng chọn một bài học để đăng bình luận.')
+    return
+  }
+
+  const newComment = document.createElement("div")
+  newComment.className = "qa-comment"
+  const authorId = getUserId()
+  newComment.setAttribute('data-user-id', authorId)
+  newComment.innerHTML = `
+    <div class="qa-comment-avatar" style="background-image: url('${getUserAvatar()}')"></div>
+    <div class="qa-comment-content">
+      <div class="qa-comment-header">
+        <span class="qa-comment-author">Bạn</span>
+        <span class="qa-comment-time">vừa xong</span>
+      </div>
+      <div class="qa-comment-text">${commentText}</div>
+      <div class="qa-comment-actions">
+        <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
+        ${renderActionsForComment(authorId)}
+      </div>
+    </div>
+  `
+
+  const commentsList = document.getElementById("qaCommentsList")
+  commentsList.insertBefore(newComment, commentsList.firstChild)
+
+  qaInput.value = ""
+
+  // Cập nhật số lượng bình luận
+  updateCommentCount()
+
+  // persist to backend
+  const form = new URLSearchParams()
+  form.append('lessionID', targetLessonId)
+  form.append('content', commentText)
+  if (courseID) {
+    // Store courseID in a hidden field or use it for filtering
+    form.append('courseID', courseID)
+  }
+  
+  fetch(`${document.body.getAttribute('data-context') || ''}/api/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
+  })
+  .then(r => {
+    if (!r.ok) {
+      throw new Error('Failed to submit comment')
+    }
+    return r.json()
+  })
+  .then(j => {
+    if (j && j.commentID) {
+      newComment.setAttribute('data-comment-id', j.commentID)
+      // Reload comments to get updated list with proper author info
+      if (courseID) {
+        fetchCommentsByCourse(courseID)
+      } else if (targetLessonId) {
+        fetchComments(targetLessonId)
+      }
+    }
+  })
+  .catch(err => {
+    console.error('Error submitting comment:', err)
+    alert('Có lỗi xảy ra khi đăng bình luận. Vui lòng thử lại.')
+  })
 }
 
+// Fetch comments by courseID (for course-level comments)
+function fetchCommentsByCourse(courseID) {
+  const base = document.body.getAttribute('data-context') || ''
+  console.log('[fetchCommentsByCourse] Fetching comments for courseID:', courseID)
+  fetch(`${base}/api/comments?courseID=${encodeURIComponent(courseID)}`)
+    .then(r => {
+      if (!r.ok) {
+        console.error('[fetchCommentsByCourse] Error response:', r.status)
+        return []
+      }
+      return r.json()
+    })
+    .then(list => {
+      console.log('[fetchCommentsByCourse] Received comments:', list ? list.length : 0)
+      renderComments(list || [])
+      updateCommentCount()
+    })
+    .catch(err => {
+      console.error('[fetchCommentsByCourse] Error:', err)
+      renderComments([])
+      updateCommentCount()
+    })
+}
+
+// Fetch comments by lessonID (for lesson-level comments)
 function fetchComments(lessonId) {
   const base = document.body.getAttribute('data-context') || ''
+  console.log('[fetchComments] Fetching comments for lessonID:', lessonId)
   fetch(`${base}/api/comments?lessionID=${encodeURIComponent(lessonId)}`)
-    .then(r=>r.json())
-    .then(list => renderComments(list))
-    .catch(()=>{})
+    .then(r => {
+      if (!r.ok) {
+        console.error('[fetchComments] Error response:', r.status)
+        return []
+      }
+      return r.json()
+    })
+    .then(list => {
+      console.log('[fetchComments] Received comments:', list ? list.length : 0)
+      renderComments(list || [])
+      updateCommentCount()
+    })
+    .catch(err => {
+      console.error('[fetchComments] Error:', err)
+      renderComments([])
+      updateCommentCount()
+    })
 }
 
 function fetchAssignments(sectionId) {
@@ -918,13 +1127,26 @@ function renderTestModalContent(container, list, lessonId) {
 
 function renderComments(list) {
   const container = document.getElementById('qaCommentsList')
-  if (!container) return
+  if (!container) {
+    console.warn('[renderComments] Comments container not found')
+    return
+  }
+  
+  console.log('[renderComments] Rendering', list ? list.length : 0, 'comments')
   container.innerHTML = ''
+  
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="qa-empty-state">Chưa có bình luận nào. Hãy là người đầu tiên bình luận!</div>'
+    updateCommentCount()
+    return
+  }
+  
   const byParent = {}
   list.forEach(c => {
     const p = c.parentID || 'root'
     ;(byParent[p] = byParent[p] || []).push(c)
   })
+  
   const renderOne = (c, isReply) => {
     const div = document.createElement('div')
     div.className = isReply ? 'qa-comment qa-reply-comment' : 'qa-comment'
@@ -933,14 +1155,38 @@ function renderComments(list) {
     const authorId = c.userID
     const avatar = c.avatarUrl && c.avatarUrl.trim() ? c.avatarUrl : getRandomAvatar()
     const authorName = c.authorName && c.authorName.trim() ? c.authorName : 'Người dùng'
+    
+    // Format time
+    let timeText = 'vừa xong'
+    if (c.createAt) {
+      const commentTime = new Date(parseInt(c.createAt))
+      const now = new Date()
+      const diffMs = now - commentTime
+      const diffMins = Math.floor(diffMs / 60000)
+      const diffHours = Math.floor(diffMs / 3600000)
+      const diffDays = Math.floor(diffMs / 86400000)
+      
+      if (diffMins < 1) {
+        timeText = 'vừa xong'
+      } else if (diffMins < 60) {
+        timeText = `${diffMins} phút trước`
+      } else if (diffHours < 24) {
+        timeText = `${diffHours} giờ trước`
+      } else if (diffDays < 7) {
+        timeText = `${diffDays} ngày trước`
+      } else {
+        timeText = commentTime.toLocaleDateString('vi-VN')
+      }
+    }
+    
     div.innerHTML = `
       <div class="qa-comment-avatar" style="background-image: url('${avatar}')"></div>
       <div class="qa-comment-content">
         <div class="qa-comment-header">
           <span class="qa-comment-author">${authorName}</span>
-          <span class="qa-comment-time"></span>
+          <span class="qa-comment-time">${timeText}</span>
         </div>
-        <div class="qa-comment-text">${c.content || ''}</div>
+        <div class="qa-comment-text">${(c.content || '').replace(/\n/g, '<br>')}</div>
         <div class="qa-comment-actions">
           <button class="qa-action-btn qa-like-btn" onclick="toggleLike(this)">Thích</button>
           ${renderActionsForComment(authorId)}
@@ -948,10 +1194,22 @@ function renderComments(list) {
       </div>`
     return div
   }
-  ;(byParent['root'] || []).forEach(c => {
+  
+  // Sort root comments by time (newest first)
+  const rootComments = (byParent['root'] || []).sort((a, b) => {
+    const timeA = a.createAt ? parseInt(a.createAt) : 0
+    const timeB = b.createAt ? parseInt(b.createAt) : 0
+    return timeB - timeA // Newest first
+  })
+  
+  rootComments.forEach(c => {
     const el = renderOne(c, false)
     container.appendChild(el)
-    const children = byParent[c.commentID] || []
+    const children = (byParent[c.commentID] || []).sort((a, b) => {
+      const timeA = a.createAt ? parseInt(a.createAt) : 0
+      const timeB = b.createAt ? parseInt(b.createAt) : 0
+      return timeA - timeB // Oldest first for replies
+    })
     if (children.length) {
       const replies = document.createElement('div')
       replies.className = 'qa-replies'
@@ -961,6 +1219,7 @@ function renderComments(list) {
       updateRepliesToggle(el)
     }
   })
+  
   updateCommentCount()
 }
 
@@ -1015,6 +1274,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Determine current lesson (prefer active, otherwise first), for fetching DB data on first open
   initializeCurrentLesson()
+  
+  // Load comments for course on page load
+  const courseID = window.currentCourseID || null
+  if (courseID) {
+    console.log('[DOMContentLoaded] Loading comments for course:', courseID)
+    fetchCommentsByCourse(courseID)
+  }
   
   // Load tests for all lessons (even if not clicked)
   setTimeout(() => {
